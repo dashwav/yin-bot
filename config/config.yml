@@ -1,0 +1,16 @@
+token: ""
+
+guild_id: 123456789
+
+mod_log: 123456798
+
+owner_id: 123456789
+
+postgres_credentials:
+    host: ""
+    user: ""
+    database: ""
+    password: ""
+
+# Wait time in seconds (default 10 min)
+default_wait_time: 600
