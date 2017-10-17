@@ -22,30 +22,55 @@ class Roles():
 
     @commands.command()
     @commands.guild_only()
-    async def iam(self, ctx, rolename):
+    async def iam(self, ctx, role_name):
         found_role = None
         users_roles = ctx.message.author.roles
-        for role in users_roles:
-            if role.name == rolename:
-                return await ctx.send(
-                    f'You already have the {rolename} role.')
         for role in ctx.guild.roles:
-            if role.name == rolename:
+            if role.name.lower() == role_name.lower():
                 found_role = role
         if found_role:
+            for role in users_roles:
+                if role == found_role:
+                    local_embed = discord.Embed(
+                        title=f'@{ctx.message.author}, you already have the '
+                              f'**{found_role.name}** role',
+                        description=' ',
+                        color=0x651111
+                    )
+                    await ctx.send(embed=local_embed)
+                    return 
             assignable = await self.bot.postgres_controller.is_role_assignable(
                 ctx.guild.id, found_role.id)
             if assignable:
                 users_roles.append(found_role)
                 try:
                     await ctx.author.edit(roles=users_roles)
+                    local_embed = discord.Embed(
+                        title=f'@{ctx.message.author}, you now have the'
+                              f'**{found_role.name}** role',
+                        description=' ',
+                        color=0x419400
+                    )
                 except discord.Forbidden:
-                    await ctx.send(
-                        f'I don\'t have the necessary permissions to do this.')
+                    local_embed = discord.Embed(
+                        title='I don\'t have the necessary permissions'
+                              'to do this',
+                        description=' ',
+                        color=0x651111
+                    )
             else:
-                ctx.send(
-                    f'{rolename} is not a self-assignable role.'
+                local_embed = discord.Embed(
+                    title=f'**{found_role.name}** is not self-assignable',
+                    description=' ',
+                    color=0x651111
                 )
+        else:
+            local_embed = discord.Embed(
+                title=f'Couldn\'t find role {role_name}',
+                description=' ',
+                color=0x651111
+            )
+        await ctx.send(embed=local_embed)
 
     @commands.group(aliases=['ar'])
     @commands.guild_only()
@@ -71,8 +96,6 @@ class Roles():
             )
             await ctx.send(embed=local_embed)
 
-            
-
     @assignableroles.command()
     async def add(self, ctx, role_name):
         """
@@ -83,10 +106,38 @@ class Roles():
             if role.name.lower() == role_name.lower():
                 found_role = role
         if found_role:
-            await self.bot.postgres_controller.add_assignable_role(
-                ctx.guild.id, found_role.id)
+            if not ctx.message.author.\
+                    top_role >= found_role:
+                local_embed = discord.Embed(
+                    title=f'You can\'t add a role that is a higher '
+                          'level than your highest role',
+                    description=' ',
+                    color=0x651111
+                )
+                await ctx.send(embed=local_embed)
+                return
+            success = await self.bot.postgres_controller.add_assignable_role(
+                ctx.guild.id, found_role.id, self.bot.logger)
+            if success:
+                local_embed = discord.Embed(
+                    title=f'Added {found_role.name} to self-assignable roles',
+                    description=' ',
+                    color=0x419400
+                )
+            else:
+                local_embed = discord.Embed(
+                    title=f'Internal error when adding {found_role.name} to '
+                          'self-assignable roles, contact @dashwav#7785',
+                    description=' ',
+                    color=0x651111
+                )
         else:
-            ctx.send(f'Couldn\'t find a role with that name')
+            local_embed = discord.Embed(
+                title=f'Couldn\'t find role {role_name}',
+                description=' ',
+                color=0x651111
+            )
+        await ctx.send(embed=local_embed)
 
     @assignableroles.command()
     async def remove(self, ctx, role_name):
@@ -98,7 +149,38 @@ class Roles():
             if role.name.lower() == role_name.lower():
                 found_role = role
         if found_role:
-            await self.bot.postgres_controller.remove_assignable_role(
-                ctx.guild.id, found_role.id)
+            try:
+                success = await \
+                    self.bot.postgres_controller.remove_assignable_role(
+                        ctx.guild.id, found_role.id, self.bot.logger)
+            except ValueError:
+                local_embed = discord.Embed(
+                    title=f'{found_role.name} is already'
+                          ' not on the self-assignable list',
+                    description=' ',
+                    color=0x651111
+                )
+                await ctx.send(embed=local_embed)
+                return
+            if success:
+                local_embed = discord.Embed(
+                    title=f'Removed {found_role.name} '
+                          'from self-assignable roles',
+                    description=' ',
+                    color=0x419400
+                )
+            else:
+                local_embed = discord.Embed(
+                    title=f'Internal error occured,'
+                          ' please contact @dashwav#7785',
+                    description=' ',
+                    color=0x651111
+                )
+            await ctx.send(embed=local_embed)
         else:
-            ctx.send(f'Couldn\'t find a role with that name')
+            local_embed = discord.Embed(
+                title=f'Couldn\'t find role {role_name}',
+                description=' ',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)

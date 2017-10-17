@@ -217,35 +217,43 @@ class PostgresController():
         row = await self.pool.fetchrow(sql, guild_id, [role_id])
         return True if row else False
 
-    async def add_assignable_role(self, guild_id: int, role_id: int):
+    async def add_assignable_role(self, guild_id: int, role_id: int, logger):
         """
         Adds a role to the assignable roles array for the server
         :param guild_id: guild to add role to
         :param role_id: role to add
         """
         sql = """
-        UPDATE {}.servers SET assignableroles = assignableroles || $1
+        UPDATE {}.servers
+        SET assignableroles = (SELECT array_agg(distinct e)
+        FROM unnest(array_append(assignableroles,$1::bigint)) e)
         WHERE serverid = $2;
         """.format(self.schema)
-        await self.pool.execute(sql, [role_id], guild_id)
+        try:
+            await self.pool.execute(sql, role_id, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding role to server {guild_id}: {e}')
+            return False
 
-    async def remove_assignable_role(self, guild_id: int, role_id: int):
+    async def remove_assignable_role(self, guild_id: int, role_id: int, logger):
         """
         Removes a role from the assignable roles array for the server
         :param guild_id: guild to remove role from
         :param role_id: role to remove
         """
-        sql = """
-        SELECT assignableroles FROM {}.servers
-        WHERE serverid = $1 AND assignableroles @> $2;
-        """.format(self.schema)
-        role_list = await self.pool.fetchval(sql, guild_id, [role_id])
+        role_list = await self.get_assignable_roles(guild_id)
         role_list.remove(role_id)
         sql = """
         UPDATE {}.servers SET assignableroles = $1
         WHERE serverid = $2;
         """.format(self.schema)
-        await self.pool.execute(sql, [role_list], guild_id)
+        try:
+            await self.pool.execute(sql, role_list, guild_id)
+        except Exception as e:
+            logger.warning(f'Error removing roles: {e}')
+            return False
+        return True
 
     async def get_assignable_roles(self, guild_id: int):
         """
