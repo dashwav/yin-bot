@@ -26,8 +26,6 @@ def has_permissions(*, check=all, **perms):
         return await check_permissions(ctx, perms, check=check)
     return commands.check(pred)
 
-def is_owner():
-    return is_owner
 
 async def check_guild_permissions(ctx, perms, *, check=all):
     is_owner = await ctx.bot.is_owner(ctx.author)

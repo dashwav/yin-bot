@@ -48,7 +48,8 @@ async def make_tables(pool: Pool, schema: str):
     servers = """
     CREATE TABLE IF NOT EXISTS {}.servers (
       serverid BIGINT,
-      assignableroles varchar ARRAY,
+      prefix varchar(2),
+      assignableroles bigint ARRAY,
       filterwordswhite varchar ARRAY,
       filterwordsblack varchar ARRAY,
       blacklistchannels integer ARRAY,
@@ -107,20 +108,7 @@ class PostgresController():
         logger.info('Tables created.')
         return cls(pool, logger, schema)
 
-    async def insert_rolechange(self, server_id: int, user_id: int,
-                                changetype: Change):
-        """
-        Inserts into the roles table a new rolechange
-        :param user_id: the id of the user changed
-        :param changetype: The type of change that occured
-        """
-        sql = """
-        INSERT INTO {}.roles VALUES ($1, $2, $3);
-        """.format(self.schema)
-
-        await self.pool.execute(sql, user_id, changetype.Value)
-
-    async def insert_modaction(self, server_id: int, mod_id: int,
+    async def insert_modaction(self, guild_id: int, mod_id: int,
                                target_id: int, action_type: Action):
         """
         Inserts into the roles table a new rolechange
@@ -133,25 +121,38 @@ class PostgresController():
         """.format(self.schema)
 
         await self.pool.execute(
-            sql, server_id, mod_id, target_id, action_type.Value)
+            sql, guild_id, mod_id, target_id, action_type.Value)
 
-    async def add_server(self, server_id: int):
+    async def add_server(self, guild_id: int):
         """
         Inserts into the server table a new server
-        :param server_id: the id of the server added
+        :param guild_id: the id of the server added
         """
         sql = """
-        INSERT INTO {}.servers VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO {}.servers VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (serverid)
         DO nothing;
         """.format(self.schema)
 
-        await self.pool.execute(sql, server_id, [], [], [], [], [])
+        await self.pool.execute(sql, guild_id, '-', [], [], [], [], [])
 
-    async def add_whitelist_word(self, server_id: int, word: str):
+    async def get_server_prefix(self):
+        """
+        Returns the custom prefix for the server
+        """
+        prefix_dict = {}
+        sql = """
+        SELECT serverid, prefix FROM {}.servers;
+        """.format(self.schema)
+        val_list = await self.pool.fetch(sql)
+        for row in val_list:
+            prefix_dict[row['serverid']] = row['prefix']
+        return prefix_dict
+
+    async def add_whitelist_word(self, guild_id: int, word: str):
         """
         Adds a word that is allowed on the whitelist channels
-        :param server_id: the id of the server to add the word to
+        :param guild_id: the id of the server to add the word to
         :param word: word to add
         """
         return
@@ -178,25 +179,82 @@ class PostgresController():
             message.created_at
         )
 
-    async def add_blacklist_word(self, server_id: int, word: str):
+    async def add_blacklist_word(self, guild_id: int, word: str):
         """
         Adds a word that is not allowed on the server
-        :param server_id: the id of the server to add the word to
+        :param guild_id: the id of the server to add the word to
         :param word: word to add
         """
         return
 
-    async def add_whitelist_channel(self, server_id: int, channel_id: int):
+    async def add_whitelist_channel(self, guild_id: int, channel_id: int):
         """
         Adds a channel that will delete all but the messages containing a
         string in the 'whitelist' column of the server row
-        :param server_id: the id of the server to add the word to
+        :param guild_id: the id of the server to add the word to
         :param word: word to add
         """
         return
 
-    async def add_r9k_channel(self, server_id: int, channel_id: int):
+    async def add_r9k_channel(self, guild_id: int, channel_id: int):
         """
         this would be a cool thing to have
         """
         return
+
+    async def is_role_assignable(self, guild_id: int, role_id: int):
+        """
+        Checks to see if a role is in a servers auto assignable roles list
+        :param guild_id: guild to look in
+        :param role_id: role to check
+        """
+        sql = """
+        SELECT * FROM {}.servers
+        WHERE serverid = $1
+        AND assignableroles @> $2;
+        """.format(self.schema)
+
+        row = await self.pool.fetchrow(sql, guild_id, [role_id])
+        return True if row else False
+
+    async def add_assignable_role(self, guild_id: int, role_id: int):
+        """
+        Adds a role to the assignable roles array for the server
+        :param guild_id: guild to add role to
+        :param role_id: role to add
+        """
+        sql = """
+        UPDATE {}.servers SET assignableroles = assignableroles || $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        await self.pool.execute(sql, [role_id], guild_id)
+
+    async def remove_assignable_role(self, guild_id: int, role_id: int):
+        """
+        Removes a role from the assignable roles array for the server
+        :param guild_id: guild to remove role from
+        :param role_id: role to remove
+        """
+        sql = """
+        SELECT assignableroles FROM {}.servers
+        WHERE serverid = $1 AND assignableroles @> $2;
+        """.format(self.schema)
+        role_list = await self.pool.fetchval(sql, guild_id, [role_id])
+        role_list.remove(role_id)
+        sql = """
+        UPDATE {}.servers SET assignableroles = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        await self.pool.execute(sql, [role_list], guild_id)
+
+    async def get_assignable_roles(self, guild_id: int):
+        """
+        returns a list of assignable roles array for the server
+        :param guild_id: guild to remove role from
+        """
+        sql = """
+        SELECT assignableroles FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        role_list = await self.pool.fetchval(sql, guild_id)
+        return role_list

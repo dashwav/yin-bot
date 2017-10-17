@@ -12,5 +12,6 @@ class Change(Enum):
 class Action(Enum):
     MUTE = 1
     KICK = 2
-    BAN = 3
-    UNBAN = 4
+    SOFTBAN = 3
+    BAN = 4
+    UNBAN = 5

@@ -3,6 +3,7 @@ This cog is the moderation toolkit this is for tasks such as
 kicking/banning users.
 """
 import discord
+import datetime
 from discord.ext import commands
 from .utils import helpers, checks
 from .utils.enums import Action
@@ -70,6 +71,37 @@ class Moderation:
         if game:
             await self.bot.change_presence(game=discord.Game(name=game))
         ctx.delete()
+
+    @commands.command()
+    @checks.has_permissions(manage_messages=True)
+    async def purge(self, ctx, *args,  mentions=None):
+        deleted = []
+        try:
+            count = int(next(iter(args or []), 'fugg'))
+        except ValueError:
+            count = 100
+        mentions = ctx.message.mentions
+        await ctx.message.delete()
+        if mentions:
+            for user in mentions:
+                try:
+                    deleted += await ctx.channel.purge(
+                        limit=count,
+                        check=lambda x: x.author == user
+                    )
+                except discord.Forbidden as e:
+                    return await ctx.send(
+                        'I do not have sufficient permissions to purge.')
+                except Exception as e:
+                    self.bot.logger.warning(f'Error purging messages: {e}')
+        else:
+            try:
+                deleted += await ctx.channel.purge(limit=count)
+            except discord.Forbidden as e:
+                return await ctx.send(
+                    'I do not have sufficient permissions to purge.')
+            except Exception as e:
+                    self.bot.logger.warning(f'Error purging messages: {e}')
 
     @commands.command()
     @checks.has_permissions(kick_members=True)
@@ -182,4 +214,23 @@ class Moderation:
                             f'from **{server_name}**.'
         embed.add_field(name='Reason:', value=reason)
         embed.set_footer(text='This is an automated message')
+        return embed
+
+    def cread_modlog_embed(self, user, action: Action, moderator, reason):
+        """
+        Creates a modlog embed with the moderator who performed the action, as 
+        well as the reason
+        :param action: Action that was performed
+        :param moderator: mod that did the action
+        :param reason: reason for the ban
+        """
+        if action != Action.KICK:
+            action_str = f'{action.name.lower()}n'
+        else:
+            action_str = action.name
+        embed = discord.Embed(
+            title=f'{user.name} has been {action_str}ed by {moderator.name}',
+            description=f'Reason: {reason}',
+            footer=datetime.utcnow()
+        )
         return embed
