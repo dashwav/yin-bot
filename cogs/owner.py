@@ -20,15 +20,23 @@ class Owner():
         self.bot = bot
 
     @commands.command(hidden=True)
+    @commands.is_owner()
+    async def add_server(self, ctx):
+        """
+        Adds a server to the db
+        """
+        await self.bot.postgres_controller.add_server(ctx.guild.id)
+        self.server_settings[ctx.guild.id]['prefix'] = '-'
+        self.server_settings[ctx.guild.id]['modlog'] = False
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def echo(self, ctx, channel, *, message):
         """
         Echoes a string into a different channel
         :params channel: channel to echo into
         :params message: message to echo
         """
-        is_owner = await ctx.bot.is_owner(ctx.author)
-        if not is_owner:
-            return
         if not ctx.message.channel_mentions:
             return await ctx.send(
                 f'<command> <channel mention> <message> u idiot')

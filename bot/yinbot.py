@@ -15,12 +15,12 @@ class Yinbot(Bot):
     """
     def __init__(self, config, logger,
                  postgres_controller: PostgresController,
-                 prefix_dict: dict):
+                 server_settings: dict):
         """
         init for bot class
         """
         self.postgres_controller = postgres_controller
-        self.prefix_dict = {}
+        self.server_settings = {}
         self.start_time = int(time())
         self.credentials = config['token']
         self.guild_id = config['guild_id']
@@ -47,11 +47,11 @@ class Yinbot(Bot):
         postgres_cred = config['postgres_credentials']
         postgres_controller = await PostgresController.get_instance(
             logger=logger, connect_kwargs=postgres_cred)
-        prefix_dict = await postgres_controller.get_server_prefix()
-        return cls(config, logger, postgres_controller, prefix_dict)
+        server_settings = await postgres_controller.get_server_prefix()
+        return cls(config, logger, postgres_controller, server_settings)
 
     async def get_pre(self, bot, message):
-        return self.prefix_dict[message.guild.id]  # or a list, ["pre1","pre2"]
+        return self.server_settings[message.guild.id]['prefix']  # or a list, ["pre1","pre2"]
 
     def start_bot(self, cogs):
         """
@@ -62,7 +62,8 @@ class Yinbot(Bot):
         self.run(self.credentials)
 
     async def on_ready(self):
-        self.prefix_dict = await self.postgres_controller.get_server_prefix()
+        self.server_settings = \
+            await self.postgres_controller.get_server_settings()
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
         self.logger.info(f'\nLogged in as\n{self.user.name}'

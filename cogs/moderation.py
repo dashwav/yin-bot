@@ -5,7 +5,7 @@ kicking/banning users.
 import discord
 import datetime
 from discord.ext import commands
-from .utils import helpers, checks
+from .utils import helpers, checks, embeds
 from .utils.enums import Action
 
 
@@ -128,6 +128,16 @@ class Moderation:
                 await ctx.send('❌', delete_after=3)
                 return
             self.bot.logger.info(f'Successfully kicked {member}')
+            if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+                try:
+                    local_embed = embeds.KickEmbed(member, ctx.author, reason)
+                    mod_logs = self.bot.postgres_controller.get_modlogs(
+                            ctx.guild.id)
+                    for channel_id in mod_logs:
+                        (self.bot.get_channel(channel_id)).send(
+                            embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.warning(f'Issue posting to mod log: {e}')
         else:
             await ctx.send("Cancelled kick", delete_after=3)
         try:

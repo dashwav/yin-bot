@@ -54,8 +54,8 @@ class Stats():
         await self.update()
         """
         await self.bot.postgres_controller.add_server(guild.id)
-        self.bot.prefix_dict = \
-            await self.postgres_controller.get_server_prefix()
+        self.bot.server_settings = \
+            await self.postgres_controller.get_server_settings()
 
     @commands.command()
     async def Stats(self):
