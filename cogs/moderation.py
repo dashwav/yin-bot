@@ -131,21 +131,15 @@ class Moderation:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.KickEmbed(member, ctx.author, reason)
-                    mod_logs = self.bot.postgres_controller.get_modlogs(
+                    mod_logs = await self.bot.postgres_controller.get_modlogs(
                             ctx.guild.id)
                     for channel_id in mod_logs:
-                        (self.bot.get_channel(channel_id)).send(
+                        await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
                 except Exception as e:
                     self.bot.logger.warning(f'Issue posting to mod log: {e}')
         else:
             await ctx.send("Cancelled kick", delete_after=3)
-        try:
-            await self.bot.postgres_controller.insert_modaction(
-                ctx.guild.id, ctx.author.id, member.id, Action.KICK
-            )
-        except Exception as e:
-            self.bot.logger.warning(f'Issue logging action to db: {e})')
 
     @commands.command()
     @checks.is_admin()
@@ -224,23 +218,4 @@ class Moderation:
                             f'from **{server_name}**.'
         embed.add_field(name='Reason:', value=reason)
         embed.set_footer(text='This is an automated message')
-        return embed
-
-    def cread_modlog_embed(self, user, action: Action, moderator, reason):
-        """
-        Creates a modlog embed with the moderator who performed the action, as 
-        well as the reason
-        :param action: Action that was performed
-        :param moderator: mod that did the action
-        :param reason: reason for the ban
-        """
-        if action != Action.KICK:
-            action_str = f'{action.name.lower()}n'
-        else:
-            action_str = action.name
-        embed = discord.Embed(
-            title=f'{user.name} has been {action_str}ed by {moderator.name}',
-            description=f'Reason: {reason}',
-            footer=datetime.utcnow()
-        )
         return embed

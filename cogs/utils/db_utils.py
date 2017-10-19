@@ -49,7 +49,7 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {}.servers (
       serverid BIGINT,
       prefix varchar(2),
-      modlog_enabled boolean DEFAULT FALSE;
+      modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
       assignableroles bigint ARRAY,
       filterwordswhite varchar ARRAY,
@@ -137,7 +137,7 @@ class PostgresController():
         """.format(self.schema)
 
         await self.pool.execute(
-            sql, guild_id, '-', 'f', [], [], [], [], [], [])
+            sql, guild_id, '-', False, [], [], [], [], [], [])
 
     async def get_server_settings(self):
         """
@@ -149,8 +149,11 @@ class PostgresController():
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)
         for row in val_list:
-            prefix_dict[row['serverid']] = {'prefix': row['prefix']}
-            prefix_dict[row['serverid']] = {'modlog': row['modlog_enabled']}
+            print(row)
+            prefix_dict[row['serverid']] = {
+                'prefix': row['prefix'],
+                'modlog_enabled': row['modlog_enabled']
+                }
         return prefix_dict
 
     async def add_whitelist_word(self, guild_id: int, word: str):
@@ -283,8 +286,14 @@ class PostgresController():
         FROM unnest(array_append(modlog_channels,$1::bigint)) e)
         WHERE serverid = $2;
         """.format(self.schema)
+        boolsql = """
+        UPDATE {}.servers
+        SET modlog_enabled = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
         try:
             await self.pool.execute(sql, channel_id, guild_id)
+            await self.pool.execute(boolsql, True, guild_id)
             return True
         except Exception as e:
             logger.warning(f'Error adding channel to server {guild_id}: {e}')
@@ -296,14 +305,22 @@ class PostgresController():
         :param guild_id: guild to remove modlog channel from
         :param channel_id: channel id to remove
         """
-        channel_list = self.get_modlogs(guild_id)
+        channel_list = await self.get_modlogs(guild_id)
         channel_list.remove(channel_id)
         sql = """
-        UPDATE {}.servers SET modlog_channels = $1
+        UPDATE {}.servers
+        SET modlog_channels = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        boolsql = """
+        UPDATE {}.servers
+        SET modlog_enabled = $1
         WHERE serverid = $2;
         """.format(self.schema)
         try:
             await self.pool.execute(sql, channel_list, guild_id)
+            if not channel_list:
+                await self.pool.execute(boolsql, False, guild_id)
         except Exception as e:
             logger.warning(f'Error removing modlog channel: {e}')
             return False

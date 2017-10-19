@@ -25,9 +25,17 @@ class Owner():
         """
         Adds a server to the db
         """
-        await self.bot.postgres_controller.add_server(ctx.guild.id)
-        self.server_settings[ctx.guild.id]['prefix'] = '-'
-        self.server_settings[ctx.guild.id]['modlog'] = False
+        try:
+            await self.bot.postgres_controller.add_server(ctx.guild.id)
+            self.bot.server_settings[ctx.guild.id] = {
+                'prefix': '-',
+                'modlog_enabled': False
+            }
+            await ctx.send('\N{OK HAND SIGN}', delete_after=3)
+            await ctx.message.delete()
+        except Exception as e:
+            await ctx.send('❌', delete_after=3)
+            self.bot.logger.warning(f'Error adding server to db: {e}')
 
     @commands.command(hidden=True)
     @commands.is_owner()

@@ -28,7 +28,7 @@ class Admin:
             )
             await ctx.send(embed=local_embed)
 
-    @prefix.commands()
+    @prefix.command()
     async def change(self, ctx, prefix):
         """
         sets the prefix for the server
@@ -76,14 +76,13 @@ class Admin:
                 if channel.id in modlogs:
                     desc += f'{channel.name} \n'
             local_embed = discord.Embed(
-                title=f'Current prefix is: '
-                f'\'{self.bot.server_settings[ctx.guild.id]["prefix"]}\'',
+                title=f'Current modlog list is: ',
                 description=desc,
                 color=0x419400
             )
             await ctx.send(embed=local_embed)
 
-    @modlog.commands()
+    @modlog.command()
     async def add(self, ctx, *, channels):
         """
         sets the prefix for the server
@@ -109,31 +108,37 @@ class Admin:
                     added_channels.append(channel.name)
             if added_channels:
                 for channel in added_channels:
-                    desc += f'{channel.name} \n'
+                    desc += f'{channel} \n'
                 local_embed = discord.Embed(
                     title=f'Channels added to modlog list:',
                     description=desc,
                     color=0x419400
                 )
+                self.bot.server_settings[ctx.guild.id]['modlog_enabled'] = True
             else:
+                self.bot.logger.info(f'slktjsaj')
                 local_embed = discord.Embed(
                     title=f'Internal error, please contact @dashwav#7785',
                     description=' ',
                     color=0x651111
                 )
+            await ctx.send(embed=local_embed)
         except Exception as e:
+            self.bot.logger.info(f'Error adding channels {e}')
             local_embed = discord.Embed(
                 title=f'Internal issue, please contact @dashwav#7785',
                 description=' ',
                 color=0x651111
             )
+            await ctx.send(embed=local_embed)
 
-    @modlog.commands(aliases=['rem'])
+    @modlog.command(aliases=['rem'])
     async def remove(self, ctx, *, channels):
         """
         Removes a channel from the modlog list
         """
         removed_channels = []
+        absent_channels = []
         desc = ''
         channel_mentions = ctx.message.channel_mentions
         if not channel_mentions:
@@ -146,19 +151,45 @@ class Admin:
             return
         try:
             for channel in channel_mentions:
-                success = await \
-                    self.bot.postgres_controller.rem_modlog_channel(
-                        ctx.guild.id, channel.id, self.bot.logger
-                    )
+                try:
+                    success = False
+                    success = await \
+                        self.bot.postgres_controller.rem_modlog_channel(
+                            ctx.guild.id, channel.id, self.bot.logger
+                        )
+                except ValueError:
+                    absent_channels.append(channel.name)
                 if success:
                     removed_channels.append(channel.name)
             if removed_channels:
                 for channel in removed_channels:
-                    desc += f'{channel.name} \n'
+                    desc += f'{channel} \n'
                 local_embed = discord.Embed(
-                    title=f'Channels removed to modlog list:',
+                    title=f'Channels removed from modlog list:',
                     description=desc,
                     color=0x419400
+                )
+                modlogs = await self.bot.postgres_controller.get_modlogs(
+                    ctx.guild.id)
+                if not modlogs:
+                    self.bot.server_settings[ctx.guild.id]['modlog_enabled']\
+                        = False
+                if absent_channels:
+                    desc = ''
+                    for channel in absent_channels:
+                        desc += f'{channel}\n'
+                    local_embed.add_field(
+                        name='Channels not in modlog list :',
+                        value=desc
+                    )
+            elif absent_channels:
+                desc = ''
+                for channel in absent_channels:
+                    desc += f'{channel}\n'
+                local_embed = discord.Embed(
+                    title=f'Channels not in modlog list: ',
+                    description=desc,
+                    color=0x651111
                 )
             else:
                 local_embed = discord.Embed(
@@ -166,9 +197,12 @@ class Admin:
                     description=' ',
                     color=0x651111
                 )
+            await ctx.send(embed=local_embed)
         except Exception as e:
+            self.bot.logger.warning(f'Issue: {e}')
             local_embed = discord.Embed(
                 title=f'Internal issue, please contact @dashwav#7785',
                 description=' ',
                 color=0x651111
             )
+            await ctx.send(embed=local_embed)

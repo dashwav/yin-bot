@@ -18,12 +18,12 @@ class KickEmbed(discord.Embed):
         """
         Init class for embed
         """
-        local_title = f'{kicked_user.name} was kicked by {resp_mod.name}'
+        local_title = f'{kicked_user} was kicked by {resp_mod}'
         local_desc = f'Reason: {reason}'
-        current_time = datetime.utcnow()
-        local_footer = current_time.strptime('%A, %b %d %H:%M')
-        super.__init__(
+        current_time = datetime.datetime.utcnow()
+        super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
-            footer=local_footer)
+            )
+        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
