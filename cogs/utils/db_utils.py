@@ -51,11 +51,10 @@ async def make_tables(pool: Pool, schema: str):
       prefix varchar(2),
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
+      welcome_enabled boolean DEFAULT FALSE,
+      welcome_message text,
       assignableroles bigint ARRAY,
-      filterwordswhite varchar ARRAY,
-      filterwordsblack varchar ARRAY,
       blacklistchannels bigint ARRAY,
-      r9kchannels integer ARRAY,
       addtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (serverid)
     );""".format(schema)
@@ -145,14 +144,16 @@ class PostgresController():
         """
         prefix_dict = {}
         sql = """
-        SELECT serverid, prefix, modlog_enabled FROM {}.servers;
+        SELECT serverid, prefix, modlog_enabled, welcome_enabled
+        FROM {}.servers;
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)
         for row in val_list:
             print(row)
             prefix_dict[row['serverid']] = {
                 'prefix': row['prefix'],
-                'modlog_enabled': row['modlog_enabled']
+                'modlog_enabled': row['modlog_enabled'],
+                'welcome_enabled': row['welcome_enabled']
                 }
         return prefix_dict
 
@@ -356,4 +357,36 @@ class PostgresController():
             logger.warning(f'Error setting prefix for {guild_id}: {e}')
             return False
 
+    async def set_welcome_message(self, guild_id: int, message: str, logger):
+        """
+        Sets the welcome message for a server
+        :param guild_id: Guild to update message for
+        :param message: string to insert
+        """
+        sql = """
+        UPDATE {}.servers
+        SET welcome_message = $1
+        WHERE serverid = $2
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, message, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Issue setting welcome_message: {e}')
+            return False
 
+    async def get_welcome_message(self, guild_id: int, logger):
+        """
+        Returns the welcome message string if it exists
+        :param guild_id: guild to get welcome message for
+        """
+        sql = """
+        SELECT welcome_message from {}.servers
+        WHERE serverid = $1
+        """.format(self.schema)
+        try:
+            message = await self.pool.fetchrow(sql, guild_id)
+            return message['welcome_message']
+        except Exception as e:
+            logger.warning(f'Error while getting welcome message: {e}')
+            return None

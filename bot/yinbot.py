@@ -47,11 +47,15 @@ class Yinbot(Bot):
         postgres_cred = config['postgres_credentials']
         postgres_controller = await PostgresController.get_instance(
             logger=logger, connect_kwargs=postgres_cred)
-        server_settings = await postgres_controller.get_server_prefix()
+        server_settings = await postgres_controller.get_server_settings()
         return cls(config, logger, postgres_controller, server_settings)
 
     async def get_pre(self, bot, message):
-        return self.server_settings[message.guild.id]['prefix']  # or a list, ["pre1","pre2"]
+        try:
+            return self.server_settings[message.guild.id]['prefix'] 
+        except Exception as e:
+            self.logger.info(f'{e}')
+            return '-'
 
     def start_bot(self, cogs):
         """
@@ -62,8 +66,13 @@ class Yinbot(Bot):
         self.run(self.credentials)
 
     async def on_ready(self):
-        self.server_settings = \
-            await self.postgres_controller.get_server_settings()
+        try:
+            self.server_settings = {}
+            self.server_settings = \
+                await self.postgres_controller.get_server_settings()
+            self.logger.info(f'{self.server_settings}')
+        except Exception as e:
+            self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
         self.logger.info(f'\nLogged in as\n{self.user.name}'
