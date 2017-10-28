@@ -72,6 +72,48 @@ class Roles():
             )
         await ctx.send(embed=local_embed)
 
+    @commands.command()
+    @commands.guild_only()
+    async def iamnot(self, ctx, role_name):
+        """
+        Removes a role from the user
+        """
+        found_role = None
+        users_roles = ctx.message.author.roles
+        for role in users_roles:
+            if role.name == role_name:
+                found_role = role
+        if not found_role:
+            local_embed = discord.Embed(
+                title=f'Role not removed:',
+                description=f'You don\'t have the'
+                f' **{role_name}** role already',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        assignable_roles = await \
+            self.bot.postgres_controller.get_assignable_roles(
+                ctx.guild.id)
+        if found_role.id in assignable_roles:
+            users_roles.remove(found_role)
+            local_embed = discord.Embed(
+                title=f'Role removed:',
+                description=f'You no longer have the '
+                f'**{found_role.name}** role.',
+                color=0x419400
+            )
+            await ctx.send(embed=local_embed, delete_after=5)
+            await ctx.message.delete()
+        else:
+            local_embed = discord.Embed(
+                title=f'Role not removed:',
+                description=f'**{found_role.name}** is not a '
+                'self-assignable role.',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+
     @commands.group(aliases=['ar'])
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
