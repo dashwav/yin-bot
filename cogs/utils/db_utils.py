@@ -4,7 +4,7 @@ Database utility functions.
 from datetime import datetime
 from json import dumps, loads
 from typing import Optional
-from .enums import Change, Action
+from .enums import Action
 try:
     from asyncpg import Record, InterfaceError, create_pool
     from asyncpg.pool import Pool
@@ -51,8 +51,8 @@ async def make_tables(pool: Pool, schema: str):
       prefix varchar(2),
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
-      welcome_enabled boolean DEFAULT FALSE,
       welcome_message text,
+      welcome_channels bigint ARRAY,
       assignableroles bigint ARRAY,
       blacklistchannels bigint ARRAY,
       addtime TIMESTAMP DEFAULT current_timestamp,
@@ -130,13 +130,22 @@ class PostgresController():
         :param guild_id: the id of the server added
         """
         sql = """
-        INSERT INTO {}.servers VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO {}.servers VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (serverid)
         DO nothing;
         """.format(self.schema)
 
         await self.pool.execute(
-            sql, guild_id, '-', False, [], [], [], [], [], [])
+            sql,
+            guild_id,
+            '-',
+            False,
+            [],
+            f'Welcome %user%!',
+            [],
+            [],
+            [],
+            )
 
     async def get_server_settings(self):
         """
@@ -144,7 +153,7 @@ class PostgresController():
         """
         prefix_dict = {}
         sql = """
-        SELECT serverid, prefix, modlog_enabled, welcome_enabled
+        SELECT serverid, prefix, modlog_enabled
         FROM {}.servers;
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)
@@ -153,7 +162,6 @@ class PostgresController():
             prefix_dict[row['serverid']] = {
                 'prefix': row['prefix'],
                 'modlog_enabled': row['modlog_enabled'],
-                'welcome_enabled': row['welcome_enabled']
                 }
         return prefix_dict
 
@@ -368,6 +376,7 @@ class PostgresController():
         SET welcome_message = $1
         WHERE serverid = $2
         """.format(self.schema)
+
         try:
             await self.pool.execute(sql, message, guild_id)
             return True
@@ -390,3 +399,54 @@ class PostgresController():
         except Exception as e:
             logger.warning(f'Error while getting welcome message: {e}')
             return None
+
+    async def add_welcome_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Adds a channel to the welcome channel array for the server
+        :param guild_id: guild to add channel to
+        :param channel_id: channel to add
+        """
+        sql = """
+        UPDATE {}.servers
+        SET welcome_channels = (SELECT array_agg(distinct e)
+        FROM unnest(array_append(welcome_channels,$1::bigint)) e)
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_id, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding channel to server {guild_id}: {e}')
+            return False
+
+    async def rem_welcome_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Removes a channel from the modlog array
+        :param guild_id: guild to remove modlog channel from
+        :param channel_id: channel id to remove
+        """
+        channel_list = await self.get_welcome_channels(guild_id, logger)
+        channel_list.remove(channel_id)
+        sql = """
+        UPDATE {}.servers
+        SET welcome_channels = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_list, guild_id)
+        except Exception as e:
+            logger.warning(f'Error removing modlog channel: {e}')
+            return False
+        return True
+
+    async def get_welcome_channels(self, guild_id: int, logger):
+        """
+        Retrieves and returns the welcome channel list
+        :param guild_id: guild to retrieve channels for
+        """
+        sql = """
+        SELECT welcome_channels FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        channel_list = await self.pool.fetchval(sql, guild_id)
+        return channel_list
