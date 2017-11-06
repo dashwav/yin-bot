@@ -52,7 +52,7 @@ class Yinbot(Bot):
 
     async def get_pre(self, bot, message):
         try:
-            return self.server_settings[message.guild.id]['prefix'] 
+            return self.server_settings[message.guild.id]['prefix']
         except Exception as e:
             self.logger.info(f'{e}')
             return '-'
