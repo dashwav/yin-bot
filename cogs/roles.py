@@ -3,13 +3,15 @@ Handling the auto assignable roles and such
 """
 
 import discord
+from discord import AuditLogAction
 from discord.ext import commands
 from .utils import checks
+from datetime import datetime, timedelta
 
 
 class Roles():
     """
-    Cog to handle the ability of users to 
+    Cog to handle the ability of users to
     add roles to themselves through use of a command
     """
 
@@ -19,6 +21,29 @@ class Roles():
         """
         super().__init__()
         self.bot = bot
+
+    @commands.command(aliases=['prunerole'])
+    @commands.guild_only()
+    @checks.has_permissions(manage_roles=True)
+    async def cleanrole(self, ctx, role_name, lcl_hours=24):
+        """
+        Removes all members from a certain
+        """
+        safe_users = []
+        found_role = None
+        dt_24hr = datetime.utcnow() - timedelta(hours=lcl_hours)
+        for role in ctx.guild.roles:
+            if role.name.lower() == role_name.lower():
+                found_role = role
+        if not found_role:
+            return
+        audit_logs = await ctx.guild.audit_logs(
+            after=dt_24hr,
+            action=AuditLogAction.member_role_update
+        )
+        async for entry in audit_logs:
+            if found_role in entry.after.roles:
+                safe_users.append(entry.target)
 
     @commands.command()
     @commands.guild_only()
@@ -38,7 +63,7 @@ class Roles():
                         color=0x651111
                     )
                     await ctx.send(embed=local_embed)
-                    return 
+                    return
             assignable = await self.bot.postgres_controller.is_role_assignable(
                 ctx.guild.id, found_role.id)
             if assignable:
