@@ -1,10 +1,8 @@
 """
 Misc commands that I want to run
 """
-
-import discord
+import traceback
 from discord.ext import commands
-from.utils import checks
 
 
 class Owner():
@@ -53,3 +51,37 @@ class Owner():
                 await channel.send(f'{message}')
         except Exception as e:
             ctx.send('Error when trying to send fam')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def load(self, ctx, *, module):
+        """Loads a module."""
+        try:
+            self.bot.load_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def unload(self, ctx, *, module):
+        """Unloads a module."""
+        try:
+            self.bot.unload_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command(name='reload', hidden=True)
+    @commands.is_owner()
+    async def _reload(self, ctx, *, module):
+        """Reloads a module."""
+        try:
+            self.bot.unload_extension(module)
+            self.bot.load_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
