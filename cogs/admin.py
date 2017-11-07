@@ -206,3 +206,7 @@ class Admin:
                 color=0x651111
             )
             await ctx.send(embed=local_embed)
+
+
+def setup(bot):
+    bot.add_cog(Admin(bot))

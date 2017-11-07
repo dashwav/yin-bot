@@ -66,7 +66,8 @@ class Logging():
                     description=desc,
                     color=0x419400
                 )
-                self.bot.server_settings[ctx.guild.id]['logging_enabled'] = True
+                self.bot.server_settings[ctx.guild.id]['logging_enabled']\
+                    = True
             else:
                 local_embed = discord.Embed(
                     title=f'Internal error, please contact @dashwav#7785',
@@ -232,7 +233,6 @@ class Logging():
         channels = await self.bot.postgres_controller.get_logger_channels(
                 before.guild.id)
         if set(before.roles) < set(after.roles):
-            self.bot.logger.info(f'1')
             for role in set(after.roles) - set(before.roles):
                 local_embed = embeds.RoleAddEmbed(
                     after,
@@ -242,7 +242,6 @@ class Logging():
                     ch = self.bot.get_channel(channel)
                     await ch.send(embed=local_embed)
         elif set(after.roles) < set(before.roles):
-            self.bot.logger.info(f'1')
             for role in set(before.roles) - set(after.roles):
                 local_embed = embeds.RoleRemoveEmbed(
                     after,
@@ -257,3 +256,7 @@ class Logging():
             for channel in channels:
                 ch = self.bot.get_channel(channel)
                 await ch.send(embed=local_embed)
+
+
+def setup(bot):
+    bot.add_cog(Logging(bot))

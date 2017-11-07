@@ -47,6 +47,8 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {}.servers (
       serverid BIGINT,
       prefix varchar(2),
+      voice_enabled boolean DEFAULT FALSE,
+      voice_role bigint,
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
       welcome_message text,
@@ -130,7 +132,8 @@ class PostgresController():
         :param guild_id: the id of the server added
         """
         sql = """
-        INSERT INTO {}.servers VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO {}.servers VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         ON CONFLICT (serverid)
         DO nothing;
         """.format(self.schema)
@@ -139,6 +142,8 @@ class PostgresController():
             sql,
             guild_id,
             '-',
+            False,
+            0,
             False,
             [],
             f'Welcome %user%!',
@@ -520,3 +525,9 @@ class PostgresController():
         """.format(self.schema)
         channel_list = await self.pool.fetchval(sql, guild_id)
         return channel_list
+
+    async def get_voice_enabled(self, guild_id: int):
+        """
+        Returns teh boolean voice_enabled for given server
+        """
+        return None

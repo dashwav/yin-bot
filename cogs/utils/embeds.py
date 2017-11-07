@@ -64,13 +64,14 @@ class JoinEmbed(discord.Embed):
         """
         local_title = f'User joined'
         local_desc = f'{joining_user.name}#{joining_user.discriminator}'\
-                     f' | {joining_user.id}'
+                     f'\n\n{joining_user.id}'
         current_time = datetime.datetime.utcnow()
         super().__init__(
             color=POSITIVECOLOR,
             title=local_title,
             description=local_desc,
             )
+        self.set_thumbnail(url=joining_user.avatar_url)
         self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
 
 
@@ -84,13 +85,14 @@ class LeaveEmbed(discord.Embed):
         """
         local_title = f'User left'
         local_desc = f'{leaving_user.name}#{leaving_user.discriminator}'\
-                     f' | {leaving_user.id}'
+                     f'\n\n{leaving_user.id}'
         current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
+        self.set_thumbnail(url=leaving_user.avatar_url)
         self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
 
 

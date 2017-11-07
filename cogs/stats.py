@@ -1,9 +1,7 @@
 """
 Cog that will print out various bot statistics
 """
-from .utils import checks
 import json
-import discord
 from discord.ext import commands
 
 
@@ -31,7 +29,7 @@ class Stats():
         async with self.bot.session.post(
                 CARBONITEX_API_BOTDATA, data=carbon_payload) as resp:
             log.info(
-                f'Carbon statistics returned {resp.status} for {carbon_payload}')
+            f'Carbon statistics returned {resp.status} for {carbon_payload}')
         """
 
         payload = json.dumps({
@@ -63,3 +61,7 @@ class Stats():
         Creates an embed with basic bot stats
         """
         return
+
+
+def setup(bot):
+    bot.add_cog(Stats(bot))

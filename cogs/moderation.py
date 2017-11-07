@@ -3,7 +3,6 @@ This cog is the moderation toolkit this is for tasks such as
 kicking/banning users.
 """
 import discord
-import datetime
 from discord.ext import commands
 from .utils import helpers, checks, embeds
 from .utils.enums import Action
@@ -219,3 +218,6 @@ class Moderation:
         embed.add_field(name='Reason:', value=reason)
         embed.set_footer(text='This is an automated message')
         return embed
+
+def setup(bot):
+    bot.add_cog(Moderation(bot))

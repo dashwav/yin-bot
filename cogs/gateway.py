@@ -47,7 +47,7 @@ class Gateway:
                 description=welcome_msg
             )
             await ctx.send(embed=local_embed)
-    
+
     @welcome.command(aliases=['set'])
     async def setwelcome(self, ctx, *, welcome_string):
         """
@@ -136,3 +136,7 @@ class Gateway:
                 color=0x651111
             )
         await ctx.send(embed=local_embed)
+
+
+def setup(bot):
+    bot.add_cog(Gateway(bot))
