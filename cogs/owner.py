@@ -19,6 +19,20 @@ class Owner():
 
     @commands.command(hidden=True)
     @commands.is_owner()
+    async def change_username(self, ctx, *, new_username: str):
+        """
+        Changes bot username
+        """
+        bot_user = self.bot.user
+        try:
+            await bot_user.edit(username=new_username)
+            await ctx.send('\N{OK HAND SIGN}', delete_after=3)
+        except Exception as e:
+            await ctx.send('❌', delete_after=3)
+            self.bot.logger.warning(f'Error changing bots username: {e}')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def add_server(self, ctx):
         """
         Adds a server to the db
