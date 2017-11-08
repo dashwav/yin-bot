@@ -210,6 +210,8 @@ class Logging():
         sends message on a user editing messages
         """
         if self.bot.server_settings[message.guild.id]['logging_enabled']:
+            if message.author.bot:
+                return
             channels = await self.bot.postgres_controller.get_logger_channels(
                 message.guild.id)
             try:
