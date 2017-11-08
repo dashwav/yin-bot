@@ -25,8 +25,7 @@ class Yinbot(Bot):
         self.credentials = config['token']
         self.guild_id = config['guild_id']
         self.bot_owner_id = config['owner_id']
-        self.mod_log = config['mod_log']
-        self.wait_time = config['default_wait_time']
+        self.base_voice = config['base_voice']
         self.logger = logger
         super().__init__(command_prefix=self.get_pre)
 

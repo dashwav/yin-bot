@@ -2,15 +2,14 @@ token: ""
 
 guild_id: 123456789
 
-mod_log: 123456798
+base_voice: "Voice"
 
-owner_id: 123456789
+owner_id: 
+
+discord_bots_key: 123456
 
 postgres_credentials:
     host: ""
     user: ""
     database: ""
     password: ""
-
-# Wait time in seconds (default 10 min)
-default_wait_time: 600

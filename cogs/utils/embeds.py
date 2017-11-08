@@ -14,6 +14,36 @@ USEREDITCOLOR = 0xe9e6c2
 ROLECOLOR = 0x800080
 
 
+class InternalErrorEmbed(discord.Embed):
+    """
+    Embed for when it isn't the users fault
+    """
+    def __init__(self):
+        local_title = f'Internal error contact @dashwav#7785'
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=' '
+        )
+
+
+class ForbiddenEmbed(discord.Embed):
+    """
+    Embed for when bot lacks permissions to do something
+    """
+    def __init__(self, action, required_perm=None):
+        local_title = f'Insuffecient Permissions:'
+        local_desc = f'Couldn\'t complete command: **{action}**'\
+                     ' due to lack of permissions'
+        current_time = datetime.datetime.utcnow()
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc
+        )
+        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+
+
 class KickEmbed(discord.Embed):
     """
     Embed for when a user has been kicked

@@ -528,6 +528,47 @@ class PostgresController():
 
     async def get_voice_enabled(self, guild_id: int):
         """
-        Returns teh boolean voice_enabled for given server
+        Returns the boolean voice_enabled for given server
         """
-        return None
+        sql = """
+        SELECT voice_enabled FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        return await self.pool.fetchval(sql, guild_id)
+
+    async def get_voice_role(self, guild_id: int):
+        """
+        Returns the role id for the given guild
+        :param guild_id: guild to pull role from
+        """
+        sql = """
+        SELECT voice_role FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        return await self.pool.fetchval(sql, guild_id)
+
+    async def set_voice_role(self, guild_id: int, role_id: int):
+        """
+        Sets the role id for the given guild
+        :param guild_id: guild to set role for
+        :param role_id: role to add to guild
+        """
+        sql = """
+        UPDATE {}.servers
+        SET voice_role = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        await self.pool.execute(sql, role_id, guild_id)
+
+    async def set_voice_enabled(self, guild_id: int, value: bool):
+        """
+        Setsthe variable voice_enabled for a given server
+        :param guild_id: guild to set voice_enabled
+        :param value: boolean to set variable to
+        """
+        sql = """
+        UPDATE {}.servers
+        SET voice_enabled = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        await self.pool.execute(sql, value, guild_id)
