@@ -207,8 +207,8 @@ class Voice():
                                 f'{vc_role} not found in {user_roles}')
             await member.edit(roles=set(user_roles))
         else:
-            vc_roles = await self.bot.postgres_controller.get_channel_roles(
-                member.guild.id, before.channel.id
+            vc_roles = await self.bot.postgres_controller.get_server_roles(
+                member.guild.id
             )
             for vc_role in vc_roles:
                 for role in user_roles:

@@ -534,6 +534,20 @@ class PostgresController():
         """.format(self.schema)
         return await self.pool.fetchval(sql, guild_id)
 
+    async def get_server_roles(self, guild_id: int):
+        """
+        Returns a list of enabled voice roles for a guild
+        """
+        sql = """
+        SELECT roleid FROM {}.roles
+        WHERE serverid = $1;
+        """.format(self.schema)
+        role_list = []
+        records = await self.pool.fetch(sql, guild_id)
+        for rec in records:
+            role_list.append(rec['roleid'])
+        return role_list
+
     async def get_role_channels(self, guild_id: int, role_id: int):
         """
         Returns a list of channels for a given role

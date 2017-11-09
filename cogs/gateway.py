@@ -48,7 +48,7 @@ class Gateway:
             )
             await ctx.send(embed=local_embed)
 
-    @welcome.command(aliases=['set'])
+    @welcome.command(name='set')
     async def setwelcome(self, ctx, *, welcome_string):
         """
         Attempts to set welcome message to string passed in
@@ -67,9 +67,11 @@ class Gateway:
             self.bot.logger
         )
         if success:
+            desc = welcome_string.replace(
+                f'%user%', ctx.message.author.mention)
             local_embed = discord.Embed(
-                title=f'Welcome message set :ok_hand:',
-                description=' ',
+                title=f'Welcome message set:',
+                description=f'**Preview:**\n{desc} ',
                 color=0x419400
             )
         else:
@@ -125,7 +127,7 @@ class Gateway:
         if success:
             local_embed = discord.Embed(
                 title=f'Channel removed:',
-                description=f'{ctx.message.channel.id}'
+                description=f'{ctx.message.channel.name} '
                 'was removed from welcome list.',
                 color=0x419400
             )
