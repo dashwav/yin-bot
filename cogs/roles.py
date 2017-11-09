@@ -81,9 +81,9 @@ class Roles():
                 try:
                     await ctx.author.edit(roles=users_roles)
                     local_embed = discord.Embed(
-                        title=f'@{ctx.message.author}, you now have the'
-                              f'**{found_role.name}** role',
-                        description=' ',
+                        title=f'Role added:',
+                        description=f'You now have the '
+                        f'**{found_role.name}** role.',
                         color=0x419400
                     )
                 except discord.Forbidden:
@@ -132,6 +132,7 @@ class Roles():
                 ctx.guild.id)
         if found_role.id in assignable_roles:
             users_roles.remove(found_role)
+            await ctx.message.author.edit(roles=users_roles)
             local_embed = discord.Embed(
                 title=f'Role removed:',
                 description=f'You no longer have the '
