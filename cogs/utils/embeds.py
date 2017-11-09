@@ -84,6 +84,26 @@ class BanEmbed(discord.Embed):
         self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
 
 
+class LogBanEmbed(discord.Embed):
+    """
+    Embed for when a user joins the server
+    """
+    def __init__(self, leaving_user: discord.Member):
+        """
+        Init class for embed
+        """
+        local_title = f'User banned'
+        local_desc = f'{leaving_user.name}#{leaving_user.discriminator}'\
+                     f'\n\n{leaving_user.id}'
+        current_time = datetime.datetime.utcnow()
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+
+
 class JoinEmbed(discord.Embed):
     """
     Embed for when a user joins the server

@@ -126,7 +126,6 @@ class Moderation:
                 self.bot.logger.warning(f'Error kicking user!: {e}')
                 await ctx.send('❌', delete_after=3)
                 return
-            self.bot.logger.info(f'Successfully kicked {member}')
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.KickEmbed(member, ctx.author, reason)
@@ -173,15 +172,18 @@ class Moderation:
                 self.bot.logger.warning(f'Error banning user!: {e}')
                 await ctx.send('❌', delete_after=3)
                 return
-            self.bot.logger.info(f'Successfully banning {member}')
+            if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+                try:
+                    local_embed = embeds.BanEmbed(member, ctx.author, reason)
+                    mod_logs = await self.bot.postgres_controller.get_modlogs(
+                            ctx.guild.id)
+                    for channel_id in mod_logs:
+                        await (self.bot.get_channel(channel_id)).send(
+                            embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.warning(f'Issue posting to mod log: {e}')
         else:
             await ctx.send("Cancelled ban", delete_after=3)
-        try:
-            await self.bot.postgres_controller.insert_modaction(
-                ctx.guild.id, ctx.author.id, member_id, Action.BAN
-            )
-        except Exception as e:
-            self.bot.logger.warning(f'Issue logging mod action to db: {e})')
 
     @commands.command()
     @checks.has_permissions(ban_members=True)
@@ -218,6 +220,7 @@ class Moderation:
         embed.add_field(name='Reason:', value=reason)
         embed.set_footer(text='This is an automated message')
         return embed
+
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

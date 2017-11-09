@@ -32,23 +32,20 @@ async def make_tables(pool: Pool, schema: str):
     """
     await pool.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(schema))
 
-    moderation = """
-    CREATE TABLE IF NOT EXISTS {}.moderation (
-      serverid BIGINT,
-      modid BIGINT,
-      targetid BIGINT,
-      action SMALLINT,
-      logtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid, modid, targetid, action)
-    );
-    """.format(schema)
+    vplust = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.roles (
+        serverid BIGINT references {schema}.servers(serverid),
+        roleid BIGINT,
+        channels BIGINT ARRAY,
+        PRIMARY KEY(roleid)
+    );"""
 
-    servers = """
-    CREATE TABLE IF NOT EXISTS {}.servers (
+    servers = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.servers (
       serverid BIGINT,
       prefix varchar(2),
       voice_enabled boolean DEFAULT FALSE,
-      voice_role bigint,
+      invites_allowed boolean DEFAULT FALSE,
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
       welcome_message text,
@@ -59,10 +56,10 @@ async def make_tables(pool: Pool, schema: str):
       blacklistchannels bigint ARRAY,
       addtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (serverid)
-    );""".format(schema)
+    );"""
 
-    await pool.execute(moderation)
     await pool.execute(servers)
+    await pool.execute(vplust)
 
 
 class PostgresController():
@@ -143,7 +140,7 @@ class PostgresController():
             guild_id,
             '-',
             False,
-            0,
+            False,
             False,
             [],
             f'Welcome %user%!',
@@ -160,7 +157,7 @@ class PostgresController():
         """
         prefix_dict = {}
         sql = """
-        SELECT serverid, prefix, modlog_enabled, logging_enabled
+        SELECT serverid, prefix, modlog_enabled, logging_enabled, invites_allowed
         FROM {}.servers;
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)
@@ -170,6 +167,7 @@ class PostgresController():
                 'prefix': row['prefix'],
                 'modlog_enabled': row['modlog_enabled'],
                 'logging_enabled': row['logging_enabled'],
+                'invites_allowed': row['invites_allowed']
                 }
         return prefix_dict
 
@@ -536,29 +534,89 @@ class PostgresController():
         """.format(self.schema)
         return await self.pool.fetchval(sql, guild_id)
 
-    async def get_voice_role(self, guild_id: int):
+    async def get_role_channels(self, guild_id: int, role_id: int):
         """
-        Returns the role id for the given guild
-        :param guild_id: guild to pull role from
+        Returns a list of channels for a given role
         """
         sql = """
-        SELECT voice_role FROM {}.servers
-        WHERE serverid = $1;
+        SELECT channels FROM {}.roles
+        WHERE serverid = $1 AND roleid = $2;
         """.format(self.schema)
-        return await self.pool.fetchval(sql, guild_id)
+        return await self.pool.fetchval(sql, guild_id, role_id)
 
-    async def set_voice_role(self, guild_id: int, role_id: int):
+    async def get_channel_roles(self, guild_id: int, channel_id: int):
+        """
+        Returns a list of roles that have a channel_id in them
+        """
+        sql = """
+        SELECT roleid FROM {}.roles
+        WHERE serverid = $1 AND $2::bigint = ANY(channels);
+        """.format(self.schema)
+        records = await self.pool.fetch(sql, guild_id, channel_id)
+        role_list = []
+        for rec in records:
+            role_list.append(rec['roleid'])
+        return role_list
+
+    async def add_role_channel(self, guild_id: int, channel_id: int, role_id):
+        """
+        Adds a given channel_id to a given roleod
+        :param guild_id: guild to pull role from
+        """
+        channel_array = [channel_id]
+        sql = """
+        INSERT INTO {}.roles VALUES ($1, $2, $3)
+        ON CONFLICT (roleid) DO UPDATE
+        SET channels = (SELECT array_agg(distinct e)
+        FROM unnest(array_append({}.roles.channels,$4::bigint)) e);
+        """.format(self.schema, self.schema)
+        await self.pool.execute(
+            sql, guild_id, role_id, channel_array, channel_id)
+        return True
+
+    async def rem_role_channel(
+            self, guild_id: int, channel_id: int, role_id, logger):
+        """
+        Removes a channel from the roles channel array
+        :param guild_id: guild to remove modlog channel from
+        :param channel_id: channel id to remove
+        """
+        channel_list = await self.get_role_channels(guild_id, role_id)
+        channel_list.remove(channel_id)
+        sql = """
+        UPDATE {}.roles
+        SET channels = $1
+        WHERE serverid = $2 AND roleid = $3;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_list, guild_id, role_id)
+        except Exception as e:
+            logger.warning(f'Error removing role channel: {e}')
+            return False
+        return True
+
+    async def add_voice_role(self, guild_id: int, role_id: int):
         """
         Sets the role id for the given guild
         :param guild_id: guild to set role for
         :param role_id: role to add to guild
         """
         sql = """
-        UPDATE {}.servers
-        SET voice_role = $1
-        WHERE serverid = $2;
+        INSERT INTO {}.roles VALUES ($1, $2, $3)
+        ON CONFLICT (roleid)
+        DO nothing;
         """.format(self.schema)
-        await self.pool.execute(sql, role_id, guild_id)
+        await self.pool.execute(sql, guild_id, role_id, [])
+
+    async def purge_voice_roles(self, guild_id: int):
+        """
+        Removes all roles from a given server.
+        """
+        sql = """
+        DELETE FROM {}.roles
+        WHERE serverid = $1;
+        """.format(self.schema)
+        await self.pool.execute(sql, guild_id)
 
     async def set_voice_enabled(self, guild_id: int, value: bool):
         """
@@ -569,6 +627,19 @@ class PostgresController():
         sql = """
         UPDATE {}.servers
         SET voice_enabled = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        await self.pool.execute(sql, value, guild_id)
+
+    async def set_invites_allowed(self, guild_id: int, value: bool):
+        """
+        Setsthe variable voice_enabled for a given server
+        :param guild_id: guild to set voice_enabled
+        :param value: boolean to set variable to
+        """
+        sql = """
+        UPDATE {}.servers
+        SET invites_allowed = $1
         WHERE serverid = $2;
         """.format(self.schema)
         await self.pool.execute(sql, value, guild_id)

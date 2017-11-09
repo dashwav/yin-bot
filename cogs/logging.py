@@ -10,6 +10,7 @@ from .utils import embeds
 class Logging():
 
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         self.logger = bot.logger
 
@@ -159,6 +160,18 @@ class Logging():
             )
             await ctx.send(embed=local_embed)
 
+    async def on_member_ban(self, guild, user):
+        """
+        sends message on user ban
+        """
+        if self.bot.server_settings[guild.id]['logging_enabled']:
+            channels = await self.bot.postgres_controller.get_logger_channels(
+                guild.id)
+            local_embed = embeds.LogBanEmbed(user)
+            for channel in channels:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed=local_embed)
+
     async def on_member_join(self, member):
         """
         Sends message on a user join
@@ -187,23 +200,26 @@ class Logging():
         """
         sends message on a user editing messages
         """
-        if self.bot.server_settings[before.guild.id]['logging_enabled']:
-            if not before.content.strip() != after.content.strip():
-                return
-            channels = await self.bot.postgres_controller.get_logger_channels(
-                before.guild.id)
-            try:
-                local_embed = embeds.MessageEditEmbed(
-                    before.author,
-                    before.channel.name,
-                    before.content,
-                    after.content
-                )
-                for channel in channels:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed=local_embed)
-            except Exception as e:
-                self.bot.logger.warning(f'Issue logging message edit: {e}')
+        try:
+            if self.bot.server_settings[before.guild.id]['logging_enabled']:
+                if not before.content.strip() != after.content.strip():
+                    return
+                channels = await self.bot.postgres_controller.get_logger_channels(
+                    before.guild.id)
+                try:
+                    local_embed = embeds.MessageEditEmbed(
+                        before.author,
+                        before.channel.name,
+                        before.content,
+                        after.content
+                    )
+                    for channel in channels:
+                        ch = self.bot.get_channel(channel)
+                        await ch.send(embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.warning(f'Issue logging message edit: {e}')
+        except AttributeError:
+            pass
 
     async def on_message_delete(self, message):
         """
@@ -236,7 +252,7 @@ class Logging():
                 before.guild.id)
         if set(before.roles) < set(after.roles):
             role_diff = set(after.roles) - set(before.roles)
-            self.bot.logger.info(f'roles: {role_diff}')
+            self.bot.logger.info(f'roles:{before.roles}\n {after.roles}\n {role_diff}')
             for role in role_diff:
                 local_embed = embeds.RoleAddEmbed(
                     after,

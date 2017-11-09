@@ -27,7 +27,7 @@ class Roles():
     @checks.has_permissions(manage_roles=True)
     async def cleanrole(self, ctx, role_name, lcl_hours=24):
         """
-        Removes all members from a certain
+        Removes all members from a certain role with a safezone
         """
         safe_users = []
         found_role = None
@@ -44,6 +44,13 @@ class Roles():
         async for entry in audit_logs:
             if found_role in entry.after.roles:
                 safe_users.append(entry.target)
+        for user in found_role.members:
+            try:
+                local_roles = user.roles
+                local_roles.remove(found_role)
+                user.edit(roles=local_roles)
+            except Exception as e:
+                self.bot.logger.warning(f'Issue cleaning role: {e}')
 
     @commands.command()
     @commands.guild_only()
@@ -164,7 +171,7 @@ class Roles():
             await ctx.send(embed=local_embed)
 
     @assignableroles.command()
-    async def add(self, ctx, role_name):
+    async def add(self, ctx, *, role_name):
         """
         Adds a role to the servers assignable roles list
         """

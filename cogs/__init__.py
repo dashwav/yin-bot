@@ -1,4 +1,5 @@
 from cogs.admin import Admin
+from cogs.filter import Filter
 from cogs.gateway import Gateway
 from cogs.logging import Logging
 from cogs.moderation import Moderation
@@ -9,6 +10,7 @@ from cogs.voice import Voice
 
 __all__ = [
     'Admin',
+    'Filter',
     'Gateway',
     'Logging',
     'Moderation',

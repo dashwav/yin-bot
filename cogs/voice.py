@@ -8,6 +8,7 @@ from discord.ext import commands
 
 class Voice():
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         self.logger = bot.logger
 
@@ -31,61 +32,107 @@ class Voice():
             await ctx.send(embed=local_embed)
 
     @voiceroles.command()
-    async def enable(self, ctx):
+    async def add(self, ctx, *, role_name):
         """
         Sets voiceroles to enabled for server and creates the
         role if it doesn't exits
         """
-        vcrole_enabled = await\
-            self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
-        if vcrole_enabled:
+        if ctx.author.voice.channel is None:
             local_embed = discord.Embed(
-                title=f'Voice channel roles are already enabled!',
-                description=' ',
-                color=0x419400
+                title=f'You must be in a voice channel to use this command',
+                description=f' ',
+                color=0x651111
             )
             await ctx.send(embed=local_embed)
             return
-        vcrole = await self.bot.postgres_controller.get_voice_role(
-            ctx.guild.id
-        )
-        vcrole_exists = False
+        voice_channel = ctx.author.voice.channel
+        if not role_name:
+            local_embed = discord.Embed(
+                title=f'Please input a role name!',
+                description=f'`voiceroles add rolename`',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        found_role = None
         for role in ctx.guild.roles:
-            if vcrole == role.id:
-                vcrole = role
-                vcrole_exists = True
-        if vcrole_exists:
-            await self.bot.postgres_controller.set_voice_enabled(
-                ctx.guild.id, True)
+            if role.name.lower() == role_name.lower():
+                found_role = role
+        if not found_role:
             local_embed = discord.Embed(
-                title=f'Voice channel roles are now enabled!',
-                description=f'**Voice Role:** {vcrole.name}',
-                color=0x419400
+                title=f'Couldn\'t find role {role_name}',
+                description=' ',
+                color=0x651111
             )
             await ctx.send(embed=local_embed)
             return
         try:
-            new_role = await ctx.guild.create_role(
-                name=self.bot.base_voice,
-            )
-        except discord.Forbidden:
-            local_embed = embeds.ForbiddenEmbed('voiceroles enable')
-            await ctx.send(embed=local_embed)
-            return
+            await self.bot.postgres_controller.add_role_channel(
+                ctx.guild.id, voice_channel.id, found_role.id)
         except Exception as e:
-            self.bot.logger.warning(f'Error creating role {e}')
-        try:
-            await self.bot.postgres_controller.set_voice_role(
-                ctx.guild.id, new_role.id)
-        except Exception as e:
+            self.bot.logger.warning(f'Error adding role/channel: {e}')
             local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
             return
-        await self.bot.postgres_controller.set_voice_enabled(
-            ctx.guild.id, True)
+        vcroles_enabled = await\
+            self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
+        if not vcroles_enabled:
+            await self.bot.postgres_controller.set_voice_enabled(
+                ctx.guild.id, True)
         local_embed = discord.Embed(
-            title=f'Voice channel roles are now enabled!',
-            description=f'**Voice Role:** {new_role.name}',
+            title=f'Added voice role to channel',
+            description=f'**Voice Role:** {found_role .name}\n'
+                        f'**Channel:** {voice_channel.name}',
+            color=0x419400
+        )
+        await ctx.send(embed=local_embed)
+
+    @voiceroles.command()
+    async def remove(self, ctx, *, role_name):
+        """
+        Removes the given role from the voice channel.
+        """
+        if ctx.author.voice.channel is None:
+            local_embed = discord.Embed(
+                title=f'You must be in a voice channel to use this command',
+                description=f' ',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        voice_channel = ctx.author.voice.channel
+        if not role_name:
+            local_embed = discord.Embed(
+                title=f'Please input a role name!',
+                description=f'`voiceroles remove rolename`',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        found_role = None
+        for role in ctx.guild.roles:
+            if role.name.lower() == role_name.lower():
+                found_role = role
+        if not found_role:
+            local_embed = discord.Embed(
+                title=f'Couldn\'t find role {role_name}',
+                description=' ',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        try:
+            await self.bot.postgres_controller.rem_role_channel(
+                ctx.guild.id, voice_channel.id, found_role.id, self.bot.logger)
+        except Exception as e:
+            self.bot.logger.warning(f'Error removing role/channel: {e}')
+            local_embed = embeds.InternalErrorEmbed()
+            await ctx.send(embed=local_embed)
+            return
+        local_embed = discord.Embed(
+            title=f'Removed voice role from channel',
+            description=f'**Voice Role:** {found_role .name}\n'
+                        f'**Channel:** {voice_channel.name}',
             color=0x419400
         )
         await ctx.send(embed=local_embed)
@@ -93,7 +140,7 @@ class Voice():
     @voiceroles.command()
     async def disable(self, ctx):
         """
-        Disables voice role, and deletes role
+        Disables all voice roles for server
         """
         vcrole_enabled = await\
             self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
@@ -105,30 +152,16 @@ class Voice():
             )
             await ctx.send(embed=local_embed)
             return
-        await self.bot.postgres_controller.set_voice_enabled(
-            ctx.guild.id, False
-        )
-        vcrole = await self.bot.postgres_controller.get_voice_role(
-            ctx.guild.id
-        )
-        vcrole_exists = False
-        for role in ctx.guild.roles:
-            if vcrole == role.id:
-                vcrole = role
-                vcrole_exists = True
-        if not vcrole_exists:
+        try:
+            await self.bot.postgres_controller.set_voice_enabled(
+                ctx.guild.id, False
+            )
+            await self.bot.postgres_controller.purge_voice_roles(
+                ctx.guild.id
+            )
             local_embed = discord.Embed(
                 title=f'Voice channel roles are now disabled!',
                 description=f' ',
-                color=0x419400
-            )
-            await ctx.send(embed=local_embed)
-            return
-        try:
-            await vcrole.delete(reason='Disabling voice+text - Yinbot')
-            local_embed = discord.Embed(
-                title=f'Voice channel roles are now disabled!',
-                description=f'Roles deleted: {vcrole.name}',
                 color=0x419400
             )
             await ctx.send(embed=local_embed)
@@ -144,26 +177,35 @@ class Voice():
             member.guild.id)
         if not vc_enabled:
             return
-        vc_role = await self.bot.postgres_controller.get_voice_role(
-            member.guild.id)
-        vc_role_exists = False
-        for role in member.guild.roles:
-            if vc_role == role.id:
-                vc_role = role
-                vc_role_exists = True
-        if not vc_role_exists:
-            return
         user_roles = member.roles
         if before.channel is None and after.channel:
-            user_roles.append(vc_role)
-            await member.edit(roles=user_roles)
+            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+                member.guild.id, after.channel.id
+            )
+            for vc_role in vc_roles:
+                found_role = None
+                for role in member.guild.roles:
+                    if role.id == vc_role:
+                        found_role = role
+                if not found_role:
+                    self.logger.warning(
+                        f'Couldn\'t find {vc_role} in guild {member.guild.id}')
+                    continue
+                user_roles.append(found_role)
+            await member.edit(roles=set(user_roles))
         elif after.channel is None and before.channel:
-            try:
-                user_roles.remove(vc_role)
-            except ValueError as e:
-                pass
-            await member.edit(roles=user_roles)
-
+            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+                member.guild.id, before.channel.id
+            )
+            for vc_role in vc_roles:
+                for role in user_roles:
+                    if role.id == vc_role:
+                        try:
+                            user_roles.remove(role)
+                        except ValueError as e:
+                            self.logger.warning(
+                                f'{vc_role} not found in {user_roles}')
+            await member.edit(roles=set(user_roles))
 
 def setup(bot):
     bot.add_cog(Voice(bot))
