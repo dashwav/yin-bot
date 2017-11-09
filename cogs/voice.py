@@ -206,6 +206,33 @@ class Voice():
                             self.logger.warning(
                                 f'{vc_role} not found in {user_roles}')
             await member.edit(roles=set(user_roles))
+        else:
+            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+                member.guild.id, before.channel.id
+            )
+            for vc_role in vc_roles:
+                for role in user_roles:
+                    if role.id == vc_role:
+                        try:
+                            user_roles.remove(role)
+                        except ValueError as e:
+                            self.logger.warning(
+                                f'{vc_role} not found in {user_roles}')
+            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+                member.guild.id, after.channel.id
+            )
+            for vc_role in vc_roles:
+                found_role = None
+                for role in member.guild.roles:
+                    if role.id == vc_role:
+                        found_role = role
+                if not found_role:
+                    self.logger.warning(
+                        f'Couldn\'t find {vc_role} in guild {member.guild.id}')
+                    continue
+                user_roles.append(found_role)
+            await member.edit(roles=set(user_roles))
+
 
 def setup(bot):
     bot.add_cog(Voice(bot))
