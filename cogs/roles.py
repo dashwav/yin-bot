@@ -55,6 +55,9 @@ class Roles():
     @commands.command()
     @commands.guild_only()
     async def iam(self, ctx, role_name):
+        """
+        Adds self-assignable role to user
+        """
         found_role = None
         users_roles = ctx.message.author.roles
         for role in ctx.guild.roles:
@@ -108,7 +111,7 @@ class Roles():
     @commands.guild_only()
     async def iamnot(self, ctx, role_name):
         """
-        Removes a role from the user
+        Removes self-assignable role from user
         """
         found_role = None
         users_roles = ctx.message.author.roles

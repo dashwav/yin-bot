@@ -31,7 +31,7 @@ class Admin:
     @prefix.command()
     async def change(self, ctx, prefix):
         """
-        sets the prefix for the server
+        Sets the prefix for the server
         """
         if len(prefix.strip()) > 2:
             local_embed = discord.Embed(
@@ -66,7 +66,7 @@ class Admin:
     @checks.is_admin()
     async def modlog(self, ctx):
         """
-        Either returns current prefix or sets new one
+        Adds or removes a channel to modlog list
         """
         if ctx.invoked_subcommand is None:
             desc = ''
@@ -83,29 +83,19 @@ class Admin:
             await ctx.send(embed=local_embed)
 
     @modlog.command()
-    async def add(self, ctx, *, channels):
+    async def add(self, ctx):
         """
-        sets the prefix for the server
+        Adds channel to modlog list
         """
         added_channels = []
         desc = ''
-        channel_mentions = ctx.message.channel_mentions
-        if not channel_mentions:
-            local_embed = discord.Embed(
-                title=f'No channel mentions detected, try again.',
-                description=' ',
-                color=0x651111
-            )
-            await ctx.send(embed=local_embed)
-            return
         try:
-            for channel in channel_mentions:
-                success = await \
-                    self.bot.postgres_controller.add_modlog_channel(
-                        ctx.guild.id, channel.id, self.bot.logger
-                    )
-                if success:
-                    added_channels.append(channel.name)
+            success = await \
+                self.bot.postgres_controller.add_modlog_channel(
+                    ctx.guild.id, ctx.message.channel.id, self.bot.logger
+                )
+            if success:
+                added_channels.append(ctx.message.channel.name)
             if added_channels:
                 for channel in added_channels:
                     desc += f'{channel} \n'
@@ -133,34 +123,24 @@ class Admin:
             await ctx.send(embed=local_embed)
 
     @modlog.command(aliases=['rem'])
-    async def remove(self, ctx, *, channels):
+    async def remove(self, ctx):
         """
         Removes a channel from the modlog list
         """
         removed_channels = []
         absent_channels = []
         desc = ''
-        channel_mentions = ctx.message.channel_mentions
-        if not channel_mentions:
-            local_embed = discord.Embed(
-                title=f'No channel mentions detected, try again.',
-                description=' ',
-                color=0x651111
-            )
-            await ctx.send(embed=local_embed)
-            return
         try:
-            for channel in channel_mentions:
-                try:
-                    success = False
-                    success = await \
-                        self.bot.postgres_controller.rem_modlog_channel(
-                            ctx.guild.id, channel.id, self.bot.logger
-                        )
-                except ValueError:
-                    absent_channels.append(channel.name)
-                if success:
-                    removed_channels.append(channel.name)
+            try:
+                success = False
+                success = await \
+                    self.bot.postgres_controller.rem_modlog_channel(
+                        ctx.guild.id, ctx.message.channel.id, self.bot.logger
+                    )
+            except ValueError:
+                absent_channels.append(ctx.message.channel.name)
+            if success:
+                removed_channels.append(ctx.message.channel.name)
             if removed_channels:
                 for channel in removed_channels:
                     desc += f'{channel} \n'

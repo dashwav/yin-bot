@@ -65,15 +65,11 @@ class Moderation:
         self.bot = bot
 
     @commands.command()
-    @checks.has_permissions(kick_members=True)
-    async def set_playing(self, ctx, *, game=None):
-        if game:
-            await self.bot.change_presence(game=discord.Game(name=game))
-        ctx.delete()
-
-    @commands.command()
     @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx, *args,  mentions=None):
+        """
+        Purges a set number of messages.
+        """
         deleted = []
         try:
             count = int(next(iter(args or []), 'fugg'))
@@ -106,6 +102,9 @@ class Moderation:
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *,
                    reason: ActionReason = None):
+        """
+        Kicks a user.
+        """
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -140,14 +139,12 @@ class Moderation:
             await ctx.send("Cancelled kick", delete_after=3)
 
     @commands.command()
-    @checks.is_admin()
-    async def hack_server(self, ctx):
-        await ctx.send('\N{OK HAND SIGN}')
-
-    @commands.command()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member_id: MemberID, *,
                   reason: ActionReason = None):
+        """
+        Bans a user.
+        """
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -189,6 +186,9 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *,
                     reason: ActionReason = None):
+        """
+        Unbans a user.
+        """
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",

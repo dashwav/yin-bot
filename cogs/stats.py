@@ -55,13 +55,6 @@ class Stats():
         self.bot.server_settings = \
             await self.bot.postgres_controller.get_server_settings()
 
-    @commands.command()
-    async def Stats(self):
-        """
-        Creates an embed with basic bot stats
-        """
-        return
-
 
 def setup(bot):
     bot.add_cog(Stats(bot))
