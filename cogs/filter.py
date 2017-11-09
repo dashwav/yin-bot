@@ -71,7 +71,7 @@ class Filter:
 
     async def on_message(self, message):
         try:
-            if not self.bot.server_settings[message.guild.id]['invites_allowed']:
+            if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return
             regexp = re.compile(r'(discord.gg\/)[a-zA-Z0-9]{0,7}')
             if bool(regexp.search(message.content)):
