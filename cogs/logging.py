@@ -230,9 +230,12 @@ class Logging():
             return
         channels = await self.bot.postgres_controller.get_logger_channels(
                 before.guild.id)
-        if set(before.roles) < set(after.roles):
-            role_diff = set(after.roles) - set(before.roles)
-            for role in role_diff:
+        self.bot.logger.info(f'{before.roles}\n{after.roles}')
+        if before.roles != after.roles:
+            add_role_diff = list(set(after.roles).symmetric_difference(
+                set(before.roles)))
+            self.bot.logger.info(f'added: {add_role_diff}')
+            for role in add_role_diff:
                 local_embed = embeds.RoleAddEmbed(
                     after,
                     role.name
@@ -240,9 +243,10 @@ class Logging():
                 for channel in channels:
                     ch = self.bot.get_channel(channel)
                     await ch.send(embed=local_embed)
-        elif set(after.roles) < set(before.roles):
-            role_diff = set(before.roles) - set(after.roles)
-            for role in role_diff:
+            remove_role_diff = set(before.roles).symmetric_difference(
+                set(after.roles))
+            self.bot.logger.info(f'removed: {remove_role_diff}')
+            for role in remove_role_diff:
                 local_embed = embeds.RoleRemoveEmbed(
                     after,
                     role.name

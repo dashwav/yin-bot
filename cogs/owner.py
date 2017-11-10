@@ -2,6 +2,7 @@
 Misc commands that I want to run
 """
 import traceback
+import discord
 from discord.ext import commands
 
 

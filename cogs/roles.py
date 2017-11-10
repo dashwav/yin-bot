@@ -54,7 +54,7 @@ class Roles():
 
     @commands.command()
     @commands.guild_only()
-    async def iam(self, ctx, role_name):
+    async def iam(self, ctx, *, role_name):
         """
         Adds self-assignable role to user
         """
@@ -109,14 +109,14 @@ class Roles():
 
     @commands.command()
     @commands.guild_only()
-    async def iamnot(self, ctx, role_name):
+    async def iamnot(self, ctx, *, role_name):
         """
         Removes self-assignable role from user
         """
         found_role = None
         users_roles = ctx.message.author.roles
         for role in users_roles:
-            if role.name == role_name:
+            if role.name.lower() == role_name.lower():
                 found_role = role
         if not found_role:
             local_embed = discord.Embed(
@@ -218,7 +218,7 @@ class Roles():
         await ctx.send(embed=local_embed)
 
     @assignableroles.command()
-    async def remove(self, ctx, role_name):
+    async def remove(self, ctx, *, role_name):
         """
         Removes a role from the serves assignable roles list
         """

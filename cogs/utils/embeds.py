@@ -61,7 +61,7 @@ class KickEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M:%S'))
 
 
 class BanEmbed(discord.Embed):
