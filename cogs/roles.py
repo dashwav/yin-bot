@@ -86,6 +86,8 @@ class Roles():
                         f'**{found_role.name}** role.',
                         color=0x419400
                     )
+                    await ctx.send(embed=local_embed, delete_after=3)
+                    await ctx.message.delete()
                 except discord.Forbidden:
                     local_embed = discord.Embed(
                         title='I don\'t have the necessary permissions'
