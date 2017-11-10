@@ -59,7 +59,7 @@ class Roles():
         Adds self-assignable role to user
         """
         found_role = None
-        users_roles = ctx.message.author.roles
+        users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
                 found_role = role
@@ -74,7 +74,7 @@ class Roles():
                     )
                     await ctx.send(embed=local_embed)
                     return
-            assignable = await self.bot.postgres_controller.is_role_assignable(
+            assignable = await self.bot.pg_utils.is_role_assignable(
                 ctx.guild.id, found_role.id)
             if assignable:
                 users_roles.append(found_role)
@@ -117,7 +117,7 @@ class Roles():
         Removes self-assignable role from user
         """
         found_role = None
-        users_roles = ctx.message.author.roles
+        users_roles = ctx.message.author.roles.copy()
         for role in users_roles:
             if role.name.lower() == role_name.lower():
                 found_role = role
@@ -131,7 +131,7 @@ class Roles():
             await ctx.send(embed=local_embed)
             return
         assignable_roles = await \
-            self.bot.postgres_controller.get_assignable_roles(
+            self.bot.pg_utils.get_assignable_roles(
                 ctx.guild.id)
         if found_role.id in assignable_roles:
             users_roles.remove(found_role)
@@ -164,7 +164,7 @@ class Roles():
             message = ' \n'
             assignable_roles = []
             assignable_role_ids = await \
-                self.bot.postgres_controller.get_assignable_roles(ctx.guild.id)
+                self.bot.pg_utils.get_assignable_roles(ctx.guild.id)
             for role in ctx.guild.roles:
                 if role.id in assignable_role_ids:
                     assignable_roles.append(role)
@@ -197,7 +197,7 @@ class Roles():
                 )
                 await ctx.send(embed=local_embed)
                 return
-            success = await self.bot.postgres_controller.add_assignable_role(
+            success = await self.bot.pg_utils.add_assignable_role(
                 ctx.guild.id, found_role.id, self.bot.logger)
             if success:
                 local_embed = discord.Embed(
@@ -232,7 +232,7 @@ class Roles():
         if found_role:
             try:
                 success = await \
-                    self.bot.postgres_controller.remove_assignable_role(
+                    self.bot.pg_utils.remove_assignable_role(
                         ctx.guild.id, found_role.id, self.bot.logger)
             except ValueError:
                 local_embed = discord.Embed(

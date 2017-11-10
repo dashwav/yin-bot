@@ -19,10 +19,10 @@ class Gateway:
         Actually handles printing the welcome message
         """
         welcome_channels = await \
-            self.bot.postgres_controller.get_welcome_channels(
+            self.bot.pg_utils.get_welcome_channels(
                 member.guild.id, self.bot.logger)
         welcome_message = await \
-            self.bot.postgres_controller.get_welcome_message(
+            self.bot.pg_utils.get_welcome_message(
                 member.guild.id, self.bot.logger)
         for ch_id in welcome_channels:
             channel = self.bot.get_channel(ch_id)
@@ -37,7 +37,7 @@ class Gateway:
         Welcome message command. If no subcommand is
         invoked, it will return the current welcome message
         """
-        welcome_msg = await self.bot.postgres_controller.get_welcome_message(
+        welcome_msg = await self.bot.pg_utils.get_welcome_message(
             ctx.guild.id,
             self.bot.logger
         )
@@ -61,7 +61,7 @@ class Gateway:
             )
             await ctx.send(embed=local_embed)
             return
-        success = await self.bot.postgres_controller.set_welcome_message(
+        success = await self.bot.pg_utils.set_welcome_message(
             ctx.guild.id,
             welcome_string,
             self.bot.logger
@@ -88,7 +88,7 @@ class Gateway:
         """
         Enables the welcome message in this channel
         """
-        success = await self.bot.postgres_controller.add_welcome_channel(
+        success = await self.bot.pg_utils.add_welcome_channel(
             ctx.guild.id, ctx.message.channel.id, self.bot.logger
         )
         if success:
@@ -112,7 +112,7 @@ class Gateway:
         Enables the welcome message in this channel
         """
         try:
-            success = await self.bot.postgres_controller.rem_welcome_channel(
+            success = await self.bot.pg_utils.rem_welcome_channel(
                 ctx.guild.id, ctx.message.channel.id, self.bot.logger
             )
         except ValueError:

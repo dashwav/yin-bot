@@ -34,7 +34,7 @@ class Filter:
         Disables autodeletion of invites
         """
         try:
-            await self.bot.postgres_controller.set_invites_allowed(
+            await self.bot.pg_utils.set_invites_allowed(
                 ctx.guild.id, True)
         except Exception as e:
             local_embed = embeds.InternalErrorEmbed()
@@ -54,7 +54,7 @@ class Filter:
         Enables autodeletion of invites
         """
         try:
-            await self.bot.postgres_controller.set_invites_allowed(
+            await self.bot.pg_utils.set_invites_allowed(
                 ctx.guild.id, False)
         except Exception as e:
             local_embed = embeds.InternalErrorEmbed()

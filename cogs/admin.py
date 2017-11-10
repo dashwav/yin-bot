@@ -42,7 +42,7 @@ class Admin:
             await ctx.send(embed=local_embed)
             return
         try:
-            success = await self.bot.postgres_controller.set_prefix(
+            success = await self.bot.pg_utils.set_prefix(
                 ctx.guild.id,
                 prefix,
                 self.bot.logger
@@ -70,7 +70,7 @@ class Admin:
         """
         if ctx.invoked_subcommand is None:
             desc = ''
-            modlogs = await self.bot.postgres_controller.get_modlogs(
+            modlogs = await self.bot.pg_utils.get_modlogs(
                 ctx.guild.id)
             for channel in ctx.guild.channels:
                 if channel.id in modlogs:
@@ -91,7 +91,7 @@ class Admin:
         desc = ''
         try:
             success = await \
-                self.bot.postgres_controller.add_modlog_channel(
+                self.bot.pg_utils.add_modlog_channel(
                     ctx.guild.id, ctx.message.channel.id, self.bot.logger
                 )
             if success:
@@ -134,7 +134,7 @@ class Admin:
             try:
                 success = False
                 success = await \
-                    self.bot.postgres_controller.rem_modlog_channel(
+                    self.bot.pg_utils.rem_modlog_channel(
                         ctx.guild.id, ctx.message.channel.id, self.bot.logger
                     )
             except ValueError:
@@ -149,7 +149,7 @@ class Admin:
                     description=desc,
                     color=0x419400
                 )
-                modlogs = await self.bot.postgres_controller.get_modlogs(
+                modlogs = await self.bot.pg_utils.get_modlogs(
                     ctx.guild.id)
                 if not modlogs:
                     self.bot.server_settings[ctx.guild.id]['modlog_enabled']\

@@ -46,7 +46,7 @@ class Owner():
         Adds a server to the db
         """
         try:
-            await self.bot.postgres_controller.add_server(ctx.guild.id)
+            await self.bot.pg_utils.add_server(ctx.guild.id)
             self.bot.server_settings[ctx.guild.id] = {
                 'prefix': '-',
                 'modlog_enabled': False

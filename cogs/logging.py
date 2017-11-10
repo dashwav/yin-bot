@@ -23,7 +23,7 @@ class Logging():
         """
         if ctx.invoked_subcommand is None:
             desc = ''
-            modlogs = await self.bot.postgres_controller.get_logger_channels(
+            modlogs = await self.bot.pg_utils.get_logger_channels(
                 ctx.guild.id)
             for channel in ctx.guild.channels:
                 if channel.id in modlogs:
@@ -44,7 +44,7 @@ class Logging():
         desc = ''
         try:
             success = await \
-                self.bot.postgres_controller.add_logger_channel(
+                self.bot.pg_utils.add_logger_channel(
                     ctx.guild.id, ctx.message.channel.id, self.bot.logger
                 )
             if success:
@@ -87,7 +87,7 @@ class Logging():
             try:
                 success = False
                 success = await \
-                    self.bot.postgres_controller.rem_logger_channel(
+                    self.bot.pg_utils.rem_logger_channel(
                         ctx.guild.id, ctx.message.channel.id, self.bot.logger
                     )
             except ValueError as e:
@@ -102,7 +102,7 @@ class Logging():
                     description=desc,
                     color=0x419400
                 )
-                logs = await self.bot.postgres_controller.get_logger_channels(
+                logs = await self.bot.pg_utils.get_logger_channels(
                     ctx.guild.id)
                 if not logs:
                     self.bot.server_settings[ctx.guild.id]['logging_enabled']\
@@ -145,7 +145,7 @@ class Logging():
         sends message on user ban
         """
         if self.bot.server_settings[guild.id]['logging_enabled']:
-            channels = await self.bot.postgres_controller.get_logger_channels(
+            channels = await self.bot.pg_utils.get_logger_channels(
                 guild.id)
             local_embed = embeds.LogBanEmbed(user)
             for channel in channels:
@@ -157,7 +157,7 @@ class Logging():
         Sends message on a user join
         """
         if self.bot.server_settings[member.guild.id]['logging_enabled']:
-            channels = await self.bot.postgres_controller.get_logger_channels(
+            channels = await self.bot.pg_utils.get_logger_channels(
                 member.guild.id)
             local_embed = embeds.JoinEmbed(member)
             for channel in channels:
@@ -169,7 +169,7 @@ class Logging():
         Sends message on a user leaving
         """
         if self.bot.server_settings[member.guild.id]['logging_enabled']:
-            channels = await self.bot.postgres_controller.get_logger_channels(
+            channels = await self.bot.pg_utils.get_logger_channels(
                 member.guild.id)
             local_embed = embeds.LeaveEmbed(member)
             for channel in channels:
@@ -184,7 +184,7 @@ class Logging():
             if self.bot.server_settings[before.guild.id]['logging_enabled']:
                 if not before.content.strip() != after.content.strip():
                     return
-                channels = await self.bot.postgres_controller.get_logger_channels(
+                channels = await self.bot.pg_utils.get_logger_channels(
                     before.guild.id)
                 try:
                     local_embed = embeds.MessageEditEmbed(
@@ -208,7 +208,7 @@ class Logging():
         if self.bot.server_settings[message.guild.id]['logging_enabled']:
             if message.author.bot:
                 return
-            channels = await self.bot.postgres_controller.get_logger_channels(
+            channels = await self.bot.pg_utils.get_logger_channels(
                 message.guild.id)
             try:
                 local_embed = embeds.MessageDeleteEmbed(
@@ -228,14 +228,11 @@ class Logging():
         """
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
-        channels = await self.bot.postgres_controller.get_logger_channels(
+        channels = await self.bot.pg_utils.get_logger_channels(
                 before.guild.id)
-        self.bot.logger.info(f'{before.roles}\n{after.roles}')
         if before.roles != after.roles:
-            add_role_diff = list(set(after.roles).symmetric_difference(
-                set(before.roles)))
-            self.bot.logger.info(f'added: {add_role_diff}')
-            for role in add_role_diff:
+            role_diff = set(after.roles) - (set(before.roles))
+            for role in role_diff:
                 local_embed = embeds.RoleAddEmbed(
                     after,
                     role.name
@@ -243,10 +240,8 @@ class Logging():
                 for channel in channels:
                     ch = self.bot.get_channel(channel)
                     await ch.send(embed=local_embed)
-            remove_role_diff = set(before.roles).symmetric_difference(
-                set(after.roles))
-            self.bot.logger.info(f'removed: {remove_role_diff}')
-            for role in remove_role_diff:
+            role_diff = set(before.roles) - (set(after.roles))
+            for role in role_diff:
                 local_embed = embeds.RoleRemoveEmbed(
                     after,
                     role.name

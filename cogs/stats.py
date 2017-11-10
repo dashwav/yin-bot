@@ -51,9 +51,9 @@ class Stats():
         """
         await self.update()
         """
-        await self.bot.postgres_controller.add_server(guild.id)
+        await self.bot.pg_utils.add_server(guild.id)
         self.bot.server_settings = \
-            await self.bot.postgres_controller.get_server_settings()
+            await self.bot.pg_utils.get_server_settings()
 
 
 def setup(bot):

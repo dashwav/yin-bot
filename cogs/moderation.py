@@ -128,7 +128,7 @@ class Moderation:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.KickEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.postgres_controller.get_modlogs(
+                    mod_logs = await self.bot.pg_utils.get_modlogs(
                             ctx.guild.id)
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
@@ -172,7 +172,7 @@ class Moderation:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.BanEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.postgres_controller.get_modlogs(
+                    mod_logs = await self.bot.pg_utils.get_modlogs(
                             ctx.guild.id)
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(

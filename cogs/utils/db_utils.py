@@ -157,7 +157,8 @@ class PostgresController():
         """
         prefix_dict = {}
         sql = """
-        SELECT serverid, prefix, modlog_enabled, logging_enabled, invites_allowed
+        SELECT serverid, prefix, modlog_enabled,
+        logging_enabled, invites_allowed
         FROM {}.servers;
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)

@@ -22,7 +22,7 @@ class Voice():
         if ctx.invoked_subcommand is None:
             desc = ''
             vcrole_enabled = await\
-                self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
+                self.bot.pg_utils.get_voice_enabled(ctx.guild.id)
             desc = 'Enabled' if vcrole_enabled else 'Disabled'
             local_embed = discord.Embed(
                 title=f'Voice channel roles are:',
@@ -67,7 +67,7 @@ class Voice():
             await ctx.send(embed=local_embed)
             return
         try:
-            await self.bot.postgres_controller.add_role_channel(
+            await self.bot.pg_utils.add_role_channel(
                 ctx.guild.id, voice_channel.id, found_role.id)
         except Exception as e:
             self.bot.logger.warning(f'Error adding role/channel: {e}')
@@ -75,9 +75,9 @@ class Voice():
             await ctx.send(embed=local_embed)
             return
         vcroles_enabled = await\
-            self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
+            self.bot.pg_utils.get_voice_enabled(ctx.guild.id)
         if not vcroles_enabled:
-            await self.bot.postgres_controller.set_voice_enabled(
+            await self.bot.pg_utils.set_voice_enabled(
                 ctx.guild.id, True)
         local_embed = discord.Embed(
             title=f'Added voice role to channel',
@@ -122,7 +122,7 @@ class Voice():
             await ctx.send(embed=local_embed)
             return
         try:
-            await self.bot.postgres_controller.rem_role_channel(
+            await self.bot.pg_utils.rem_role_channel(
                 ctx.guild.id, voice_channel.id, found_role.id, self.bot.logger)
         except Exception as e:
             self.bot.logger.warning(f'Error removing role/channel: {e}')
@@ -143,7 +143,7 @@ class Voice():
         Disables all voice roles for server
         """
         vcrole_enabled = await\
-            self.bot.postgres_controller.get_voice_enabled(ctx.guild.id)
+            self.bot.pg_utils.get_voice_enabled(ctx.guild.id)
         if not vcrole_enabled:
             local_embed = discord.Embed(
                 title=f'Voice channel roles are already disabled!',
@@ -153,10 +153,10 @@ class Voice():
             await ctx.send(embed=local_embed)
             return
         try:
-            await self.bot.postgres_controller.set_voice_enabled(
+            await self.bot.pg_utils.set_voice_enabled(
                 ctx.guild.id, False
             )
-            await self.bot.postgres_controller.purge_voice_roles(
+            await self.bot.pg_utils.purge_voice_roles(
                 ctx.guild.id
             )
             local_embed = discord.Embed(
@@ -173,13 +173,13 @@ class Voice():
         Checks if a user has recently joined or left a voice channel and adds
         role if necessary
         """
-        vc_enabled = await self.bot.postgres_controller.get_voice_enabled(
+        vc_enabled = await self.bot.pg_utils.get_voice_enabled(
             member.guild.id)
         if not vc_enabled:
             return
-        user_roles = member.roles
+        users_roles = member.roles.copy()
         if before.channel is None and after.channel:
-            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+            vc_roles = await self.bot.pg_utils.get_channel_roles(
                 member.guild.id, after.channel.id
             )
             for vc_role in vc_roles:
@@ -191,34 +191,34 @@ class Voice():
                     self.logger.warning(
                         f'Couldn\'t find {vc_role} in guild {member.guild.id}')
                     continue
-                user_roles.append(found_role)
-            await member.edit(roles=set(user_roles))
+                users_roles.append(found_role)
+            await member.edit(roles=set(users_roles))
         elif after.channel is None and before.channel:
-            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+            vc_roles = await self.bot.pg_utils.get_channel_roles(
                 member.guild.id, before.channel.id
             )
             for vc_role in vc_roles:
-                for role in user_roles:
+                for role in users_roles:
                     if role.id == vc_role:
                         try:
-                            user_roles.remove(role)
+                            users_roles.remove(role)
                         except ValueError as e:
                             self.logger.warning(
-                                f'{vc_role} not found in {user_roles}')
-            await member.edit(roles=set(user_roles))
+                                f'{vc_role} not found in {users_roles}')
+            await member.edit(roles=set(users_roles))
         else:
-            vc_roles = await self.bot.postgres_controller.get_server_roles(
+            vc_roles = await self.bot.pg_utils.get_server_roles(
                 member.guild.id
             )
             for vc_role in vc_roles:
-                for role in user_roles:
+                for role in users_roles:
                     if role.id == vc_role:
                         try:
-                            user_roles.remove(role)
+                            users_roles.remove(role)
                         except ValueError as e:
                             self.logger.warning(
-                                f'{vc_role} not found in {user_roles}')
-            vc_roles = await self.bot.postgres_controller.get_channel_roles(
+                                f'{vc_role} not found in {users_roles}')
+            vc_roles = await self.bot.pg_utils.get_channel_roles(
                 member.guild.id, after.channel.id
             )
             for vc_role in vc_roles:
@@ -230,8 +230,8 @@ class Voice():
                     self.logger.warning(
                         f'Couldn\'t find {vc_role} in guild {member.guild.id}')
                     continue
-                user_roles.append(found_role)
-            await member.edit(roles=set(user_roles))
+                users_roles.append(found_role)
+            await member.edit(roles=set(users_roles))
 
 
 def setup(bot):
