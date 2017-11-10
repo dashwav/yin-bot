@@ -88,6 +88,7 @@ class Roles():
                     )
                     await ctx.send(embed=local_embed, delete_after=3)
                     await ctx.message.delete()
+                    return
                 except discord.Forbidden:
                     local_embed = discord.Embed(
                         title='I don\'t have the necessary permissions'
