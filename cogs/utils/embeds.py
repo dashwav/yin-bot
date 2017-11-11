@@ -261,7 +261,7 @@ class SelfRoleAddedEmbed(discord.Embed):
     """
     def __init__(self, message_user, role_name):
         local_title = f'Role Added'
-        local_desc = f'You now have the '\
+        local_desc = f'{message_user.mention}, you now have the '\
                      f'**{role_name}** role.'
         super().__init__(
             title=local_title,
@@ -275,9 +275,9 @@ class SelfRoleRemovedEmbed(discord.Embed):
     """
     Embed for when a role is added
     """
-    def __init__(self, role_name):
+    def __init__(self, message_user, role_name):
         local_title = f'Role Removed'
-        local_desc = f'You no longer have the '\
+        local_desc = f'{message_user.mention}, you no longer have the '\
                      f'**{role_name}** role.'
         super().__init__(
             title=local_title,

@@ -121,7 +121,7 @@ class Roles():
             users_roles.remove(found_role)
             await ctx.message.author.edit(roles=users_roles)
             local_embed = embeds.SelfRoleRemovedEmbed(
-                found_role.name
+                ctx.message.author, found_role.name
             )
             await ctx.send(embed=local_embed, delete_after=5)
             await ctx.message.delete()
