@@ -14,12 +14,12 @@ class Yinbot(Bot):
     actual bot class
     """
     def __init__(self, config, logger,
-                 postgres_controller: PostgresController,
+                 pg_utils: PostgresController,
                  server_settings: dict):
         """
         init for bot class
         """
-        self.postgres_controller = postgres_controller
+        self.pg_utils = pg_utils
         self.server_settings = {}
         self.start_time = int(time())
         self.credentials = config['token']
@@ -32,7 +32,7 @@ class Yinbot(Bot):
     @classmethod
     async def get_instance(cls):
         """
-        async method to initialize the postgres_controller class
+        async method to initialize the pg_utils class
         """
         with open("config/config.yml", 'r') as yml_config:
             config = yaml.load(yml_config)
@@ -44,10 +44,10 @@ class Yinbot(Bot):
         logger.addHandler(console_handler)
         logger.setLevel(INFO)
         postgres_cred = config['postgres_credentials']
-        postgres_controller = await PostgresController.get_instance(
+        pg_utils = await PostgresController.get_instance(
             logger=logger, connect_kwargs=postgres_cred)
-        server_settings = await postgres_controller.get_server_settings()
-        return cls(config, logger, postgres_controller, server_settings)
+        server_settings = await pg_utils.get_server_settings()
+        return cls(config, logger, pg_utils, server_settings)
 
     async def get_pre(self, bot, message):
         try:
@@ -68,7 +68,7 @@ class Yinbot(Bot):
         try:
             self.server_settings = {}
             self.server_settings = \
-                await self.postgres_controller.get_server_settings()
+                await self.pg_utils.get_server_settings()
             self.logger.info(f'{self.server_settings}')
         except Exception as e:
             self.logger.warning(f'issue getting server settings: {e}')

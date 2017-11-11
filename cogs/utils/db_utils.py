@@ -46,6 +46,8 @@ async def make_tables(pool: Pool, schema: str):
       prefix varchar(2),
       voice_enabled boolean DEFAULT FALSE,
       invites_allowed boolean DEFAULT TRUE,
+      voice_logging boolean DEFAULT FALSE,
+      voice_channels bigint ARRAY,
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
       welcome_message text,
@@ -130,7 +132,7 @@ class PostgresController():
         """
         sql = """
         INSERT INTO {}.servers VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         ON CONFLICT (serverid)
         DO nothing;
         """.format(self.schema)
@@ -141,6 +143,8 @@ class PostgresController():
             '-',
             False,
             True,
+            False,
+            [],
             False,
             [],
             f'Welcome %user%!',
@@ -534,6 +538,80 @@ class PostgresController():
         WHERE serverid = $1;
         """.format(self.schema)
         return await self.pool.fetchval(sql, guild_id)
+
+    async def get_voice_logging(self, guild_id: int):
+        """
+        Returns the boolean voice_enabled for given server
+        """
+        sql = """
+        SELECT voice_logging FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        return await self.pool.fetchval(sql, guild_id)
+
+    async def add_voice_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Adds a channel to the voice channel array for the server
+        :param guild_id: guild to add channel to
+        :param channel_id: channel to add
+        """
+        sql = """
+        UPDATE {}.servers
+        SET voice_channels = (SELECT array_agg(distinct e)
+        FROM unnest(array_append(voice_channels,$1::bigint)) e)
+        WHERE serverid = $2;
+        """.format(self.schema)
+        boolsql = """
+        UPDATE {}.servers
+        SET voice_logging = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_id, guild_id)
+            await self.pool.execute(boolsql, True, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding channel to server {guild_id}: {e}')
+            return False
+
+    async def rem_voice_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Removes a channel from the modlog array
+        :param guild_id: guild to remove modlog channel from
+        :param channel_id: channel id to remove
+        """
+        channel_list = await self.get_voice_channels(guild_id)
+        channel_list.remove(channel_id)
+        sql = """
+        UPDATE {}.servers
+        SET voice_channels = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        boolsql = """
+        UPDATE {}.servers
+        SET voice_logging = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_list, guild_id)
+            if not channel_list:
+                await self.pool.execute(boolsql, False, guild_id)
+        except Exception as e:
+            logger.warning(f'Error removing logging channel: {e}')
+            return False
+        return True
+
+    async def get_voice_channels(self, guild_id: int):
+        """
+        Returns a list of channel ids for posting mod actions
+        :param guild_id: guild to search roles for
+        """
+        sql = """
+        SELECT voice_channels FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        channel_list = await self.pool.fetchval(sql, guild_id)
+        return channel_list
 
     async def get_server_roles(self, guild_id: int):
         """

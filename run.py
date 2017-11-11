@@ -19,10 +19,10 @@ def run():
       Gateway(bot),
       Logging(bot),
       Moderation(bot),
-      Owner(bot),
       Roles(bot),
       Stats(bot),
-      Voice(bot)
+      Voice(bot),
+      Owner(bot),
     ]
     bot.start_bot(cogs)
 

@@ -5,7 +5,7 @@ Handling the auto assignable roles and such
 import discord
 from discord import AuditLogAction
 from discord.ext import commands
-from .utils import checks
+from .utils import checks, embeds
 from datetime import datetime, timedelta
 
 
@@ -66,11 +66,8 @@ class Roles():
         if found_role:
             for role in users_roles:
                 if role == found_role:
-                    local_embed = discord.Embed(
-                        title=f'@{ctx.message.author}, you already have the '
-                              f'**{found_role.name}** role',
-                        description=' ',
-                        color=0x651111
+                    local_embed = embeds.RoleDuplicateUserEmbed(
+                        ctx.message.author, found_role.name
                     )
                     await ctx.send(embed=local_embed)
                     return
@@ -80,33 +77,23 @@ class Roles():
                 users_roles.append(found_role)
                 try:
                     await ctx.author.edit(roles=users_roles)
-                    local_embed = discord.Embed(
-                        title=f'Role added:',
-                        description=f'You now have the '
-                        f'**{found_role.name}** role.',
-                        color=0x419400
+                    local_embed = embeds.SelfRoleAddedEmbed(
+                        ctx.message.author, found_role.name
                     )
                     await ctx.send(embed=local_embed, delete_after=3)
                     await ctx.message.delete()
                     return
                 except discord.Forbidden:
-                    local_embed = discord.Embed(
-                        title='I don\'t have the necessary permissions'
-                              'to do this',
-                        description=' ',
-                        color=0x651111
+                    local_embed = embeds.ForbiddenEmbed(
+                        'self-assign role'
                     )
             else:
-                local_embed = discord.Embed(
-                    title=f'**{found_role.name}** is not self-assignable',
-                    description=' ',
-                    color=0x651111
+                local_embed = embeds.SelfRoleNotAssignableEmbed(
+                    found_role.name
                 )
         else:
-            local_embed = discord.Embed(
-                title=f'Couldn\'t find role {role_name}',
-                description=' ',
-                color=0x651111
+            local_embed = embeds.RoleNotFoundEmbed(
+                role_name
             )
         await ctx.send(embed=local_embed)
 
@@ -122,11 +109,8 @@ class Roles():
             if role.name.lower() == role_name.lower():
                 found_role = role
         if not found_role:
-            local_embed = discord.Embed(
-                title=f'Role not removed:',
-                description=f'You don\'t have the'
-                f' **{role_name}** role already',
-                color=0x651111
+            local_embed = embeds.RoleNotRemovedEmbed(
+                ctx.message.author, role_name
             )
             await ctx.send(embed=local_embed)
             return
@@ -136,20 +120,14 @@ class Roles():
         if found_role.id in assignable_roles:
             users_roles.remove(found_role)
             await ctx.message.author.edit(roles=users_roles)
-            local_embed = discord.Embed(
-                title=f'Role removed:',
-                description=f'You no longer have the '
-                f'**{found_role.name}** role.',
-                color=0x419400
+            local_embed = embeds.SelfRoleRemovedEmbed(
+                found_role.name
             )
             await ctx.send(embed=local_embed, delete_after=5)
             await ctx.message.delete()
         else:
-            local_embed = discord.Embed(
-                title=f'Role not removed:',
-                description=f'**{found_role.name}** is not a '
-                'self-assignable role.',
-                color=0x651111
+            local_embed = embeds.SelfRoleNotAssignableEmbed(
+                role_name
             )
             await ctx.send(embed=local_embed)
 

@@ -14,6 +14,14 @@ USEREDITCOLOR = 0xe9e6c2
 ROLECOLOR = 0x800080
 
 
+def return_current_time():
+    """
+    Returns a string with the current time in it
+    """
+    time = datetime.datetime.utcnow()
+    return time.strftime('%A, %b %d %H:%M')
+
+
 class InternalErrorEmbed(discord.Embed):
     """
     Embed for when it isn't the users fault
@@ -25,6 +33,7 @@ class InternalErrorEmbed(discord.Embed):
             title=local_title,
             description=' '
         )
+        self.set_footer(text=return_current_time())
 
 
 class ForbiddenEmbed(discord.Embed):
@@ -35,13 +44,12 @@ class ForbiddenEmbed(discord.Embed):
         local_title = f'Insuffecient Permissions:'
         local_desc = f'Couldn\'t complete command: **{action}**'\
                      ' due to lack of permissions'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc
         )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class KickEmbed(discord.Embed):
@@ -55,13 +63,12 @@ class KickEmbed(discord.Embed):
         """
         local_title = f'{kicked_user.name} was kicked by {resp_mod}'
         local_desc = f'Reason: {reason}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M:%S'))
+        self.set_footer(text=return_current_time())
 
 
 class BanEmbed(discord.Embed):
@@ -75,13 +82,12 @@ class BanEmbed(discord.Embed):
         """
         local_title = f'{banned_user.name} was banned by {resp_mod}'
         local_desc = f'Reason: {reason}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class LogBanEmbed(discord.Embed):
@@ -95,13 +101,12 @@ class LogBanEmbed(discord.Embed):
         local_title = f'User banned'
         local_desc = f'{leaving_user.name}#{leaving_user.discriminator}'\
                      f'\n\n{leaving_user.id}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class JoinEmbed(discord.Embed):
@@ -115,14 +120,13 @@ class JoinEmbed(discord.Embed):
         local_title = f'User joined'
         local_desc = f'{joining_user.name}#{joining_user.discriminator}'\
                      f'\n\n{joining_user.id}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=POSITIVECOLOR,
             title=local_title,
             description=local_desc,
             )
         self.set_thumbnail(url=joining_user.avatar_url)
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class LeaveEmbed(discord.Embed):
@@ -136,14 +140,13 @@ class LeaveEmbed(discord.Embed):
         local_title = f'User left'
         local_desc = f'{leaving_user.name}#{leaving_user.discriminator}'\
                      f'\n\n{leaving_user.id}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
         self.set_thumbnail(url=leaving_user.avatar_url)
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class UsernameUpdateEmbed(discord.Embed):
@@ -159,13 +162,12 @@ class UsernameUpdateEmbed(discord.Embed):
         local_desc = f'{updated_user.name}#{updated_user.discriminator}'\
                      f' | {updated_user.id}'\
                      f'\n**From**: {old_name} **To**: {new_name}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=USEREDITCOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class RoleAddEmbed(discord.Embed):
@@ -181,13 +183,12 @@ class RoleAddEmbed(discord.Embed):
         local_desc = f'{updated_user.name}#{updated_user.discriminator}'\
                      f' | {updated_user.id}\n'\
                      f'*{role_name}*'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=ROLECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class RoleRemoveEmbed(discord.Embed):
@@ -203,13 +204,12 @@ class RoleRemoveEmbed(discord.Embed):
         local_desc = f'{updated_user.name}#{updated_user.discriminator}'\
                      f' | {updated_user.id}\n'\
                      f'*{role_name}*'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=ROLECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class MessageEditEmbed(discord.Embed):
@@ -226,13 +226,12 @@ class MessageEditEmbed(discord.Embed):
                      f' | {message_user.id}\n'\
                      f'**Old message**:\n{old_message}\n'\
                      f'**New message**:\n{new_message}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=EDITEDCOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
 
 
 class MessageDeleteEmbed(discord.Embed):
@@ -248,10 +247,142 @@ class MessageDeleteEmbed(discord.Embed):
         local_desc = f'{message_user.name}#{message_user.discriminator}'\
                      f' | {message_user.id}\n'\
                      f'\n{old_message}'
-        current_time = datetime.datetime.utcnow()
         super().__init__(
             color=DELETEDCOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=current_time.strftime('%A, %b %d %H:%M'))
+        self.set_footer(text=return_current_time())
+
+
+class SelfRoleAddedEmbed(discord.Embed):
+    """
+    Embed for when a user adds a self assignable role
+    """
+    def __init__(self, message_user, role_name):
+        local_title = f'Role Added'
+        local_desc = f'You now have the '\
+                     f'**{found_role.name}** role.'
+        super().__init__(
+            title=local_title,
+            description=local_desc,
+            color=POSITIVECOLOR
+        )
+        self.set_footer(text=return_current_time())
+
+
+class SelfRoleRemovedEmbed(discord.Embed):
+    """
+    Embed for when a role is added
+    """
+    def __init__(self, role_name):
+        local_title = f'Role Removed'
+        local_desc = f'You no longer have the '\
+                     f'**{found_role.name}** role.'
+        super().__init__(
+            title=local_title,
+            description=local_desc,
+            color=POSITIVECOLOR
+        )
+        self.set_footer(text=return_current_time())
+
+
+class SelfRoleNotAssignableEmbed(discord.Embed):
+    """
+    Embed for when a role can't be assigned
+    """
+    def __init__(self, role_name):
+        local_title = f'Role Not Added'
+        local_desc = f'**{role_name}** is not self-assignable'
+        super().__init__(
+            title=local_title,
+            description=local_desc,
+            color=NEGATIVECOLOR
+        )
+        self.set_footer(text=return_current_time())
+
+
+class RoleNotFoundEmbed(discord.Embed):
+    """
+    Embed for not found role
+    """
+    def __init__(self, role_name):
+        local_title = f' '
+        local_desc = f'Couldn\'t find role **{role_name}**'
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
+
+
+class RoleDuplicateUserEmbed(discord.Embed):
+    """
+    Embed for already has role
+    """
+    def __init__(self, message_user, role_name):
+        local_desc = f'@{message_user.mention}, you already have the '\
+                     f'**{found_role.name}** role'
+        super().__init__(
+            title='Role Not Added',
+            description=local_desc,
+            color=NEGATIVECOLOR
+        )
+        self.set_footer(text=return_current_time())
+
+
+class RoleNotRemovedEmbed(discord.Embed):
+    """
+    Embed for when people already have no role
+    """
+    def __init__(self, message_user, role_name):
+        local_desc = f'@{message_user.mention}, you already don\'t'\
+                     f' have the **{role_name}** role'
+        super().__init__(
+            title='Role Not Removed',
+            description=local_desc,
+            color=NEGATIVECOLOR
+        )
+        self.set_footer(text=return_current_time())
+
+
+class VoiceChannelStateEmbed(discord.Embed):
+    """
+    Embed for voice channel update
+    """
+    def __init__(self, channel_user: discord.Member,
+                 channel_name, action):
+        """
+        init class for embed
+        """
+        local_title = 'Presence Update'
+        local_desc = f'**{channel_user.name}#{channel_user.discriminator}**'\
+                     f' has {action} **{channel_name}**.'
+        super().__init__(
+            color=POSITIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
+
+
+class VoiceChannelMoveEmbed(discord.Embed):
+    """
+    Embed for voice channel update
+    """
+    def __init__(self, channel_user: discord.Member,
+                 before_channel, after_channel):
+        """
+        init class for embed
+        """
+        local_title = f'Presence update'
+        local_desc = f'**{channel_user.name}#{channel_user.discriminator}**'\
+                     f' has moved from **{before_channel}**'\
+                     f' to **{after_channel}**.'
+        super().__init__(
+            color=POSITIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
