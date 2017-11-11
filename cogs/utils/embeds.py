@@ -262,7 +262,7 @@ class SelfRoleAddedEmbed(discord.Embed):
     def __init__(self, message_user, role_name):
         local_title = f'Role Added'
         local_desc = f'You now have the '\
-                     f'**{found_role.name}** role.'
+                     f'**{role_name}** role.'
         super().__init__(
             title=local_title,
             description=local_desc,
@@ -278,7 +278,7 @@ class SelfRoleRemovedEmbed(discord.Embed):
     def __init__(self, role_name):
         local_title = f'Role Removed'
         local_desc = f'You no longer have the '\
-                     f'**{found_role.name}** role.'
+                     f'**{role_name}** role.'
         super().__init__(
             title=local_title,
             description=local_desc,
@@ -323,7 +323,7 @@ class RoleDuplicateUserEmbed(discord.Embed):
     """
     def __init__(self, message_user, role_name):
         local_desc = f'@{message_user.mention}, you already have the '\
-                     f'**{found_role.name}** role'
+                     f'**{role_name}** role'
         super().__init__(
             title='Role Not Added',
             description=local_desc,
