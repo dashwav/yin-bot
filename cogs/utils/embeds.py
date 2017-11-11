@@ -322,7 +322,7 @@ class RoleDuplicateUserEmbed(discord.Embed):
     Embed for already has role
     """
     def __init__(self, message_user, role_name):
-        local_desc = f'@{message_user.mention}, you already have the '\
+        local_desc = f'{message_user.mention}, you already have the '\
                      f'**{role_name}** role'
         super().__init__(
             title='Role Not Added',
@@ -337,7 +337,7 @@ class RoleNotRemovedEmbed(discord.Embed):
     Embed for when people already have no role
     """
     def __init__(self, message_user, role_name):
-        local_desc = f'@{message_user.mention}, you already don\'t'\
+        local_desc = f'{message_user.mention}, you already don\'t'\
                      f' have the **{role_name}** role'
         super().__init__(
             title='Role Not Removed',
