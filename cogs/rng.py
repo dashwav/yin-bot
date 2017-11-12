@@ -52,10 +52,17 @@ class RNG():
         """Chooses between multiple choices.
         To denote multiple choices, you should use double quotes.
         """
+        choices = text.split(';')
         if len(choices) < 2:
             return await ctx.send('Not enough choices to pick from.')
-
-        await ctx.send(rng.choice(choices))
+        
+        choice = rng.choice(choices)
+        local_embed = discord.Embed(
+            title=f' ',
+            description=f':thinking:\n\n{choice}',
+            color=0x419400
+        )
+        await ctx.send()
 
     @commands.command(name='8ball')
     async def eightball(self, ctx, *, question):
