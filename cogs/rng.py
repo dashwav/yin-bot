@@ -70,7 +70,7 @@ class RNG():
             description=f'**❓ Question**\n\n{question}\n\n:8ball: **8ball**\n\n{answer}',
             color=0x419400
         )
-        await ctx.send(local_embed)
+        await ctx.send(embed=local_embed)
         
 def setup(bot):
     bot.add_cog(RNG(bot))
