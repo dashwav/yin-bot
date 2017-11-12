@@ -19,6 +19,7 @@ def run():
       Gateway(bot),
       Logging(bot),
       Moderation(bot),
+      RNG(bot),
       Roles(bot),
       Stats(bot),
       Voice(bot),
