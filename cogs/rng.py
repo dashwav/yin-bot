@@ -62,7 +62,7 @@ class RNG():
             description=f':thinking:\n\n{choice}',
             color=0x419400
         )
-        await ctx.send()
+        await ctx.send(embed=local_embed)
 
     @commands.command(name='8ball')
     async def eightball(self, ctx, *, question):
