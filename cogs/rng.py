@@ -67,7 +67,7 @@ class RNG():
         answer = rng.choice(self.answers)
         local_embed = discord.Embed(
             title=f' ',
-            description=f'**Question**\n{question}\n:8ball: **8ball**{answer}',
+            description=f'**❓ Question**\n\n{question}\n\n:8ball: **8ball**\n\n{answer}',
             color=0x419400
         )
         await ctx.send(local_embed)
