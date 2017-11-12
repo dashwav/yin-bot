@@ -48,7 +48,7 @@ class RNG():
         await ctx.send(rng.randint(minimum, maximum))
 
     @commands.command()
-    async def choose(self, ctx, *choices: commands.clean_content):
+    async def choose(self, ctx, *, text):
         """Chooses between multiple choices.
         To denote multiple choices, you should use double quotes.
         """
