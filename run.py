@@ -3,7 +3,7 @@ Actually runs the code
 """
 from asyncio import get_event_loop
 from bot import Yinbot
-from cogs import Moderation, Owner, Roles, Stats
+from cogs import Moderation, Owner, Roles, Stats, RNG
 from cogs import Admin, Gateway, Logging, Voice, Filter
 
 
