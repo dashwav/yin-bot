@@ -106,7 +106,7 @@ class Roles():
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
                 found_role1= role
-        if not found_role1
+        if not found_role1:
             return
         for role in users_roles:
             if role.name.lower() == role_name.lower():
