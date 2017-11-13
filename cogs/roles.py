@@ -92,9 +92,7 @@ class Roles():
                     found_role.name
                 )
         else:
-            local_embed = embeds.RoleNotFoundEmbed(
-                role_name
-            )
+            pass
         await ctx.send(embed=local_embed)
 
     @commands.command()
@@ -105,6 +103,11 @@ class Roles():
         """
         found_role = None
         users_roles = ctx.message.author.roles.copy()
+        for role in ctx.guild.roles:
+            if role.name.lower() == role_name.lower():
+                found_role1= role
+        if not found_role1
+            return
         for role in users_roles:
             if role.name.lower() == role_name.lower():
                 found_role = role
