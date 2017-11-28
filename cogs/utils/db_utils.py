@@ -55,7 +55,7 @@ async def make_tables(pool: Pool, schema: str):
       logging_enabled boolean DEFAULT FALSE,
       logging_channels bigint ARRAY,
       assignableroles bigint ARRAY,
-      blacklistchannels bigint ARRAY,
+      blacklist_channels bigint ARRAY,
       addtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (serverid)
     );"""
@@ -736,3 +736,54 @@ class PostgresController():
         WHERE serverid = $2;
         """.format(self.schema)
         await self.pool.execute(sql, value, guild_id)
+
+    async def add_blacklist_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Adds a channel to the blacklist channel array for the server
+        :param guild_id: guild to add channel to
+        :param channel_id: channel to add
+        """
+        sql = """
+        UPDATE {}.servers
+        SET blacklist_channels = (SELECT array_agg(distinct e)
+        FROM unnest(array_append(blacklist_channels,$1::bigint)) e)
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_id, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding channel to server {guild_id}: {e}')
+            return False
+
+    async def rem_blacklist_channel(self, guild_id: int, channel_id: int, logger):
+        """
+        Removes a channel from the blacklist channel array
+        :param guild_id: guild to remove modlog channel from
+        :param channel_id: channel id to remove
+        """
+        channel_list = await self.get_modlogs(guild_id)
+        channel_list.remove(channel_id)
+        sql = """
+        UPDATE {}.servers
+        SET blacklist_channels = $1
+        WHERE serverid = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_list, guild_id)
+        except Exception as e:
+            logger.warning(f'Error removing modlog channel: {e}')
+            return False
+        return True
+
+    async def get_blacklist_channels(self, guild_id: int):
+        """
+        Returns a list of channel ids for posting mod actions
+        :param guild_id: guild to search roles for
+        """
+        sql = """
+        SELECT blacklist_channels FROM {}.servers
+        WHERE serverid = $1;
+        """.format(self.schema)
+        channel_list = await self.pool.fetchval(sql, guild_id)
+        return channel_list

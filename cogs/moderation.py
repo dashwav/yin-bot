@@ -70,6 +70,8 @@ class Moderation:
         """
         Purges a set number of messages.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         deleted = []
         try:
             count = int(next(iter(args or []), 'fugg'))
@@ -105,6 +107,8 @@ class Moderation:
         """
         Kicks a user.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -145,6 +149,8 @@ class Moderation:
         """
         Bans a user.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -189,6 +195,8 @@ class Moderation:
         """
         Unbans a user.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",

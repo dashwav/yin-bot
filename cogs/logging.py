@@ -21,6 +21,8 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_logger_channels(
@@ -147,6 +149,8 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if ctx.invoked_subcommand is None:
             desc = ''
             voicelogs = await self.bot.pg_utils.get_voice_channels(

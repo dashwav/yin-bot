@@ -1,4 +1,5 @@
 from discord.ext import commands
+from asyncio import get_event_loop
 
 """
 The permission system of the bot is based on a "just works" basis
@@ -86,6 +87,16 @@ def is_in_guilds(*guild_ids):
             return False
         return guild.id in guild_ids
     return commands.check(predicate)
+
+async def is_channel_blacklisted(self, ctx):
+    blacklist_channels = await self.bot.pg_utils.get_blacklist_channels(
+        ctx.guild.id)
+    if not blacklist_channels:
+        return True
+    if ctx.channel.id in blacklist_channels:
+        return False
+    return True
+
 
 
 def is_lounge_cpp():

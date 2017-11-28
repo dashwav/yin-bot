@@ -27,8 +27,10 @@ class Roles():
     @checks.has_permissions(manage_roles=True)
     async def cleanrole(self, ctx, role_name, lcl_hours=24):
         """
-        Removes all members from a certain role with a safezone
+        (Testing) Removes all members from a certain role with a safezone
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         safe_users = []
         found_role = None
         dt_24hr = datetime.utcnow() - timedelta(hours=lcl_hours)
@@ -58,6 +60,8 @@ class Roles():
         """
         Adds self-assignable role to user
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -101,6 +105,8 @@ class Roles():
         """
         Removes self-assignable role from user
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -141,6 +147,8 @@ class Roles():
         """
         manages servers assignable roles
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if ctx.invoked_subcommand is None:
             message = ' \n'
             assignable_roles = []

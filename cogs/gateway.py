@@ -37,6 +37,8 @@ class Gateway:
         Welcome message command. If no subcommand is
         invoked, it will return the current welcome message
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         welcome_msg = await self.bot.pg_utils.get_welcome_message(
             ctx.guild.id,
             self.bot.logger

@@ -19,6 +19,8 @@ class Voice():
         """
         Returns whether voice_roles are enabled for the server
         """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
         if ctx.invoked_subcommand is None:
             desc = ''
             vcrole_enabled = await\
