@@ -762,7 +762,7 @@ class PostgresController():
         :param guild_id: guild to remove modlog channel from
         :param channel_id: channel id to remove
         """
-        channel_list = await self.get_modlogs(guild_id)
+        channel_list = await self.get_blacklist_channels(guild_id)
         channel_list.remove(channel_id)
         sql = """
         UPDATE {}.servers
