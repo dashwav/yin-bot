@@ -240,7 +240,7 @@ class Admin:
             try:
                 success = False
                 success = await \
-                    self.bot.pg_utils.rem_blacklistß_channel(
+                    self.bot.pg_utils.rem_blacklist_channel(
                         ctx.guild.id, ctx.message.channel.id, self.bot.logger
                     )
             except ValueError:

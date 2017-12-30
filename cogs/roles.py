@@ -25,34 +25,37 @@ class Roles():
     @commands.command(aliases=['prunerole'])
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
-    async def cleanrole(self, ctx, role_name, lcl_hours=24):
+    async def cleanrole(self, ctx, *, role_name):
         """
-        (Testing) Removes all members from a certain role with a safezone
+        (Testing) Removes all members from a certain role
         """
         if not await checks.is_channel_blacklisted(self,ctx):
             return
-        safe_users = []
         found_role = None
-        dt_24hr = datetime.utcnow() - timedelta(hours=lcl_hours)
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
                 found_role = role
         if not found_role:
+            await ctx.send(embed=discord.Embed(
+                title='Role cleaned:',
+                description=f'Successfully removed {count} users from {found_role.name}',
+                color=0x419400
+	    ))
             return
-        audit_logs = await ctx.guild.audit_logs(
-            after=dt_24hr,
-            action=AuditLogAction.member_role_update
-        )
-        async for entry in audit_logs:
-            if found_role in entry.after.roles:
-                safe_users.append(entry.target)
+        count = 0
         for user in found_role.members:
             try:
-                local_roles = user.roles
+                local_roles = user.roles.copy()
                 local_roles.remove(found_role)
-                user.edit(roles=local_roles)
+                await user.edit(roles=local_roles)
+                count += 1
             except Exception as e:
                 self.bot.logger.warning(f'Issue cleaning role: {e}')
+        await ctx.send(embed=discord.Embed(
+            title='Role cleaned:',
+            description=f'Successfully removed {count} users from {found_role.name}',
+            color=0x419400
+	))
 
     @commands.command()
     @commands.guild_only()
