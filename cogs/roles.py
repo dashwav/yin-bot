@@ -76,7 +76,7 @@ class Roles():
                     local_embed = embeds.RoleDuplicateUserEmbed(
                         ctx.message.author, found_role.name
                     )
-                    await ctx.send(embed=local_embed)
+                    await ctx.send(embed=local_embed, delete_after=5)
                     return
             assignable = await self.bot.pg_utils.is_role_assignable(
                 ctx.guild.id, found_role.id)
@@ -100,7 +100,7 @@ class Roles():
                 )
         else:
             pass
-        await ctx.send(embed=local_embed)
+        await ctx.send(embed=local_embed, delete_after=5)
 
     @commands.command()
     @commands.guild_only()
