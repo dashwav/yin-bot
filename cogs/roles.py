@@ -97,7 +97,7 @@ class Roles():
                 )
         else:
             pass
-        await ctx.send(embed=local_embed)
+        await ctx.send(embed=local_embed, delete_after=5)
 
     @commands.command()
     @commands.guild_only()
