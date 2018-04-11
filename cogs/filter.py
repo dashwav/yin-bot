@@ -45,7 +45,7 @@ class Filter:
         self.bot.server_settings[ctx.guild.id]['invites_allowed'] = True
         local_embed = discord.Embed(
                 title=f'Invites are now:',
-                description=f'{self.bot.server_settings["invites_allowed"]}',
+                description=f'{self.bot.server_settings[ctx.guild.id]["invites_allowed"]}',
                 color=0x419400
             )
         await ctx.send(embed=local_embed)
