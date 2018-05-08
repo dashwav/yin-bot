@@ -37,8 +37,8 @@ class Roles():
                 found_role = role
         if not found_role:
             await ctx.send(embed=discord.Embed(
-                title='Role cleaned:',
-                description=f'Successfully removed {count} users from {found_role.name}',
+                title='Couldn\'t find role',
+                description=f'Couldn\'t find the given role to remove',
                 color=0x419400
 	    ))
             return
