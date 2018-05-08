@@ -75,6 +75,8 @@ class Filter:
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return
+            if message.author.guild_permissions.manage_messages:
+                return
             regexp = re.compile(r'(discord.gg\/)[a-zA-Z0-9]{0,7}')
             if bool(regexp.search(message.content)):
                 await message.delete()
