@@ -116,7 +116,7 @@ class Moderation:
                 return
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = self.create_embed('Kick', ctx.guild, reason)
+            embed = self.create_embed('Kick', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
@@ -159,7 +159,7 @@ class Moderation:
         member = await self.bot.get_user_info(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = self.create_embed('Ban', ctx.guild, reason)
+            embed = self.create_embed('Ban', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
@@ -217,16 +217,20 @@ class Moderation:
         else:
             await ctx.send("Cancelled unban", delete_after=3)
 
-    def create_embed(self, command_type, server_name, reason):
+    async def create_embed(self, command_type, server_name, server_id, reason):
         embed = discord.Embed(title=f'❗ {command_type} Reason ❗', type='rich')
+        footer = 'This is an automated message'
         if command_type.lower() == 'ban':
             command_type = 'bann'
+            footer = await self.bot.pg_utils.get_ban_footer(server_id)
+        elif command_type.lower() == 'kick':
+            footer = await self.bot.pg_utils.get_kick_footer(server_id)
         elif command_type.lower() == 'unban':
             command_type = 'unbann'
         embed.description = f'\nYou were {command_type.lower()}ed '\
                             f'from **{server_name}**.'
         embed.add_field(name='Reason:', value=reason)
-        embed.set_footer(text='This is an automated message')
+        embed.set_footer(text=footer)
         return embed
 
 
