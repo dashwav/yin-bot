@@ -209,7 +209,7 @@ class Moderation:
                 return
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = self.create_embed('Kick', ctx.guild, ctx.guild.id, reason)
+            embed = await self.create_embed('Kick', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
@@ -252,7 +252,7 @@ class Moderation:
         member = await self.bot.get_user_info(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = self.create_embed('Ban', ctx.guild, ctx.guild.id, reason)
+            embed = await self.create_embed('Ban', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
