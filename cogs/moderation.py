@@ -64,6 +64,99 @@ class Moderation:
         super().__init__()
         self.bot = bot
 
+    @commands.group()
+    @commands.guild_only()
+    @checks.is_admin()
+    async def footer(self, ctx):
+        """
+        Ban/kick footer command. If no subcommand is
+        invoked, it will return the current ban/kick footer
+        """
+        if not await checks.is_channel_blacklisted(self,ctx):
+            return
+        welcome_msg = await self.bot.pg_utils.get_welcome_message(
+            ctx.guild.id,
+            self.bot.logger
+        )
+        if ctx.invoked_subcommand is None:
+            local_embed = discord.Embed(
+                title=f'Current welcome message: ',
+                description=welcome_msg
+            )
+            await ctx.send(embed=local_embed)
+
+    @footer.command(name='set_ban')
+    async def set_ban_footer(self, ctx, *, footer_string):
+        """
+        Attempts to set kick/ban footer to string passed in
+        """
+        if not footer_string:
+            local_embed = discord.Embed(
+                title=f'No string detected, I need a string parameter to work',
+                description=' ',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        success = await self.bot.pg_utils.set_ban_footer(
+            ctx.guild.id,
+            footer_string,
+            self.bot.logger
+        )
+        if success:
+            desc = footer_string.replace(
+                f'%user%', ctx.message.author.mention)
+            local_embed = discord.Embed(
+                title=f'Footer message set:',
+                description=f'**Preview:**',
+                color=0x419400
+            )
+            local_embed.set_footer(text=desc)
+        else:
+            local_embed = discord.Embed(
+                title=f'Internal error occured, please contact @dashwav#7785',
+                description=' ',
+                color=0x651111
+            )
+        await ctx.send(embed=local_embed)
+        return
+
+    @footer.command(name='set_kick')
+    async def set_kick_footer(self, ctx, *, footer_string):
+        """
+        Attempts to set kick/ban footer to string passed in
+        """
+        if not footer_string:
+            local_embed = discord.Embed(
+                title=f'No string detected, I need a string parameter to work',
+                description=' ',
+                color=0x651111
+            )
+            await ctx.send(embed=local_embed)
+            return
+        success = await self.bot.pg_utils.set_kick_footer(
+            ctx.guild.id,
+            footer_string,
+            self.bot.logger
+        )
+        if success:
+            desc = footer_string.replace(
+                f'%user%', ctx.message.author.mention)
+            local_embed = discord.Embed(
+                title=f'Footer message set:',
+                description=f'**Preview:**',
+                color=0x419400
+            )
+            local_embed.set_footer(text=desc)
+        else:
+            local_embed = discord.Embed(
+                title=f'Internal error occured, please contact @dashwav#7785',
+                description=' ',
+                color=0x651111
+            )
+        await ctx.send(embed=local_embed)
+        return
+
     @commands.command()
     @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx, *args,  mentions=None):
