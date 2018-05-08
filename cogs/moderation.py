@@ -74,14 +74,19 @@ class Moderation:
         """
         if not await checks.is_channel_blacklisted(self,ctx):
             return
-        welcome_msg = await self.bot.pg_utils.get_welcome_message(
+        ban_footer = await self.bot.pg_utils.get_ban_footer(
             ctx.guild.id,
             self.bot.logger
         )
+        kick_footer = await self.bot.pg_utils.get_kick_footer(
+            ctx.guild.id,
+            self.bot.logger
+        )
+        footer_msg = f'**Ban Footer**:\n\n{ban_footer}\n\n**Kick Footer:**\n\n{kick_footer}'
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Current welcome message: ',
-                description=welcome_msg
+                description=footer_msg
             )
             await ctx.send(embed=local_embed)
 
