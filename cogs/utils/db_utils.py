@@ -51,6 +51,8 @@ async def make_tables(pool: Pool, schema: str):
       modlog_enabled boolean DEFAULT FALSE,
       modlog_channels bigint ARRAY,
       welcome_message text,
+      ban_footer text,
+      kick_footer text,
       welcome_channels bigint ARRAY,
       logging_enabled boolean DEFAULT FALSE,
       logging_channels bigint ARRAY,
@@ -148,6 +150,8 @@ class PostgresController():
             False,
             [],
             f'Welcome %user%!',
+            f'This is an automated message',
+            f'This is an automated message',
             [],
             False,
             [],
@@ -205,29 +209,6 @@ class PostgresController():
             message.clean_content,
             message.created_at
         )
-
-    async def add_blacklist_word(self, guild_id: int, word: str):
-        """
-        Adds a word that is not allowed on the server
-        :param guild_id: the id of the server to add the word to
-        :param word: word to add
-        """
-        return
-
-    async def add_whitelist_channel(self, guild_id: int, channel_id: int):
-        """
-        Adds a channel that will delete all but the messages containing a
-        string in the 'whitelist' column of the server row
-        :param guild_id: the id of the server to add the word to
-        :param word: word to add
-        """
-        return
-
-    async def add_r9k_channel(self, guild_id: int, channel_id: int):
-        """
-        this would be a cool thing to have
-        """
-        return
 
     async def is_role_assignable(self, guild_id: int, role_id: int):
         """
@@ -410,6 +391,76 @@ class PostgresController():
             return message['welcome_message']
         except Exception as e:
             logger.warning(f'Error while getting welcome message: {e}')
+            return None
+
+    async def set_ban_footer(self, guild_id: int, message: str, logger):
+        """
+        Sets the ban footer for a server
+        :param guild_id: Guild to update footer for
+        :param message: string to insert
+        """
+        sql = """
+        UPDATE {}.servers
+        SET ban_footer = $1
+        WHERE serverid = $2
+        """.format(self.schema)
+
+        try:
+            await self.pool.execute(sql, message, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Issue setting ban footer: {e}')
+            return False
+
+    async def get_ban_footer(self, guild_id: int, logger):
+        """
+        Returns the ban footer string if it exists
+        :param guild_id: guild to get footer for
+        """
+        sql = """
+        SELECT ban_footer from {}.servers
+        WHERE serverid = $1
+        """.format(self.schema)
+        try:
+            message = await self.pool.fetchrow(sql, guild_id)
+            return message['ban_footer']
+        except Exception as e:
+            logger.warning(f'Error while getting ban footer: {e}')
+            return None
+
+    async def set_kick_footer(self, guild_id: int, message: str, logger):
+        """
+        Sets the ban footer for a server
+        :param guild_id: Guild to update footer for
+        :param message: string to insert
+        """
+        sql = """
+        UPDATE {}.servers
+        SET kick_footer = $1
+        WHERE serverid = $2
+        """.format(self.schema)
+
+        try:
+            await self.pool.execute(sql, message, guild_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Issue setting kick footer: {e}')
+            return False
+
+    async def get_kick_footer(self, guild_id: int, logger):
+        """
+        Returns the ban footer string if it exists
+        :param guild_id: guild to get footer for
+        """
+        sql = """
+        SELECT kick_footer from {}.servers
+        WHERE serverid = $1
+        """.format(self.schema)
+        try:
+            message = await self.pool.fetchrow(sql, guild_id)
+            return message['kick_footer']
+        except Exception as e:
+            logger.warning(f'Error while getting kick footer: {e}')
             return None
 
     async def add_welcome_channel(
