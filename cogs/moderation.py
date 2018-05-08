@@ -321,9 +321,13 @@ class Moderation:
             footer = 'This is an automated message'
             if command_type.lower() == 'ban':
                 command_type = 'bann'
-                footer = await self.bot.pg_utils.get_ban_footer(server_id)
+                footer = await self.bot.pg_utils.get_ban_footer(
+                    server_id,
+                    self.bot.logger)
             elif command_type.lower() == 'kick':
-                footer = await self.bot.pg_utils.get_kick_footer(server_id)
+                footer = await self.bot.pg_utils.get_kick_footer(
+                    server_id,
+                    self.bot.logger)
             elif command_type.lower() == 'unban':
                 command_type = 'unbann'
             embed.description = f'\nYou were {command_type.lower()}ed '\
