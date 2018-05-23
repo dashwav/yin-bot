@@ -1,4 +1,4 @@
-token: "MzY5MzYyMDA0NDU4MDc4MjA4.DOWRGQ.5PriZ0kHmRgiFO9_MU10LkGg030"
+token: ""
 
 guild_id: 123456789
 
@@ -10,6 +10,6 @@ discord_bots_key: 123456
 
 postgres_credentials:
     host: "localhost"
-    user: "yinbotuser"
+    user: "user"
     database: "yinbot"
-    password: "D91E94E2A85C2379A3DB4C0B5BD818F3F3D2C901"
+    password: "password"
