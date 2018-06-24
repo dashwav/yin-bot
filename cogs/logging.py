@@ -2,6 +2,7 @@
 This cog will handle logging all server actions to a specific channel
 """
 import discord
+import asyncio
 from discord.ext import commands
 from .utils import checks
 from .utils import embeds
@@ -267,7 +268,16 @@ class Logging():
         """
         sends message on user ban
         """
+        
+        if self.bot.server_settings[guild.id]['logging_enabled']:
+            channels = await self.bot.pg_utils.get_logger_channels(
+                guild.id)
+            local_embed = embeds.LogBanEmbed(user)
+            for channel in channels:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed=local_embed)
         if self.bot.server_settings[guild.id]['modlog_enabled']:
+            asyncio.sleep(2)
             banned_member = None
             moderator = None
             reason = None
@@ -287,13 +297,6 @@ class Logging():
                         embed=local_embed)
             except Exception as e:
                 self.bot.logger.warning(f'Issue posting to mod log: {e}')
-        if self.bot.server_settings[guild.id]['logging_enabled']:
-            channels = await self.bot.pg_utils.get_logger_channels(
-                guild.id)
-            local_embed = embeds.LogBanEmbed(user)
-            for channel in channels:
-                ch = self.bot.get_channel(channel)
-                await ch.send(embed=local_embed)
 
     async def on_member_join(self, member):
         """
