@@ -75,13 +75,13 @@ class Moderation:
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
                 confirm = await helpers.custom_confirm(ctx,
-                    f'User: {member.user}\nReason: {reason}'
+                    f'```\nUser: {member.user}\nReason: {reason}\n```'
                 )
                 if not confirm: 
                     return
                 resp_mod = moderator if moderator else ctx.author
                 ban_reason = reason if reason else member.reason
-                local_embed = embeds.BanEmbed(member.user, resp_mod, member.reason)
+                local_embed = embeds.BanEmbed(member.user, resp_mod, ban_reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
