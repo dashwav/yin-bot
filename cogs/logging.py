@@ -267,6 +267,26 @@ class Logging():
         """
         sends message on user ban
         """
+        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+            banned_member = None
+            moderator = None
+            reason = None
+            try:
+                async for entry in guild.audit_logs(limit=10):
+                    if entry.target == user and entry.action == discord.AuditLogAction.ban:
+                        banned_member = entry.target
+                        moderator = entry.user
+                        reason = entry.reason
+                if not banned_member and moderator:
+                    raise Exception()
+                local_embed = embeds.BanEmbed(banned_member, moderator, reason)
+                mod_logs = await self.bot.pg_utils.get_modlogs(
+                        ctx.guild.id)
+                for channel_id in mod_logs:
+                    await (self.bot.get_channel(channel_id)).send(
+                        embed=local_embed)
+            except Exception as e:
+                self.bot.logger.warning(f'Issue posting to mod log: {e}')
         if self.bot.server_settings[guild.id]['logging_enabled']:
             channels = await self.bot.pg_utils.get_logger_channels(
                 guild.id)
