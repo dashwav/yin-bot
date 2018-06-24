@@ -267,7 +267,7 @@ class Logging():
         """
         sends message on user ban
         """
-        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+        if self.bot.server_settings[guild.id]['modlog_enabled']:
             banned_member = None
             moderator = None
             reason = None
