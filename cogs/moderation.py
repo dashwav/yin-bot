@@ -67,7 +67,7 @@ class Moderation:
     @commands.command()    
     @checks.is_mod()
     @commands.guild_only()
-    async def logban(self, ctx, member: BannedMember, moderator: discord.member):
+    async def logban(self, ctx, member: BannedMember, moderator: discord.Member):
         """
         Logs a right-click ban to modlog channels
         """
