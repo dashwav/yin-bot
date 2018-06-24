@@ -74,6 +74,11 @@ class Moderation:
         """
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
+                confirm = await helpers.custom_confirm(
+                    f'User: {member.user}\nReason: {reason}'
+                )
+                if not confirm: 
+                    return
                 resp_mod = moderator if moderator else ctx.author
                 ban_reason = reason if reason else member.reason
                 local_embed = embeds.BanEmbed(member.user, resp_mod, member.reason)
