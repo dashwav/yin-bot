@@ -281,7 +281,7 @@ class Logging():
                     raise Exception()
                 local_embed = embeds.BanEmbed(banned_member, moderator, reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
-                        ctx.guild.id)
+                        guild.id)
                 for channel_id in mod_logs:
                     await (self.bot.get_channel(channel_id)).send(
                         embed=local_embed)
