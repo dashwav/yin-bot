@@ -7,6 +7,7 @@ import discord
 import datetime
 
 NEGATIVECOLOR = 0x651111
+SLIGHTLYNEGATIVECOLOR = 0xF26E00
 POSITIVECOLOR = 0x419400
 DELETEDCOLOR = 0x3399CC
 EDITEDCOLOR = 0x00E4C9
@@ -64,7 +65,7 @@ class KickEmbed(discord.Embed):
         local_title = f'{kicked_user.name} was kicked by {resp_mod}'
         local_desc = f'Reason: {reason}'
         super().__init__(
-            color=NEGATIVECOLOR,
+            color=SLIGHTLYNEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
@@ -103,6 +104,24 @@ class LogBanEmbed(discord.Embed):
                      f'\n\n{leaving_user.id}'
         super().__init__(
             color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
+
+class UnBanEmbed(discord.Embed):
+    """
+    Embed for when a user has been kicked
+    """
+    def __init__(self, unbanned_user: discord.Member,
+                 resp_mod: discord.Member, reason: str):
+        """
+        Init class for embed
+        """
+        local_title = f'{unbanned_user.name} was unbanned by {resp_mod}'
+        local_desc = f'Reason: {reason}'
+        super().__init__(
+            color=POSITIVECOLOR,
             title=local_title,
             description=local_desc,
             )
