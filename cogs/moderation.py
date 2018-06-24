@@ -377,7 +377,7 @@ class Moderation:
             self.bot.logger.info(f'Successfully unbanning {member}')
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
-                    local_embed = embeds.UnBanEmbed(member, ctx.author, reason)
+                    local_embed = embeds.UnBanEmbed(member.user, ctx.author, reason)
                     mod_logs = await self.bot.pg_utils.get_modlogs(
                             ctx.guild.id)
                     for channel_id in mod_logs:
