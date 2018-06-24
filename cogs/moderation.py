@@ -64,59 +64,17 @@ class Moderation:
         super().__init__()
         self.bot = bot
 
-    @commands.command()
-    @checks.is_mod()
-    @commands.guild_only()
-    async def logkick(self, ctx, member: discord.Member, *,
-                   reason: ActionReason = None):
-        """
-        Logs a right-click kick to modlog channels
-        """
-        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
-            try:
-                local_embed = embeds.KickEmbed(member, ctx.author, reason)
-                mod_logs = await self.bot.pg_utils.get_modlogs(
-                        ctx.guild.id)
-                for channel_id in mod_logs:
-                    await (self.bot.get_channel(channel_id)).send(
-                        embed=local_embed)
-            except Exception as e:
-                self.bot.logger.warning(f'Issue posting to mod log: {e}')
-        else:
-            await ctx.send(f'No modlog channels detected', delete_after=3)
-
     @commands.command()    
     @checks.is_mod()
     @commands.guild_only()
-    async def logban(self, ctx, member: discord.Member, *,
-                   reason: ActionReason = None):
+    async def logban(self, ctx, member: BannedMember):
         """
         Logs a right-click ban to modlog channels
         """
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
-                local_embed = embeds.BanEmbed(member, ctx.author, reason)
-                mod_logs = await self.bot.pg_utils.get_modlogs(
-                        ctx.guild.id)
-                for channel_id in mod_logs:
-                    await (self.bot.get_channel(channel_id)).send(
-                        embed=local_embed)
-            except Exception as e:
-                self.bot.logger.warning(f'Issue posting to mod log: {e}')
-        else:
-            await ctx.send(f'No modlog channels detected', delete_after=3)
 
-    @commands.command()
-    @checks.is_mod()
-    @commands.guild_only()
-    async def logunban(self, ctx, member: discord.Member, *,
-                   reason: ActionReason = None):
-        """
-        Logs a right-click kick to modlog channels
-        """
-        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
-            try:
-                local_embed = embeds.UnBanEmbed(member, ctx.author, reason)
+                local_embed = embeds.BanEmbed(member.user, ctx.author, member.reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
