@@ -277,7 +277,7 @@ class Logging():
                         banned_member = entry.target
                         moderator = entry.user
                         reason = entry.reason
-                if not banned_member and moderator:
+                if not banned_member:
                     raise Exception()
                 local_embed = embeds.BanEmbed(banned_member, moderator, reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
