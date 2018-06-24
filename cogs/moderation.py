@@ -67,14 +67,14 @@ class Moderation:
     @commands.command()    
     @checks.is_mod()
     @commands.guild_only()
-    async def logban(self, ctx, member: BannedMember):
+    async def logban(self, ctx, member: BannedMember, moderator: discord.member):
         """
         Logs a right-click ban to modlog channels
         """
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
-
-                local_embed = embeds.BanEmbed(member.user, ctx.author, member.reason)
+                resp_mod = moderator if moderator else ctx.author
+                local_embed = embeds.BanEmbed(member.user, resp_mod, member.reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
