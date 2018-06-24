@@ -101,3 +101,6 @@ ENV/
 .mypy_cache/
 .vscode
 .DS_Store
+
+# Config
+config.yml

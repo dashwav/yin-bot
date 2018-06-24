@@ -83,8 +83,8 @@ class Admin:
             )
             await ctx.send(embed=local_embed)
 
-    @modlog.command()
-    async def add(self, ctx):
+    @modlog.command(aliases=['add'])
+    async def add_channel(self, ctx):
         """
         Adds channel to modlog list
         """
@@ -115,8 +115,8 @@ class Admin:
             local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
 
-    @modlog.command(aliases=['rem'])
-    async def remove(self, ctx):
+    @modlog.command(aliases=['rem', 'remove'])
+    async def remove_channel(self, ctx):
         """
         Removes a channel from the modlog list
         """
