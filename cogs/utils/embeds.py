@@ -429,13 +429,14 @@ class WarningListEmbed(discord.Embed):
     """
     Embed that lists all a users infractions
     """
-    def __init__(self, warned_user: discord.Member, infractions: list):
+    def __init__(self, warned_user: discord.Member, infractions: list, logger):
         
         local_title = f'**{warned_user.name}#{warned_user.discriminator}**\'s infractions'
         local_desc = f'' if infractions else f'User has no warnings'
         warning_string = ''
         string_list = []
         for index, warning in enumerate(infractions):
+            logger.info(f'{index} {warning}')
             level = 'MAJOR' if warning['major'] else 'MINOR'
             tmp_warning_string = f'**{index}.** ({level}) {warning["reason"]}'
             if len(tmp_warning_string) + len(warning_string) > 1000:
