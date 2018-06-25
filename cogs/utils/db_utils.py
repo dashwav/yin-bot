@@ -170,17 +170,17 @@ class PostgresController():
             False,
             True,
             False,
-            [],
+            list([]),
             False,
-            [],
+            list([]),
             f'Welcome %user%!',
             f'This is an automated message',
             f'This is an automated message',
-            [],
+            list([]),
             False,
-            [],
-            [],
-            [],
+            list([]),
+            list([]),
+            list([]),
             )
 
     async def get_server_settings(self):
