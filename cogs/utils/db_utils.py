@@ -62,8 +62,32 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (serverid)
     );"""
 
+    warnings = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.warnings(
+      serverid BIGINT,
+      userid BIGINT,
+      indexid INT,
+      reason text,
+      major BOOLEAN DEFAULT FALSE,
+      logtime TIMESTAMP DEFAULT current_timestamp,
+      PRIMARY KEY (serverid, userid, indexid)
+    );"""
+
+    moderation = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.moderation (
+      serverid BIGINT,
+      userid BIGINT,
+      moderatorid BIGINT,
+      ban BOOLEAN,
+      reason text,
+      logtime TIMESTAMP DEFAULT current_timestamp,
+      PRIMARY KEY (serverid, userid, indexid)
+    );"""
+
     await pool.execute(servers)
     await pool.execute(vplust)
+    await pool.execute(warnings)
+    await pool.execute(moderation)
 
 
 class PostgresController():
@@ -838,3 +862,102 @@ class PostgresController():
         """.format(self.schema)
         channel_list = await self.pool.fetchval(sql, guild_id)
         return channel_list
+
+    """
+    Warnings
+    """
+
+    async def get_warning_count(self, guild_id, user_id):
+        """
+        Returns a count of infractions a user has
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT COUNT(userid) FROM {}.warnings
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        return await self.poll.fetchval(sql, guild_id, user_id)
+
+    async def add_warning(
+        self, guild_id: int, user_id: str, reason: str, major: bool, logger):
+        """
+        Takes a userid and string and inserts it into the guild's
+        warning log
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param reason: reason for warning
+        :param major: whether warning is a major/minor warning
+        """
+        infraction_count = await self.get_warning_count(guild_id, user_id)
+        sql = """
+        INSERT INTO {}.warnings VALUES ($1, $2, $3, $4, $5);
+        """.format(self.schema)
+        try:
+            await self.pool.execute(
+                sql,
+                guild_id,
+                user_id,
+                infraction_count + 1,
+                reason,
+                major
+            )
+            return infraction_count
+        except Exception as e:
+            logger.warning(f'Error inserting warning into db: {e}')
+            return False
+
+    async def get_warnings(self, guild_id: int, user_id: int, logger):
+        """
+        Returns all warnings a user has on a server
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT * FROM {}.warnings
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id)
+        except Exception as e:
+            logger.warning(f'Error retrieving warnings {e}')
+            return False
+
+    async def add_mod_action(self, guild_id: int, user_id: int,
+                             mod_id: int, ban: bool, reason: str, logger):
+        """
+        Adds a new mod action to the database
+        :param guild_id: guild to add mod action to
+        :param user_id: user action was taken against
+        :param mod_id: responsible moderator
+        :param ban: whether action was a ban
+        :param reason: reason for mod action
+        """
+        sql = """
+        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5);
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, guild_id, user_id, mod_id,
+                                    ban, reason)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding mod action to database: {e}')
+            return False
+
+
+    async def get_all_mod_actions(self, guild_id: int, user_id: int, logger):
+        """
+        Returns all modActions a user has on a server
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT * FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id)
+        except Exception as e:
+            logger.warning(f'Error retrieving warnings {e}')
+            return False
+

@@ -405,3 +405,55 @@ class VoiceChannelMoveEmbed(discord.Embed):
             description=local_desc,
             )
         self.set_footer(text=return_current_time())
+    
+class WarningAddEmbed(discord.Embed):
+    """
+    Embed for when someone gets warned
+    """
+    def __init__(self, warned_user: discord.Member, major: bool,
+                 reason: str, infraction_count: int):
+        level = 'MAJOR' if major else 'MINOR'
+        local_title = f'User Warned'
+        local_desc = f'{warned_user.mention}'\
+                     f' has been given a **{level}** warning for '\
+                     f'**{reason}**\n\n'\
+                     f'This warning number {infraction_count} for {warned_user.name}\'s'
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
+
+class WarningListEmbed(discord.Embed):
+    """
+    Embed that lists all a users infractions
+    """
+    def __init__(self, warned_user: discord.Member, infractions: list):
+        
+        local_title = f'**{channel_user.name}#{channel_user.discriminator}**\'s infractions'
+        local_desc = f'' if infractions else f'User has no warnings'
+        warning_string = ''
+        string_list = []
+        for index, warning in enumerate(infractions):
+            level = 'MAJOR' if warning['major'] else 'MINOR'
+            tmp_warning_string = f'**{index}.** ({level}) {warning["reason"]}'
+            if tmp_warning_string.length + warning_string.length > 1000:
+                string_list.append(warning_string)
+                warning_string = tmp_warning_string
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        for index, string in enumerate(string_list):
+            if index == 0:
+                self.add_field(
+                    name='Infractions:',
+                    value=string
+                )
+            self.add_field(
+                    name='Infractions:(cont),
+                    value=string
+                )
+        self.set_footer(text=return_current_time())
