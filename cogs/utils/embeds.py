@@ -438,10 +438,11 @@ class WarningListEmbed(discord.Embed):
         for index, warning in enumerate(infractions):
             logger.info(f'{index} {warning}')
             level = 'MAJOR' if warning['major'] else 'MINOR'
-            tmp_warning_string = f'**{index}.** ({level}) {warning["reason"]}'
+            tmp_warning_string = f'**{index+1}.** ({level}) {warning["reason"]}'
             if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string
+            warning_string += tmp_warning_string
         super().__init__(
             color=SLIGHTLYNEGATIVECOLOR,
             title=local_title,
