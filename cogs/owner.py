@@ -3,6 +3,7 @@ Misc commands that I want to run
 """
 import traceback
 import discord
+from utils import helpers
 from discord.ext import commands
 
 
@@ -56,6 +57,50 @@ class Owner():
         except Exception as e:
             await ctx.send('❌', delete_after=3)
             self.bot.logger.warning(f'Error adding server to db: {e}')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def auto_fix_servers(self, ctx, *, test: str=None):
+        """
+        Fixes servers that are not in the database
+        """
+        wrong_guilds = []
+        for server in self.bot.guilds:
+            try:
+                server_settings = await self.bot.pg_utils.get_server(
+                    server.id, self.bot.logger
+                )
+            except Exception as e:
+                self.bot.logger.warning(f'Issues getting servers: {e}')
+                await ctx.send('❌', delete_after=3)
+            if not server_settings:
+                wrong_guilds.append(server)
+        if test:
+            local_embed = discord.Embed(
+                name='Discord Server Check',
+                value=f'There are {len(wrong_guilds)} that are not '\
+                      'correctly represented in the database'
+            )
+            current_s = ''
+            for server_s in self.bot.server_settings:
+                current_s += f'{server_s[]}'
+            await ctx.send(embed=local_embed)
+            return
+        confirm = await helpers.custom_confirm(
+            ctx,
+            f'```This will edit {len(wrong_guilds)} in the database.'\
+            f'This is an irreversable action, are you sure?```'
+        )
+        if not confirm:
+            return
+        for server in wrong_guilds:
+            try:
+                await self.bot.pg_utils.add_server(server.id)
+            except Exception as e:
+                self.bot.logger.warning(f'Error adding server to db: {e}')
+                await ctx.send('❌', delete_after=3)
+                return
+        await ctx.send('\N{OK HAND SIGN}', delete_after=3)
 
     @commands.command(hidden=True)
     @commands.is_owner()

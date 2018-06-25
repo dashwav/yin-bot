@@ -87,6 +87,13 @@ class Warnings:
             await ctx.send(embed=embeds.InternalErrorEmbed())
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
+    @warn.command(aliases=['rem', 'remove'])
+    async def remove_warning(self, ctx, member: discord.Member, index: int):
+        """
+        This command removes a warning from a user at selected index
+        """
+        return
+
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
