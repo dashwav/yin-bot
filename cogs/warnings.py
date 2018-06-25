@@ -97,12 +97,12 @@ class Warnings:
         if not await checks.is_channel_blacklisted(self,ctx):
             return
         try:
+            warnings = None
             warnings = await self.bot.pg_utils.get_warnings(
                 ctx.guild.id,
                 member.id,
                 self.bot.logger)
-            if not warnings:
-                await ctx.send(embed=embeds.InternalErrorEmbed())
+            if warnings == None:
                 self.bot.logger.warning(
                     f'No warnings lmao')
             local_embed = embeds.WarningListEmbed(member, warnings)
