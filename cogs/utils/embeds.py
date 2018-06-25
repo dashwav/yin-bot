@@ -442,6 +442,7 @@ class WarningListEmbed(discord.Embed):
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string
             warning_string += tmp_warning_string
+        string_list.append(warning_string)
         super().__init__(
             color=SLIGHTLYNEGATIVECOLOR,
             title=local_title,
