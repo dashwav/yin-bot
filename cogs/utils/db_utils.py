@@ -215,7 +215,7 @@ class PostgresController():
         """.format(self.schema)
         try:
             return await self.fetchrow(sql, server_id)
-        except:
+        except Exception as e:
             logger.warning(f'Error getting server settings {e}')
             return False
 
