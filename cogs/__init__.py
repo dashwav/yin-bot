@@ -8,6 +8,7 @@ from cogs.rng import RNG
 from cogs.roles import Roles
 from cogs.stats import Stats
 from cogs.voice import Voice
+from cogs.warnings import Warnings
 
 __all__ = [
     'Admin',
@@ -19,5 +20,6 @@ __all__ = [
     'RNG',
     'Roles',
     'Stats',
-    'Voice'
+    'Voice',
+    'Warnings'
 ]

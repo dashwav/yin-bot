@@ -4,7 +4,7 @@ Actually runs the code
 from asyncio import get_event_loop
 from bot import Yinbot
 from cogs import Moderation, Owner, Roles, Stats, RNG
-from cogs import Admin, Gateway, Logging, Voice, Filter
+from cogs import Admin, Gateway, Logging, Voice, Filter, Warnings
 
 
 def run():
@@ -24,6 +24,7 @@ def run():
       Stats(bot),
       Voice(bot),
       Owner(bot),
+      Warnings(bot),
     ]
     bot.start_bot(cogs)
 
