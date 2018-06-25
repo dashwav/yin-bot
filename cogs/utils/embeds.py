@@ -453,7 +453,7 @@ class WarningListEmbed(discord.Embed):
                     value=string
                 )
             self.add_field(
-                    name='Infractions:(cont),
+                    name='Infractions:(cont)',
                     value=string
                 )
         self.set_footer(text=return_current_time())
