@@ -102,7 +102,7 @@ class Warnings:
                 ctx.guild.id,
                 member.id,
                 self.bot.logger)
-            logger.info(warnings)
+            self.bot.logger.info(warnings)
             if warnings == None:
                 self.bot.logger.warning(
                     f'No warnings lmao')
