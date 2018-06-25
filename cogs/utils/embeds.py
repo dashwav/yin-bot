@@ -415,15 +415,15 @@ class WarningAddEmbed(discord.Embed):
         level = 'MAJOR' if major else 'MINOR'
         local_title = f'User Warned'
         local_desc = f'{warned_user.mention}'\
-                     f' has been given a **{level}** warning for '\
-                     f'**{reason}**\n\n'\
-                     f'This warning number {infraction_count} for {warned_user.name}\'s'
+                     f' has been given a **{level}** warning for:\n'\
+                     f'\'**{reason}**\''
         super().__init__(
             color=SLIGHTLYNEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
-        self.set_footer(text=return_current_time())
+        self.set_footer(
+            f'This warning number {infraction_count} for {warned_user.name}\'s')
 
 class WarningListEmbed(discord.Embed):
     """
@@ -438,7 +438,7 @@ class WarningListEmbed(discord.Embed):
         for index, warning in enumerate(infractions):
             level = 'MAJOR' if warning['major'] else 'MINOR'
             tmp_warning_string = f'**{index}.** ({level}) {warning["reason"]}'
-            if tmp_warning_string.length + warning_string.length > 1000:
+            if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string
         super().__init__(
