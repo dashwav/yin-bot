@@ -29,7 +29,7 @@ class Warnings:
             )
             await ctx.send(embed=local_embed, delete_after=5)
 
-    @warn.commands(aliases=['!'])
+    @warn.command(aliases=['!'])
     async def major(self, ctx, member: discord.Member, *, reason: str=None):
         """
         Gives a major warning
@@ -58,7 +58,7 @@ class Warnings:
             await ctx.send(embed=embeds.InternalErrorEmbed())
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
-    @warn.commands(aliases=['?'])
+    @warn.command(aliases=['?'])
     async def minor(self, ctx, member: discord.Member, *, reason: str=None):
         """
         Gives a minor warning
