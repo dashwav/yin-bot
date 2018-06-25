@@ -52,7 +52,7 @@ class Warnings:
                 True,
                 self.bot.logger
             )
-            local_embed = embeds.WarningAddEmbed(member, True, reason)
+            local_embed = embeds.WarningAddEmbed(member, True, reason, count)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
@@ -81,7 +81,7 @@ class Warnings:
                 False,
                 self.bot.logger
             )
-            local_embed = embeds.WarningAddEmbed(member, False, reason)
+            local_embed = embeds.WarningAddEmbed(member, False, reason, count)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
