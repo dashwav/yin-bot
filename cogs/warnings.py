@@ -104,9 +104,9 @@ class Warnings:
             if not warnings:
                 await ctx.send(embed=embeds.InternalErrorEmbed())
                 self.bot.logger.warning(
-                    f'Error trying to warn user: {e}')
+                    f'No warnings lmao')
             local_embed = embeds.WarningListEmbed(member, warnings)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
-            self.bot.logger.warning(f'Error trying to warn user: {e}')
+            self.bot.logger.warning(f'Error trying to get user warnings: {e}')
