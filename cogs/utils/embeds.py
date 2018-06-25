@@ -423,7 +423,7 @@ class WarningAddEmbed(discord.Embed):
             description=local_desc,
             )
         self.set_footer(
-            text=f'This is warning number {infraction_count+1} for {warned_user.name})
+            text=f'This is warning number {infraction_count+1} for {warned_user.name}')
 
 class WarningListEmbed(discord.Embed):
     """
