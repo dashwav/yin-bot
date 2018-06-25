@@ -86,7 +86,7 @@ class Owner():
             for key, server_s in self.bot.server_settings.items():
                 current_s += f'{key}\n'
             for server in wrong_guilds:
-                wrong_s += 'server.id\n'
+                wrong_s += f'{server.id}\n'
             local_embed.add_field(name='current_servers', value=current_s)
             local_embed.add_field(name='wrong_servers', value=wrong_s)
             await ctx.send(embed=local_embed)
