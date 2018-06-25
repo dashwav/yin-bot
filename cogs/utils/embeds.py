@@ -423,7 +423,7 @@ class WarningAddEmbed(discord.Embed):
             description=local_desc,
             )
         self.set_footer(
-            text=f'This warning number {infraction_count} for {warned_user.name}\'s')
+            text=f'This is warning number {infraction_count+1} for {warned_user.name})
 
 class WarningListEmbed(discord.Embed):
     """
@@ -448,16 +448,16 @@ class WarningListEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
-        logger.info(string_list)
-        for index, string in enumerate(string_list):
-            if index == 0:
-                self.add_field(
-                    name='Infractions:',
-                    value=string
-                )
-            else:
-                self.add_field(
-                        name='Infractions:(cont)',
+        if string_list[0] != '':
+            for index, string in enumerate(string_list):
+                if index == 0:
+                    self.add_field(
+                        name='Infractions:',
                         value=string
                     )
+                else:
+                    self.add_field(
+                            name='Infractions:(cont)',
+                            value=string
+                        )
         self.set_footer(text=return_current_time())
