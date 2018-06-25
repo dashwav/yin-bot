@@ -204,6 +204,21 @@ class PostgresController():
                 }
         return prefix_dict
 
+    async def get_server(self, server_id: int, logger):
+        """
+        Returns all server settings
+        :param server_id: server to find info on
+        """
+        sql = """
+        SELECT * FROM {}.servers
+        WHERE serverid = $1
+        """.format(self.schema)
+        try:
+            return await self.fetchrow(sql, server_id)
+        except:
+            logger.warning(f'Error getting server settings {e}')
+            return False
+
     async def add_whitelist_word(self, guild_id: int, word: str):
         """
         Adds a word that is allowed on the whitelist channels
@@ -877,7 +892,7 @@ class PostgresController():
         SELECT COUNT(userid) FROM {}.warnings
         WHERE serverid = $1 AND userid = $2;
         """.format(self.schema)
-        return await self.poll.fetchval(sql, guild_id, user_id)
+        return await self.pool.fetchval(sql, guild_id, user_id)
 
     async def add_warning(
         self, guild_id: int, user_id: str, reason: str, major: bool, logger):
