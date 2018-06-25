@@ -431,7 +431,7 @@ class WarningListEmbed(discord.Embed):
     """
     def __init__(self, warned_user: discord.Member, infractions: list):
         
-        local_title = f'**{channel_user.name}#{channel_user.discriminator}**\'s infractions'
+        local_title = f'**{warned_user.name}#{warned_user.discriminator}**\'s infractions'
         local_desc = f'' if infractions else f'User has no warnings'
         warning_string = ''
         string_list = []
