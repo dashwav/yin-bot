@@ -90,6 +90,7 @@ class BanEmbed(discord.Embed):
             )
         self.set_footer(text=return_current_time())
 
+
 class ModerationEmbed(discord.Embed):
     """
     Embed for when a user has been moderated in other ways
