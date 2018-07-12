@@ -67,7 +67,7 @@ class Moderation:
     @commands.command()    
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def logban(self, ctx, member: BannedMember, moderator: discord.Member, *,
+    async def logban(self, ctx, member: BannedMember, *,
                    reason: ActionReason = None):
         """
         Logs a right-click ban to modlog channels
@@ -79,9 +79,35 @@ class Moderation:
                 )
                 if not confirm: 
                     return
-                resp_mod = moderator if moderator else ctx.author
+                resp_mod = ctx.author
                 ban_reason = reason if reason else member.reason
                 local_embed = embeds.BanEmbed(member.user, resp_mod, ban_reason)
+                mod_logs = await self.bot.pg_utils.get_modlogs(
+                        ctx.guild.id)
+                for channel_id in mod_logs:
+                    await (self.bot.get_channel(channel_id)).send(
+                        embed=local_embed)
+            except Exception as e:
+                self.bot.logger.warning(f'Issue posting to mod log: {e}')
+        else:
+            await ctx.send(f'No modlog channels detected', delete_after=3)
+
+    @commands.command()    
+    @checks.has_permissions(ban_members=True)
+    @commands.guild_only()
+    async def moderate(self, ctx, member: discord.Member, *,
+                   reason: ActionReason = None):
+        """
+        Logs a punishment for a user
+        """
+        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+            try:
+                confirm = await helpers.custom_confirm(ctx,
+                    f'```\nUser: {member.user}\nReason: {reason}\n```'
+                )
+                if not confirm: 
+                    return
+                local_embed = embeds.ModerationEmbed(member.user, ctx.author, reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
