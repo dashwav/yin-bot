@@ -65,7 +65,7 @@ class Moderation:
         self.bot = bot
 
     @commands.command()    
-    @checks.is_mod()
+    @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, moderator: discord.Member, *,
                    reason: ActionReason = None):
