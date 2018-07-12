@@ -19,7 +19,7 @@ class Admin:
         """
         Either returns current prefix or sets new one
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
@@ -67,7 +67,7 @@ class Admin:
         """
         Adds or removes a channel to modlog list
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             desc = ''
@@ -279,6 +279,7 @@ class Admin:
             self.bot.logger.warning(f'Issue: {e}')
             local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
+
 
 def setup(bot):
     bot.add_cog(Admin(bot))

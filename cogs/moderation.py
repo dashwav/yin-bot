@@ -5,7 +5,6 @@ kicking/banning users.
 import discord
 from discord.ext import commands
 from .utils import helpers, checks, embeds
-from .utils.enums import Action
 
 
 class MemberID(commands.Converter):
@@ -68,13 +67,14 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, *,
-                   reason: ActionReason = None):
+                     reason: ActionReason = None):
         """
         Logs a right-click ban to modlog channels
         """
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
-                confirm = await helpers.custom_confirm(ctx,
+                confirm = await helpers.custom_confirm(
+                    ctx,
                     f'```\nUser: {member.user}\nReason: {reason}\n```'
                 )
                 if not confirm: 
@@ -96,7 +96,7 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def moderate(self, ctx, member: discord.Member, *,
-                   reason: ActionReason = None):
+                       reason: ActionReason = None):
         """
         Logs a punishment for a user
         """

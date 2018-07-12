@@ -2,7 +2,6 @@
 This cog will handle logging all server actions to a specific channel
 """
 import discord
-import asyncio
 from discord.ext import commands
 from .utils import checks
 from .utils import embeds
@@ -22,7 +21,7 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             desc = ''
