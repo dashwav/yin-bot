@@ -107,7 +107,7 @@ class Moderation:
                 )
                 if not confirm: 
                     return
-                local_embed = embeds.ModerationEmbed(member.user, ctx.author, reason)
+                local_embed = embeds.ModerationEmbed(member, ctx.author, reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
