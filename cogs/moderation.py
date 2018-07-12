@@ -103,7 +103,7 @@ class Moderation:
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
                 confirm = await helpers.custom_confirm(ctx,
-                    f'```\nUser: {member.user}\nReason: {reason}\n```'
+                    f'```\nUser: {member}\nReason: {reason}\n```'
                 )
                 if not confirm: 
                     return
