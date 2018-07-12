@@ -77,7 +77,8 @@ class Filter:
                 return
             if message.author.guild_permissions.manage_messages:
                 return
-            regexp = re.compile(r'(discord.gg\/)[a-zA-Z0-9]{0,7}')
+            regexp = re.compile(
+                r'(discord.gg\/)[a-zA-Z0-9]{0,7}|(discordapp.com\/invite\/)[a-zA-Z0-9]{0,7}')
             if bool(regexp.search(message.content)):
                 await message.delete()
         except AttributeError:
