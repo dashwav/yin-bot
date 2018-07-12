@@ -74,7 +74,7 @@ class KickEmbed(discord.Embed):
 
 class BanEmbed(discord.Embed):
     """
-    Embed for when a user has been kicked
+    Embed for when a user has been banned
     """
     def __init__(self, banned_user: discord.Member,
                  resp_mod: discord.Member, reason: str):
@@ -85,6 +85,24 @@ class BanEmbed(discord.Embed):
         local_desc = f'Reason: {reason}'
         super().__init__(
             color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(text=return_current_time())
+
+class ModerationEmbed(discord.Embed):
+    """
+    Embed for when a user has been moderated in other ways
+    """
+    def __init__(self, moderated_user: discord.Member,
+                 resp_mod: discord.Member, reason: str):
+        """
+        Init class for embed
+        """
+        local_title = f'{moderated_user.name} was moderated by {resp_mod}'
+        local_desc = f'Reason: {reason}'
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
             title=local_title,
             description=local_desc,
             )
