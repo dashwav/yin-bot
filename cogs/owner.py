@@ -78,7 +78,7 @@ class Owner():
         if test:
             local_embed = discord.Embed(
                 name='Discord Server Check',
-                value=f'There are {len(wrong_guilds)} that are not '\
+                value=f'There are {len(wrong_guilds)} that are not '
                       'correctly represented in the database'
             )
             current_s = '----\n'
@@ -93,7 +93,7 @@ class Owner():
             return
         confirm = await helpers.custom_confirm(
             ctx,
-            f'```This will edit {len(wrong_guilds)} in the database.'\
+            f'```This will edit {len(wrong_guilds)} in the database.'
             f'This is an irreversable action, are you sure?```'
         )
         if not confirm:
