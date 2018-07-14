@@ -85,10 +85,20 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (serverid, userid, indexid)
     );"""
 
+    slowchannels = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.slowmode (
+      serverid BIGINT,
+      channelid BIGINT,
+      interval INT,
+      logtime TIMESTAMP DEFAULT current_timestamp
+      PRIMARY KEY (serverid, channelid)
+    );"""
+
     await pool.execute(servers)
     await pool.execute(vplust)
     await pool.execute(warnings)
     await pool.execute(moderation)
+    await pool.execute(slowchannels)
 
 
 class PostgresController():
@@ -159,7 +169,8 @@ class PostgresController():
         """
         sql = """
         INSERT INTO {}.servers VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+        $11, $12, $13, $14, $15, $16, $17)
         ON CONFLICT (serverid)
         DO nothing;
         """.format(self.schema)
@@ -829,7 +840,8 @@ class PostgresController():
         """.format(self.schema)
         await self.pool.execute(sql, value, guild_id)
 
-    async def add_blacklist_channel(self, guild_id: int, channel_id: int, logger):
+    async def add_blacklist_channel(
+            self, guild_id: int, channel_id: int, logger):
         """
         Adds a channel to the blacklist channel array for the server
         :param guild_id: guild to add channel to
@@ -848,7 +860,8 @@ class PostgresController():
             logger.warning(f'Error adding channel to server {guild_id}: {e}')
             return False
 
-    async def rem_blacklist_channel(self, guild_id: int, channel_id: int, logger):
+    async def rem_blacklist_channel(
+            self, guild_id: int, channel_id: int, logger):
         """
         Removes a channel from the blacklist channel array
         :param guild_id: guild to remove modlog channel from
@@ -897,7 +910,8 @@ class PostgresController():
         return await self.pool.fetchval(sql, guild_id, user_id)
 
     async def add_warning(
-        self, guild_id: int, user_id: str, reason: str, major: bool, logger):
+            self, guild_id: int, user_id: str,
+            reason: str, major: bool, logger):
         """
         Takes a userid and string and inserts it into the guild's
         warning log
@@ -961,7 +975,6 @@ class PostgresController():
             logger.warning(f'Error adding mod action to database: {e}')
             return False
 
-
     async def get_all_mod_actions(self, guild_id: int, user_id: int, logger):
         """
         Returns all modActions a user has on a server
@@ -978,3 +991,55 @@ class PostgresController():
             logger.warning(f'Error retrieving warnings {e}')
             return False
 
+    async def add_slowmode_channel(
+            self, server_id: int, channel_id: int, time: int, logger):
+        """
+        Adds a channel to the slowmode db
+        :param server_id: server to add channel for
+        :param channel_id: channel to add
+        :param time: time in seconds to set slowmode for
+        """
+        sql = """
+        INSERT INTO {}.slowmode VALUES ($1, $2, $3);
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, server_id, channel_id, time)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding slowmode channel to database: {e}')
+            return False
+
+    async def rem_slowmode_channel(
+            self, server_id: int, channel_id: int, logger):
+        """
+        Removes a channel from the slowmode db
+        :param server_id: server to add channel for
+        :param channel_id: channel to add
+        """
+        sql = """
+        DELETE FROM {}.slowmode
+        WHERE server_id = $1 AND channel_id = $2;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, server_id, channel_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error removing slowmode channel to database: {e}')
+            return False
+
+    async def get_slowmode_channels(self, logger):
+        """
+        Returns all slowmode channels
+        """
+        sql = """
+        SELECT * FROM {}.slowmode;
+        """.format(self.schema)
+        try:
+            ret_channels = {}
+            channels = await self.pool.fetch(sql)
+            for channel in channels:
+                ret_channels[channel['channelid']] = channel['interval']
+            return ret_channels
+        except Exception as e:
+            logger.warning(f'Error retrieving slowmode channels {e}')
+            return False
