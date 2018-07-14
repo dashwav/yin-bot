@@ -63,7 +63,7 @@ class Moderation:
         super().__init__()
         self.bot = bot
 
-    @commands.command()    
+    @commands.command()
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, *,
@@ -77,11 +77,12 @@ class Moderation:
                     ctx,
                     f'```\nUser: {member.user}\nReason: {reason}\n```'
                 )
-                if not confirm: 
+                if not confirm:
                     return
                 resp_mod = ctx.author
                 ban_reason = reason if reason else member.reason
-                local_embed = embeds.BanEmbed(member.user, resp_mod, ban_reason)
+                local_embed = embeds.BanEmbed(
+                    member.user, resp_mod, ban_reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
@@ -92,7 +93,7 @@ class Moderation:
         else:
             await ctx.send(f'No modlog channels detected', delete_after=3)
 
-    @commands.command()    
+    @commands.command()
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def moderate(self, ctx, member: discord.Member, *,
@@ -102,12 +103,14 @@ class Moderation:
         """
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
-                confirm = await helpers.custom_confirm(ctx,
+                confirm = await helpers.custom_confirm(
+                    ctx,
                     f'```\nUser: {member}\nReason: {reason}\n```'
                 )
-                if not confirm: 
+                if not confirm:
                     return
-                local_embed = embeds.ModerationEmbed(member, ctx.author, reason)
+                local_embed = embeds.ModerationEmbed(
+                    member, ctx.author, reason)
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
@@ -126,7 +129,7 @@ class Moderation:
         Ban/kick footer command. If no subcommand is
         invoked, it will return the current ban/kick footer
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         ban_footer = await self.bot.pg_utils.get_ban_footer(
             ctx.guild.id,
@@ -136,7 +139,8 @@ class Moderation:
             ctx.guild.id,
             self.bot.logger
         )
-        footer_msg = f'**Ban Footer**:\n\n{ban_footer}\n\n**Kick Footer:**\n\n{kick_footer}'
+        footer_msg = f'**Ban Footer**:\n\n{ban_footer}\n\n'\
+                     f'**Kick Footer:**\n\n{kick_footer}'
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Current welcome message: ',
@@ -222,7 +226,7 @@ class Moderation:
         """
         Purges a set number of messages.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         deleted = []
         try:
@@ -259,7 +263,7 @@ class Moderation:
         """
         Kicks a user.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if reason is None:
                 await ctx.send(
@@ -268,7 +272,8 @@ class Moderation:
                 return
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = await self.create_embed('Kick', ctx.guild, ctx.guild.id, reason)
+            embed = await self.create_embed(
+                'Kick', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
@@ -301,7 +306,7 @@ class Moderation:
         """
         Bans a user.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if reason is None:
                 await ctx.send(
@@ -311,7 +316,8 @@ class Moderation:
         member = await self.bot.get_user_info(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
-            embed = await self.create_embed('Ban', ctx.guild, ctx.guild.id, reason)
+            embed = await self.create_embed(
+                'Ban', ctx.guild, ctx.guild.id, reason)
             try:
                 try:
                     await member.create_dm()
@@ -347,7 +353,7 @@ class Moderation:
         """
         Unbans a user.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if reason is None:
                 await ctx.send(
@@ -368,7 +374,8 @@ class Moderation:
             self.bot.logger.info(f'Successfully unbanning {member}')
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
-                    local_embed = embeds.UnBanEmbed(member.user, ctx.author, reason)
+                    local_embed = embeds.UnBanEmbed(
+                        member.user, ctx.author, reason)
                     mod_logs = await self.bot.pg_utils.get_modlogs(
                             ctx.guild.id)
                     for channel_id in mod_logs:
@@ -381,7 +388,8 @@ class Moderation:
 
     async def create_embed(self, command_type, server_name, server_id, reason):
         try:
-            embed = discord.Embed(title=f'❗ {command_type} Reason ❗', type='rich')
+            embed = discord.Embed(
+                title=f'❗ {command_type} Reason ❗', type='rich')
             footer = 'This is an automated message'
             if command_type.lower() == 'ban':
                 command_type = 'bann'
@@ -400,8 +408,8 @@ class Moderation:
             embed.set_footer(text=footer)
             return embed
         except Exception as e:
-            self.bot.logger.warning(f'Error creating embed for {command_type.lower()}: {e}')
-        
+            self.bot.logger.warning(
+                f'Error creating embed for {command_type.lower()}: {e}')
 
 
 def setup(bot):
