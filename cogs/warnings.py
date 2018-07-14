@@ -5,7 +5,7 @@ Loosely (moreso in some places) based off of Mee6's warning
 import discord
 from discord.ext import commands
 from .utils import checks, embeds
-from datetime import datetime, timedelta
+
 
 class Warnings:
     def __init__(self, bot):
@@ -19,12 +19,13 @@ class Warnings:
         """
         Base command for warning system
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Command Error',
-                description=f"Please use either `.warn minor` or `.warn major`",
+                description=f"Please use either"
+                            f"`.warn minor` or `.warn major`",
                 color=0x419400
             )
             await ctx.send(embed=local_embed, delete_after=5)
@@ -101,7 +102,7 @@ class Warnings:
         """
         Returns all the warnings a user has gotten
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         try:
             warnings = None
@@ -110,10 +111,11 @@ class Warnings:
                 member.id,
                 self.bot.logger)
             self.bot.logger.info(warnings)
-            if warnings == None:
+            if warnings is None:
                 self.bot.logger.warning(
                     f'No warnings lmao')
-            local_embed = embeds.WarningListEmbed(member, warnings, self.bot.logger)
+            local_embed = embeds.WarningListEmbed(
+                member, warnings, self.bot.logger)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
