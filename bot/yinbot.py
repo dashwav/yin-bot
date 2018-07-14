@@ -67,9 +67,13 @@ class Yinbot(Bot):
     async def on_ready(self):
         try:
             self.server_settings = {}
+            self.slow_channels = {}
             self.server_settings = \
                 await self.pg_utils.get_server_settings()
-            self.logger.info(f'{self.server_settings}')
+            self.slow_channels = \
+                await self.pg_utils.get_slowmode_channels(self.logger)
+            self.logger.info(f'Servers: {len(self.server_settings)}\n'
+                             f'Slowmode Channels: {len(self.slow_channels)}\n')
         except Exception as e:
             self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):
