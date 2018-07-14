@@ -128,6 +128,7 @@ class LogBanEmbed(discord.Embed):
             )
         self.set_footer(text=return_current_time())
 
+
 class UnBanEmbed(discord.Embed):
     """
     Embed for when a user has been kicked
@@ -424,7 +425,8 @@ class VoiceChannelMoveEmbed(discord.Embed):
             description=local_desc,
             )
         self.set_footer(text=return_current_time())
-    
+
+
 class WarningAddEmbed(discord.Embed):
     """
     Embed for when someone gets warned
@@ -442,21 +444,25 @@ class WarningAddEmbed(discord.Embed):
             description=local_desc,
             )
         self.set_footer(
-            text=f'This is warning number {infraction_count+1} for {warned_user.name}')
+            text=f'This is warning number {infraction_count+1}'
+                 f' for {warned_user.name}')
+
 
 class WarningListEmbed(discord.Embed):
     """
     Embed that lists all a users infractions
     """
     def __init__(self, warned_user: discord.Member, infractions: list, logger):
-        
-        local_title = f'**{warned_user.name}#{warned_user.discriminator}**\'s infractions'
+
+        local_title = f'**{warned_user.name}#{warned_user.discriminator}'\
+                      f'**\'s infractions'
         local_desc = f'' if infractions else f'User has no warnings'
         warning_string = ''
         string_list = []
         for index, warning in enumerate(infractions):
             level = 'MAJOR' if warning['major'] else 'MINOR'
-            tmp_warning_string = f'**{index+1}.** ({level}) {warning["reason"]}\n'
+            tmp_warning_string = f'**{index+1}.** ({level})'\
+                                 f' {warning["reason"]}\n'
             if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string
