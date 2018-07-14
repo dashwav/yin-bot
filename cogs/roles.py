@@ -3,10 +3,8 @@ Handling the auto assignable roles and such
 """
 
 import discord
-from discord import AuditLogAction
 from discord.ext import commands
 from .utils import checks, embeds
-from datetime import datetime, timedelta
 
 
 class Roles():
@@ -29,7 +27,7 @@ class Roles():
         """
         (Testing) Removes all members from a certain role
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         found_role = None
         for role in ctx.guild.roles:
@@ -40,7 +38,7 @@ class Roles():
                 title='Couldn\'t find role',
                 description=f'Couldn\'t find the given role to remove',
                 color=0x419400
-	    ))
+            ))
             return
         count = 0
         for user in found_role.members:
@@ -53,9 +51,10 @@ class Roles():
                 self.bot.logger.warning(f'Issue cleaning role: {e}')
         await ctx.send(embed=discord.Embed(
             title='Role cleaned:',
-            description=f'Successfully removed {count} users from {found_role.name}',
+            description=f'Successfully removed {count} '
+                        f'users from {found_role.name}',
             color=0x419400
-	))
+        ))
 
     @commands.command()
     @commands.guild_only()
@@ -63,7 +62,7 @@ class Roles():
         """
         Adds self-assignable role to user
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
@@ -108,13 +107,13 @@ class Roles():
         """
         Removes self-assignable role from user
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
-                found_role1= role
+                found_role1 = role
         if not found_role1:
             return
         for role in users_roles:
@@ -150,7 +149,7 @@ class Roles():
         """
         manages servers assignable roles
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             message = ' \n'
