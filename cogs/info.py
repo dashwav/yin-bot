@@ -36,7 +36,7 @@ class Info():
         """
         Links support server
         """
-        await ctx.send(embed=embeds.SupportEmbed)
+        await ctx.send(embed=embeds.SupportEmbed())
 
     @commands.command()
     async def stats(self, ctx):
