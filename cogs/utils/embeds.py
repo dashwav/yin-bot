@@ -499,7 +499,7 @@ class WarningListEmbed(discord.Embed):
         string_list = []
         for index, warning in enumerate(infractions):
             level = 'MAJOR' if warning['major'] else 'MINOR'
-            date = warning['logtime'].strftime('%b %d %Y')
+            date = warning['logtime'].strftime('%b %d %Y %H:%M')
             tmp_warning_string = f'**{index+1}.** ({level})'\
                                  f' {warning["reason"]} '\
                                  f'[{date}]\n'
