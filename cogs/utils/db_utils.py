@@ -90,7 +90,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT,
       channelid BIGINT,
       interval INT,
-      logtime TIMESTAMP DEFAULT current_timestamp
+      logtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (serverid, channelid)
     );"""
 

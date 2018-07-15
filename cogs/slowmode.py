@@ -6,7 +6,6 @@ import discord
 import asyncio
 from discord.ext import commands
 from .utils import checks, embeds
-from datetime import datetime, timedelta
 
 
 class Slowmode():
@@ -21,7 +20,7 @@ class Slowmode():
         try:
             if message.channel.id not in self.bot.slow_channels:
                 return
-            if message.author.guild_permissions.manage_messages:
+            if message.author.bot:
                 return
             try:
                 self.bot.loop.create_task(self.slowmode_user(
@@ -57,10 +56,9 @@ class Slowmode():
         except Exception as e:
             self.bot.logger.warning(f'{e}')
 
-
     @commands.group()
     @commands.guild_only()
-    @checks.is_admin()
+    @checks.has_permissions(manage_messages=True)
     async def slowmode(self, ctx):
         """
         Adds or removes a channel to slowmode list
@@ -70,7 +68,7 @@ class Slowmode():
         if ctx.invoked_subcommand is None:
             return
 
-    @slowmode.command(aliases=['add'])
+    @slowmode.command(aliases=['add'], name='add_channel')
     async def _add_channel(self, ctx, interval=60):
         """
         Adds channel to slowmode list
@@ -89,9 +87,9 @@ class Slowmode():
                 added_channels.append(ctx.message.channel.name)
             if added_channels:
                 for channel in added_channels:
-                    desc += f'{channel} \n'
+                    desc += f'{channel} timeout: {interval} seconds.\n'
                 local_embed = discord.Embed(
-                    title=f'Channels added to slowmode list:',
+                    title=f'Channel added to slowmode list:',
                     description=desc,
                     color=0x419400
                 )
@@ -105,8 +103,8 @@ class Slowmode():
             local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
 
-    @slowmode.command(aliases=['rem', 'remove'])
-    async def _remove_channel(self, ctx):
+    @slowmode.command(aliases=['rem', 'remove'], name='rem_channel')
+    async def __remove_channel(self, ctx):
         """
         Removes a channel from the slowmode list
         """
