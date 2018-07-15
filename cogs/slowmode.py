@@ -43,7 +43,7 @@ class Slowmode():
         removes a users perms on a channel
         """
         try:
-            await channel.set_permissions(user, send_messages=False)
+            await channel.set_permissions(user, overwrite=None)
         except Exception as e:
             self.bot.logger.warning(f'{e}')
 
