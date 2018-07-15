@@ -95,7 +95,6 @@ class Slowmode():
                 )
                 self.bot.slow_channels[ctx.message.channel.id] = interval
             else:
-                self.bot.logger.info(f'slktjsaj')
                 local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
         except Exception as e:
@@ -103,7 +102,7 @@ class Slowmode():
             local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
 
-    @slowmode.command(aliases=['rem', 'remove'], name='rem_channel')
+    @slowmode.command(aliases=['rem', 'remove', 'end'], name='rem_channel')
     async def __remove_channel(self, ctx):
         """
         Removes a channel from the slowmode list
@@ -152,11 +151,7 @@ class Slowmode():
                     color=0x651111
                 )
             else:
-                local_embed = discord.Embed(
-                    title=f'Internal error, please contact @dashwav#7785',
-                    description=' ',
-                    color=0x651111
-                )
+                local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
         except Exception as e:
             self.bot.logger.warning(f'Issue: {e}')

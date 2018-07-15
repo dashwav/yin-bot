@@ -33,11 +33,14 @@ class InternalErrorEmbed(discord.Embed):
     Embed for when it isn't the users fault
     """
     def __init__(self):
-        local_title = f'Internal error contact @dashwav#7785'
+        local_title = f'Internal error!'
+        local_desc = f'Contact <@164546159140929538>'\
+                     f' or [Click here]({DISCORD}) to join '\
+                     f'<@369362004458078208>\'s support server!'
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
-            description=' '
+            description=local_desc
         )
         self.set_footer(text=return_current_time())
 
