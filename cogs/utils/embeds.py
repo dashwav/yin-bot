@@ -496,9 +496,10 @@ class WarningListEmbed(discord.Embed):
         string_list = []
         for index, warning in enumerate(infractions):
             level = 'MAJOR' if warning['major'] else 'MINOR'
+            date = warning['logtime'].strftime('%b %d %Y')
             tmp_warning_string = f'**{index+1}.** ({level})'\
                                  f' {warning["reason"]} '\
-                                 f'[{warning["logtime"]}]\n'
+                                 f'[{date}]\n'
             if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string
