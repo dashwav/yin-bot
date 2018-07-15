@@ -1018,7 +1018,7 @@ class PostgresController():
         """
         sql = """
         DELETE FROM {}.slowmode
-        WHERE server_id = $1 AND channel_id = $2;
+        WHERE serverid = $1 AND channelid = $2;
         """.format(self.schema)
         try:
             await self.pool.execute(sql, server_id, channel_id)
