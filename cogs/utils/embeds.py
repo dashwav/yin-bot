@@ -14,6 +14,11 @@ EDITEDCOLOR = 0x00E4C9
 USEREDITCOLOR = 0xe9e6c2
 ROLECOLOR = 0x800080
 
+INVITE = 'https://discordapp.com/oauth2/authorize?'\
+         'client_id=369362004458078208&scope=bot&permissions=268528894'
+
+DISCORD = 'https://discordapp.com/invite/svU3Mdd'
+
 
 def return_current_time():
     """
@@ -33,6 +38,36 @@ class InternalErrorEmbed(discord.Embed):
             color=NEGATIVECOLOR,
             title=local_title,
             description=' '
+        )
+        self.set_footer(text=return_current_time())
+
+
+class InviteEmbed(discord.Embed):
+    """
+    Embed that contains link to invite
+    """
+    def __init__(self):
+        local_title = f'Invite link'
+        super().__init__(
+            color=POSITIVECOLOR,
+            title=local_title,
+            description=f'[Click here]({INVITE}) to invite '
+                        f'<@369362004458078208> to your server!'
+        )
+        self.set_footer(text=return_current_time())
+
+
+class SupportEmbed(discord.Embed):
+    """
+    Embed that contains link to invite
+    """
+    def __init__(self):
+        local_title = f'Invite link'
+        super().__init__(
+            color=POSITIVECOLOR,
+            title=local_title,
+            description=f'[Click here]({DISCORD}) to join '
+                        f'<@369362004458078208>\'s support server!'
         )
         self.set_footer(text=return_current_time())
 
@@ -462,7 +497,8 @@ class WarningListEmbed(discord.Embed):
         for index, warning in enumerate(infractions):
             level = 'MAJOR' if warning['major'] else 'MINOR'
             tmp_warning_string = f'**{index+1}.** ({level})'\
-                                 f' {warning["reason"]}\n'
+                                 f' {warning["reason"]} '\
+                                 f'[{warning["logtime"]}]\n'
             if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
                 warning_string = tmp_warning_string

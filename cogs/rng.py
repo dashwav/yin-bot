@@ -3,6 +3,7 @@ import random as rng
 from .utils import checks
 import discord
 
+
 class RNG():
 
     def __init__(self, bot):
@@ -32,7 +33,8 @@ class RNG():
     async def random(self, ctx):
         """Displays a random thing you request."""
         if ctx.invoked_subcommand is None:
-            await ctx.send(f'Incorrect random subcommand passed. Try {ctx.prefix}help random')
+            await ctx.send(f'Incorrect random subcommand passed. Try '
+                           f'{ctx.prefix}help random')
 
     @random.command()
     async def number(self, ctx, minimum=0, maximum=100):
@@ -40,7 +42,7 @@ class RNG():
         The minimum must be smaller than the maximum and the maximum number
         accepted is 1000.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         maximum = min(maximum, 1000)
         if minimum >= maximum:
@@ -54,12 +56,11 @@ class RNG():
         """Chooses between multiple choices.
         To denote multiple choices, you should use double quotes.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         choices = text.split(';')
         if len(choices) < 2:
             return await ctx.send('Not enough choices to pick from.')
-        
         choice = rng.choice(choices)
         local_embed = discord.Embed(
             title=f' ',
@@ -73,17 +74,19 @@ class RNG():
         """
         Uses magic to determine the answer to a question
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if not question:
             return
         answer = rng.choice(self.answers)
         local_embed = discord.Embed(
             title=f' ',
-            description=f'**❓ Question**\n\n{question}\n\n:8ball: **8ball**\n\n{answer}',
+            description=f'**❓ Question**\n\n{question}\n\n:'
+                        f'8ball: **8ball**\n\n{answer}',
             color=0x419400
         )
         await ctx.send(embed=local_embed)
-        
+
+
 def setup(bot):
     bot.add_cog(RNG(bot))

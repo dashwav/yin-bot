@@ -149,7 +149,7 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
+        if not await checks.is_channel_blacklisted(self, ctx):
             return
         if ctx.invoked_subcommand is None:
             desc = ''
