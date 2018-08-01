@@ -78,6 +78,7 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {schema}.moderation (
       serverid BIGINT,
       userid BIGINT,
+      indexid INT,
       moderatorid BIGINT,
       ban BOOLEAN,
       reason text,
