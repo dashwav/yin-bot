@@ -192,9 +192,9 @@ class PostgresController():
             [],
             [],
             [],
-            datetime.datetime.now(),
             f'This is an automated message',
             f'This is an automated message',
+            datetime.datetime.now()
             )
 
     async def get_server_settings(self):
