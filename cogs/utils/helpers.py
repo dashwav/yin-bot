@@ -61,7 +61,7 @@ def create_confirm_embed(ctx, server_name, member_to_kick, reason):
         embed = discord.Embed(
             title=f'❗ Confirmation Request ❗',
             type='rich')
-        embed.description = f'\nYou are attempting to {ctx.command}'\
+        embed.description = f'\nYou are attempting to {ctx.command} '\
                             f'**{member_to_kick}** from **{server_name}**'\
                             f'\n```{str(ctx.command).title()} '\
                             f'reason:\n\n{reason}```'\
