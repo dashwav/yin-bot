@@ -47,7 +47,7 @@ class InternalErrorEmbed(discord.Embed):
 
 class InviteEmbed(discord.Embed):
     """
-    Embed that contains link to invite
+    Embed that contains link to invite yin elsewhere
     """
     def __init__(self):
         local_title = f'Invite link'
@@ -62,7 +62,7 @@ class InviteEmbed(discord.Embed):
 
 class SupportEmbed(discord.Embed):
     """
-    Embed that contains link to invite
+    Embed that contains link to yin's support server
     """
     def __init__(self):
         local_title = f'Invite link'
@@ -150,7 +150,7 @@ class ModerationEmbed(discord.Embed):
 
 class LogBanEmbed(discord.Embed):
     """
-    Embed for when a user joins the server
+    Embed for when a moderator logs a ban that has already occurred
     """
     def __init__(self, leaving_user: discord.Member):
         """
@@ -169,7 +169,7 @@ class LogBanEmbed(discord.Embed):
 
 class UnBanEmbed(discord.Embed):
     """
-    Embed for when a user has been kicked
+    Embed for when a user has their ban revoked
     """
     def __init__(self, unbanned_user: discord.Member,
                  resp_mod: discord.Member, reason: str):
@@ -208,7 +208,7 @@ class JoinEmbed(discord.Embed):
 
 class LeaveEmbed(discord.Embed):
     """
-    Embed for when a user joins the server
+    Embed for when a user leaves the server
     """
     def __init__(self, leaving_user: discord.Member):
         """
@@ -228,7 +228,7 @@ class LeaveEmbed(discord.Embed):
 
 class UsernameUpdateEmbed(discord.Embed):
     """
-    Embed for when a user edits their profile
+    Embed for when a user changes their username
     """
     def __init__(self, updated_user: discord.Member,
                  old_name: str, new_name: str):
@@ -249,7 +249,7 @@ class UsernameUpdateEmbed(discord.Embed):
 
 class RoleAddEmbed(discord.Embed):
     """
-    Embed for when a user's role is updated
+    Embed for when a user has a role added
     """
     def __init__(self, updated_user: discord.Member,
                  role_name: str):
@@ -270,7 +270,7 @@ class RoleAddEmbed(discord.Embed):
 
 class RoleRemoveEmbed(discord.Embed):
     """
-    Embed for when a user's role is updated
+    Embed for when a user has a role removed
     """
     def __init__(self, updated_user: discord.Member,
                  role_name: str):
@@ -291,7 +291,7 @@ class RoleRemoveEmbed(discord.Embed):
 
 class MessageEditEmbed(discord.Embed):
     """
-    Embed for when a user updates their message
+    Embed for when a user edits their message
     """
     def __init__(self, message_user: discord.Member,
                  channel_name, old_message, new_message):
@@ -313,7 +313,7 @@ class MessageEditEmbed(discord.Embed):
 
 class MessageDeleteEmbed(discord.Embed):
     """
-    Embed for when a user updates their message
+    Embed for when a user deletes a message
     """
     def __init__(self, message_user: discord.Member,
                  channel_name, old_message):
@@ -350,7 +350,7 @@ class SelfRoleAddedEmbed(discord.Embed):
 
 class SelfRoleRemovedEmbed(discord.Embed):
     """
-    Embed for when a role is added
+    Embed for when a user removes a self assignable role
     """
     def __init__(self, message_user, role_name):
         local_title = f'Role Removed'
@@ -366,7 +366,7 @@ class SelfRoleRemovedEmbed(discord.Embed):
 
 class SelfRoleNotAssignableEmbed(discord.Embed):
     """
-    Embed for when a role can't be assigned
+    Embed for when a user requests a role that can't be self assigned
     """
     def __init__(self, role_name):
         local_title = f'Role Not Added'
@@ -381,7 +381,7 @@ class SelfRoleNotAssignableEmbed(discord.Embed):
 
 class RoleNotFoundEmbed(discord.Embed):
     """
-    Embed for not found role
+    Embed for when a user requests a role that doesn't exist
     """
     def __init__(self, role_name):
         local_title = f' '
@@ -396,7 +396,7 @@ class RoleNotFoundEmbed(discord.Embed):
 
 class RoleDuplicateUserEmbed(discord.Embed):
     """
-    Embed for already has role
+    Embed for when a user requests a role they already have
     """
     def __init__(self, message_user, role_name):
         local_desc = f'{message_user.mention}, you already have the '\
@@ -411,7 +411,7 @@ class RoleDuplicateUserEmbed(discord.Embed):
 
 class RoleNotRemovedEmbed(discord.Embed):
     """
-    Embed for when people already have no role
+    Embed for when a user requests to remove a role they don't have
     """
     def __init__(self, message_user, role_name):
         local_desc = f'{message_user.mention}, you already don\'t'\
@@ -426,7 +426,7 @@ class RoleNotRemovedEmbed(discord.Embed):
 
 class VoiceChannelStateEmbed(discord.Embed):
     """
-    Embed for voice channel update
+    Embed for user joined/left voice channel update
     """
     def __init__(self, channel_user: discord.Member,
                  channel_name, action):
@@ -446,7 +446,7 @@ class VoiceChannelStateEmbed(discord.Embed):
 
 class VoiceChannelMoveEmbed(discord.Embed):
     """
-    Embed for voice channel update
+    Embed for user moved voice channel update
     """
     def __init__(self, channel_user: discord.Member,
                  before_channel, after_channel):
