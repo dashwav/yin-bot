@@ -356,7 +356,7 @@ class Logging():
             if before in guild.members:
                 user_mutuals.append(guild.id)
         extended_channels = []
-        for guild in user_mutuals:
+        for guild_id in user_mutuals:
             extended_channels.extend = \
                 await self.bot.pg_utils.get_logger_channels(
                     guild_id)
