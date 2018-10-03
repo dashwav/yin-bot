@@ -408,7 +408,7 @@ class Moderation:
             if not custom_footer == footer:
                 embed.add_field(name='Reason:', value=reason
                                f'\n\n{custom_footer})
-            else
+            else:
                 embed.add_field(name='Reason:', value=reason)
             embed.set_footer(text=footer)
             return embed
