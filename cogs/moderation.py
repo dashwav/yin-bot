@@ -405,9 +405,11 @@ class Moderation:
                 command_type = 'unbann'
             embed.description = f'\nYou were {command_type.lower()}ed '\
                                 f'from **{server_name}**.'
-            embed.add_field(name='Reason:', value=reason)
             if not custom_footer == footer:
-                embed.add_field(name='', value=custom_footer)
+                embed.add_field(name='Reason:', value=reason
+                               f'\n\n{custom_footer})
+            else
+                embed.add_field(name='Reason:', value=reason)
             embed.set_footer(text=footer)
             return embed
         except Exception as e:
