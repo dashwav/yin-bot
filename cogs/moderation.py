@@ -391,20 +391,25 @@ class Moderation:
             embed = discord.Embed(
                 title=f'❗ {command_type} Reason ❗', type='rich')
             footer = 'This is an automated message'
+            custom_footer = footer
             if command_type.lower() == 'ban':
                 command_type = 'bann'
-                footer = await self.bot.pg_utils.get_ban_footer(
+                custom_footer = await self.bot.pg_utils.get_ban_footer(
                     server_id,
                     self.bot.logger)
             elif command_type.lower() == 'kick':
-                footer = await self.bot.pg_utils.get_kick_footer(
+                custom_footer = await self.bot.pg_utils.get_kick_footer(
                     server_id,
                     self.bot.logger)
             elif command_type.lower() == 'unban':
                 command_type = 'unbann'
             embed.description = f'\nYou were {command_type.lower()}ed '\
                                 f'from **{server_name}**.'
-            embed.add_field(name='Reason:', value=reason)
+            if custom_footer != footer:
+                embed.add_field(name='Reason:', value=reason+\
+                               f'\n\n{custom_footer})
+            else:
+                embed.add_field(name='Reason:', value=reason)
             embed.set_footer(text=footer)
             return embed
         except Exception as e:
