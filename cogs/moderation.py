@@ -171,10 +171,9 @@ class Moderation:
                 f'%user%', ctx.message.author.mention)
             local_embed = discord.Embed(
                 title=f'Footer message set:',
-                description=f'**Preview:**',
+                description=f'**Preview:**\n{desc}',
                 color=0x419400
             )
-            local_embed.set_footer(text=desc)
         else:
             local_embed = discord.Embed(
                 title=f'Internal error occured, please contact @dashwav#7785',
@@ -207,10 +206,9 @@ class Moderation:
                 f'%user%', ctx.message.author.mention)
             local_embed = discord.Embed(
                 title=f'Footer message set:',
-                description=f'**Preview:**',
+                description=f'**Preview:**\n{desc}',
                 color=0x419400
             )
-            local_embed.set_footer(text=desc)
         else:
             local_embed = discord.Embed(
                 title=f'Internal error occured, please contact @dashwav#7785',
