@@ -5,6 +5,7 @@ kicking/banning users.
 import discord
 from discord.ext import commands
 from .utils import helpers, checks, embeds
+import re
 
 
 class MemberID(commands.Converter):
@@ -30,12 +31,17 @@ class MemberID(commands.Converter):
 
 class BannedMember(commands.Converter):
     async def convert(self, ctx, argument):
+        # check if argument is # or <@#>
         ban_list = await ctx.guild.bans()
-        try:
-            member_id = int(argument, base=10)
+        match = re.match(r'<@!?([0-9]+)>$', argument)
+
+        if match is None: # If not <@#>
+            match = re.match(r'!?([0-9]+)$', argument)
+        if match is not None:
+            member_id = int(match.group(1), base=10)
             entity = discord.utils.find(
                 lambda u: u.user.id == member_id, ban_list)
-        except ValueError:
+        else:
             entity = discord.utils.find(
                 lambda u: str(u.user) == argument, ban_list)
 
