@@ -415,8 +415,8 @@ class Moderation:
             embed.description = f'\nYou were {command_type.lower()}ed '\
                                 f'from **{server_name}**.'
             if custom_footer != footer:
-                embed.add_field(name='Reason:', value=reason+\
-                               f'\n\n{custom_footer}')
+                embed.add_field(name='Reason:', value=reason +
+                                f'\n\n{custom_footer}')
             else:
                 embed.add_field(name='Reason:', value=reason)
             embed.set_footer(text=footer)
