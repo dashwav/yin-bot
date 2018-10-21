@@ -45,6 +45,22 @@ class InternalErrorEmbed(discord.Embed):
         self.set_footer(text=return_current_time())
 
 
+class LogbanErrorEmbed(discord.Embed):
+    """
+    Embed for when it is the users fault
+    """
+    def __init__(self):
+        local_title = f'Incorrect User!'
+        local_desc = f'The user that was passed in '\
+                     f'hasn\'t been banned or does not exist!'
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc
+        )
+        self.set_footer(text=return_current_time())
+
+
 class InviteEmbed(discord.Embed):
     """
     Embed that contains link to invite yin elsewhere
