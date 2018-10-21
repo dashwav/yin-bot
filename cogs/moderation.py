@@ -34,16 +34,13 @@ class BannedMember(commands.Converter):
         # check if argument is # or <@#>
         ban_list = await ctx.guild.bans()
         match = re.match(r'<@!?([0-9]+)>$', argument)
-
-        if match is None: # If not <@#>
+        entity = None
+        if match is None:  # If not <@#>
             match = re.match(r'!?([0-9]+)$', argument)
         if match is not None:
             member_id = int(match.group(1), base=10)
             entity = discord.utils.find(
                 lambda u: u.user.id == member_id, ban_list)
-        else:
-            entity = discord.utils.find(
-                lambda u: str(u.user) == argument, ban_list)
 
         if entity is None:
             raise commands.BadArgument("Not a valid previously-banned member.")
@@ -98,6 +95,14 @@ class Moderation:
                 self.bot.logger.warning(f'Issue posting to mod log: {e}')
         else:
             await ctx.send(f'No modlog channels detected', delete_after=3)
+
+    @logban.error
+    async def logban_error(self, ctx, error):
+        self.bot.logger.warning(f'Banned_user argument not found in ban list.')
+        await ctx.send(
+            embed=embeds.LogbanErrorEmbed(),
+            delete_after=3
+        )
 
     @commands.command()
     @checks.has_permissions(ban_members=True)
