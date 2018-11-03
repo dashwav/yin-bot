@@ -106,16 +106,22 @@ class Warnings:
             return
         try:
             warnings = None
+            moderations = None
             warnings = await self.bot.pg_utils.get_warnings(
                 ctx.guild.id,
                 member.id,
                 self.bot.logger)
-            if warnings is None:
-                self.bot.logger.warning(
-                    f'No warnings lmao')
+            moderations = await self.bot.pg_utils.get_moderation(
+                ctx.guild.id,
+                member.id,
+                self.bot.logger)
             local_embed = embeds.WarningListEmbed(
                 member, warnings, self.bot.logger)
             await ctx.send(embed=local_embed)
+            if moderations:
+                mod_embed = embeds.ModerationListEmbed(
+                    member, moderations, self.bot.logger)
+                await ctx.send(embed=mod_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
             self.bot.logger.warning(f'Error trying to get user warnings: {e}')

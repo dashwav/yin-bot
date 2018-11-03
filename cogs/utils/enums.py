@@ -1,11 +1,10 @@
 from enum import Enum
 
-__all__ = ['Change', 'Action']
+__all__ = ['Action']
 
 
 class Action(Enum):
-    MUTE = 1
-    KICK = 2
-    SOFTBAN = 3
-    BAN = 4
-    UNBAN = 5
+    KICK = 1
+    BAN = 2
+    MISC = 3
+    UNBAN = 4

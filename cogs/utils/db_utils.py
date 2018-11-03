@@ -77,10 +77,10 @@ async def make_tables(pool: Pool, schema: str):
     moderation = f"""
     CREATE TABLE IF NOT EXISTS {schema}.moderation (
       serverid BIGINT,
+      moderatorid BIGINT,
       userid BIGINT,
       indexid INT,
-      moderatorid BIGINT,
-      ban BOOLEAN,
+      action INT,
       reason text,
       logtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (serverid, userid, indexid)
@@ -148,8 +148,21 @@ class PostgresController():
         logger.info('Tables created.')
         return cls(pool, logger, schema)
 
+    async def get_moderation_count(self, guild_id, user_id):
+        """
+        Returns a count of moderations a user has
+        :param guild_id: guild to search moderations
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT COUNT(userid) FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        return await self.pool.fetchval(sql, guild_id, user_id)
+
     async def insert_modaction(self, guild_id: int, mod_id: int,
-                               target_id: int, action_type: Action):
+                               target_id: int, reason: str,
+                               action_type: Action):
         """
         Inserts into the roles table a new rolechange
         :param mod_id: the id of the mod that triggered the action
@@ -157,11 +170,36 @@ class PostgresController():
         :param action_type: The type of change that occured
         """
         sql = """
-        INSERT INTO {}.moderation VALUES ($1, $2, $3);
+        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
         """.format(self.schema)
 
+        moderations = self.get_moderation_count(guild_id, target_id)
+
         await self.pool.execute(
-            sql, guild_id, mod_id, target_id, action_type.Value)
+            sql, 
+            guild_id,
+            mod_id,
+            target_id,
+            moderations +1,
+            action_type.Value,
+            reason
+        )
+
+    async def get_moderation(self, guild_id: int, user_id: int, logger):
+        """
+        Returns all moderation that a user has been done to
+        :param guild_id: guild to search moderations
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT * FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id)
+        except Exception as e:
+            logger.warning(f'Error retrieving moderations {e}')
+            return False
 
     async def add_server(self, guild_id: int):
         """
