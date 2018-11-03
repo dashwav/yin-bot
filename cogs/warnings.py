@@ -125,3 +125,7 @@ class Warnings:
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
             self.bot.logger.warning(f'Error trying to get user warnings: {e}')
+
+    @warnings.error
+    async def warnings_error(self, ctx, error):
+        self.bot.logger.warnign(f'Error retrieving warnings for user {error}')
