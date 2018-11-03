@@ -173,7 +173,7 @@ class PostgresController():
         INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
         """.format(self.schema)
 
-        moderations = self.get_moderation_count(guild_id, target_id)
+        moderations = await self.get_moderation_count(guild_id, target_id)
 
         await self.pool.execute(
             sql, 
@@ -181,7 +181,7 @@ class PostgresController():
             mod_id,
             target_id,
             moderations +1,
-            action_type.Value,
+            action_type.value,
             reason
         )
 

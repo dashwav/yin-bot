@@ -557,7 +557,7 @@ class ModerationListEmbed(discord.Embed):
         moderation_string = ''
         string_list = []
         for index, moderation in enumerate(modactions):
-            level = Action(moderation['action'])
+            level = Action(moderation['action']).name
             date = moderation['logtime'].strftime('%b %d %Y %H:%M')
             tmp_warning_string = f'**{index+1}.** ({level})'\
                                  f' {moderation["reason"]} '\
