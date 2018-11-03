@@ -6,6 +6,8 @@ the mod log
 import discord
 import datetime
 
+from .enums import Action
+
 NEGATIVECOLOR = 0x651111
 SLIGHTLYNEGATIVECOLOR = 0xF26E00
 POSITIVECOLOR = 0x419400
@@ -539,6 +541,47 @@ class WarningListEmbed(discord.Embed):
                 else:
                     self.add_field(
                             name='Infractions:(cont)',
+                            value=string
+                        )
+        self.set_footer(text=return_current_time())
+
+class ModerationListEmbed(discord.Embed):
+    """
+    Embed that lists all a users ModActions
+    """
+    def __init__(self, moderated_user: discord.Member, modactions: list, logger):
+
+        local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
+                      f'**\'s modactions'
+        local_desc = f'' if modactions else f'User has no modactions'
+        moderation_string = ''
+        string_list = []
+        for index, moderation in enumerate(modactions):
+            level = Action(moderation['action']).name
+            date = moderation['logtime'].strftime('%b %d %Y %H:%M')
+            tmp_warning_string = f'**{index+1}.** ({level})'\
+                                 f' {moderation["reason"]} '\
+                                 f'[{date}]\n'
+            if len(tmp_warning_string) + len(moderation_string) > 1000:
+                string_list.append(moderation_string)
+                moderation_string = tmp_warning_string
+            moderation_string += tmp_warning_string
+        string_list.append(moderation_string)
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        if string_list[0] != '':
+            for index, string in enumerate(string_list):
+                if index == 0:
+                    self.add_field(
+                        name='Modactions:',
+                        value=string
+                    )
+                else:
+                    self.add_field(
+                            name='Modactions:(cont)',
                             value=string
                         )
         self.set_footer(text=return_current_time())
