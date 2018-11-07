@@ -116,7 +116,7 @@ class KickEmbed(discord.Embed):
         """
         Init class for embed
         """
-        local_title = f'{kicked_user.name} was kicked by {resp_mod}'
+        local_title = f'{kicked_user.name} was kicked by {resp_mod.name}'
         local_desc = f'Reason: {reason}'
         super().__init__(
             color=SLIGHTLYNEGATIVECOLOR,
@@ -135,7 +135,7 @@ class BanEmbed(discord.Embed):
         """
         Init class for embed
         """
-        local_title = f'{banned_user.name} was banned by {resp_mod}'
+        local_title = f'{banned_user.name} was banned by {resp_mod.name}'
         local_desc = f'Reason: {reason}'
         super().__init__(
             color=NEGATIVECOLOR,
@@ -154,7 +154,7 @@ class ModerationEmbed(discord.Embed):
         """
         Init class for embed
         """
-        local_title = f'{moderated_user.name} was moderated by {resp_mod}'
+        local_title = f'{moderated_user.name} was moderated by {resp_mod.name}'
         local_desc = f'Reason: {reason}'
         super().__init__(
             color=SLIGHTLYNEGATIVECOLOR,
