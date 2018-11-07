@@ -4,7 +4,7 @@ kicking/banning users.
 """
 import discord
 from discord.ext import commands
-from .utils import helpers, checks, embeds
+from .utils import helpers, checks, embeds, enums
 import re
 
 
@@ -89,6 +89,16 @@ class Moderation:
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
+                    try:
+                        await self.bot.pg_utils.insert_modaction(
+                            ctx.guild.id,
+                            resp_mod.id,
+                            member.user.id,
+                            ban_reason,
+                            enums.Action.BAN
+                        )
+                    except Exception as e:
+                        self.bot.logger.warning(f'Error storing modaction: {e}')
                     await (self.bot.get_channel(channel_id)).send(
                         embed=local_embed)
             except Exception as e:
@@ -125,6 +135,16 @@ class Moderation:
                 mod_logs = await self.bot.pg_utils.get_modlogs(
                         ctx.guild.id)
                 for channel_id in mod_logs:
+                    try:
+                        await self.bot.pg_utils.insert_modaction(
+                            ctx.guild.id,
+                            ctx.author.id,
+                            member.id,
+                            reason,
+                            enums.Action.MISC
+                        )
+                    except Exception as e:
+                        self.bot.logger.warning(f'Error storing modaction: {e}')
                     await (self.bot.get_channel(channel_id)).send(
                         embed=local_embed)
             except Exception as e:
@@ -291,6 +311,16 @@ class Moderation:
                     self.bot.logger.warning(f'Error messaging user!: {e}')
                 await member.kick(reason=f'by: {ctx.author} for: {reason}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
+                try:
+                    await self.bot.pg_utils.insert_modaction(
+                        ctx.guild.id,
+                        ctx.author.id,
+                        member.id,
+                        reason,
+                        enums.Action.KICK
+                    )
+                except Exception as e:
+                    self.bot.logger.warning(f'Error storing modaction: {e}')
             except Exception as e:
                 self.bot.logger.warning(f'Error kicking user!: {e}')
                 await ctx.send('❌', delete_after=3)
@@ -338,6 +368,16 @@ class Moderation:
                     delete_message_days=0,
                     reason=f'by: {ctx.author} for: {reason}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
+                try:
+                    await self.bot.pg_utils.insert_modaction(
+                        ctx.guild.id,
+                        ctx.author.id,
+                        member.id,
+                        reason,
+                        enums.Action.BAN
+                    )
+                except Exception as e:
+                    self.bot.logger.warning(f'Error storing modaction: {e}')
             except Exception as e:
                 self.bot.logger.warning(f'Error banning user!: {e}')
                 await ctx.send('❌', delete_after=3)
@@ -381,6 +421,16 @@ class Moderation:
                 await ctx.send('❌', delete_after=3)
                 return
             self.bot.logger.info(f'Successfully unbanning {member}')
+            try:
+                await self.bot.pg_utils.insert_modaction(
+                    ctx.guild.id,
+                    ctx.author.id,
+                    member.user.id,
+                    reason,
+                    enums.Action.UNBAN
+                )
+            except Exception as e:
+                self.bot.logger.warning(f'Error storing modaction: {e}')
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.UnBanEmbed(
