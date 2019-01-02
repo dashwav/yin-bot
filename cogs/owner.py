@@ -21,9 +21,9 @@ class Owner():
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def set_playing(self, ctx, *, game=None):
+    async def set_playing(self, ctx, *, game: str = None):
         if game:
-            await self.bot.change_presence(game=discord.Game(name=game))
+            await self.bot.change_presence(activity=discord.Game(game))
         ctx.delete()
 
     @commands.command(hidden=True)
