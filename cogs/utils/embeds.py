@@ -482,6 +482,25 @@ class VoiceChannelMoveEmbed(discord.Embed):
             )
         self.set_footer(text=return_current_time())
 
+class WarningEditEmbed(discord.Embed):
+    """
+    Embed for when someone gets warned
+    """
+    def __init__(self, warned_user: discord.Member, major: bool,
+                 reason: str, infraction_count: int):
+        level = 'MAJOR' if major else 'MINOR'
+        local_title = f'User Warning Edited'
+        local_desc = f'{warned_user.mention}'\
+                     f' previous warning has been changed to a **{level}** warning for:\n'\
+                     f'\'**{reason}**\''
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(
+            text=f'This is warning number {infraction_count}'
+                 f' for {warned_user.name}')
 
 class WarningAddEmbed(discord.Embed):
     """
@@ -503,6 +522,19 @@ class WarningAddEmbed(discord.Embed):
             text=f'This is warning number {infraction_count+1}'
                  f' for {warned_user.name}')
 
+class WarningRmEmbed(discord.Embed):
+    """
+    Embed for when someone gets warned
+    """
+    def __init__(self, warned_user: discord.Member):
+        local_title = f'User Warning Removed'
+        local_desc = f'{warned_user.mention}'\
+                     f' has been forgiven for a warning.'
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
 
 class WarningListEmbed(discord.Embed):
     """
@@ -516,9 +548,10 @@ class WarningListEmbed(discord.Embed):
         warning_string = ''
         string_list = []
         for index, warning in enumerate(infractions):
+            index = warning['indexid']
             level = 'MAJOR' if warning['major'] else 'MINOR'
             date = warning['logtime'].strftime('%b %d %Y %H:%M')
-            tmp_warning_string = f'**{index+1}.** ({level})'\
+            tmp_warning_string = f'**{index}.** ({level})'\
                                  f' {warning["reason"]} '\
                                  f'[{date}]\n'
             if len(tmp_warning_string) + len(warning_string) > 1000:

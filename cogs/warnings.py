@@ -88,12 +88,61 @@ class Warnings:
             await ctx.send(embed=embeds.InternalErrorEmbed())
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
-    @warn.command(aliases=['rem', 'remove'])
-    async def remove_warning(self, ctx, member: discord.Member, index: int):
+    @warn.command(aliases=['e'])
+    async def edit(self, ctx, member: discord.Member, index: int=None, dtype: str=None, *, reason: str=None):
+        """
+        Edits a warning
+        user set and then display set
+        """
+        if not reason or not index or not dtype:
+            await ctx.send(
+                "You need to supply the correct parameters <member, index (from 1), warning type, reason>, try again.",
+                delete_after=5)
+            return
+        if len(reason) > 500:
+            await ctx.send(
+                "Reason must be shorter than 500 char",
+                delete_after=5
+            )
+        dtype = True if dtype.lower() is 'major' else False
+        try:
+            count = await self.bot.pg_utils.set_single_warning(
+                ctx.guild.id,
+                member.id,
+                reason,
+                dtype,
+                index,
+                self.bot.logger
+            )
+            local_embed = embeds.WarningEditEmbed(member, dtype, reason, count)
+            await ctx.send(embed=local_embed)
+        except Exception as e:
+            await ctx.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying edit warnings for user: {e}')
+
+    @warn.command(aliases=['rm', 'rem', 'remove', 'delete'])
+    async def remove_warning(self, ctx, member: discord.Member, index: int=None):
         """
         This command removes a warning from a user at selected index
         """
-        return
+        # use .util.db_utils.delete_single_warning
+        if member is None or index is None:
+            await ctx.send(
+                "You need to supply the correct parameters <member, index (from 1)>, try again.",
+                delete_after=5)
+            return
+        try:
+            count = await self.bot.pg_utils.delete_single_warning(
+                ctx.guild.id,
+                member.id,
+                index,
+                self.bot.logger
+            )
+            local_embed = embeds.WarningRmEmbed(member)
+            await ctx.send(embed=local_embed)
+        except Exception as e:
+            await ctx.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error removing warning for user: {e}')
 
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
@@ -128,4 +177,4 @@ class Warnings:
 
     @warnings.error
     async def warnings_error(self, ctx, error):
-        self.bot.logger.warnign(f'Error retrieving warnings for user {error}')
+        self.bot.logger.warning(f'Error retrieving warnings for user {error}')
