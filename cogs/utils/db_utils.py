@@ -1059,7 +1059,7 @@ class PostgresController():
         """
         sql = """
         SELECT * FROM {}.warnings
-        WHERE serverid = $1 AND userid = $2;
+        WHERE serverid = $1 AND userid = $2 ORDER BY indexid;
         """.format(self.schema)
         try:
             return await self.pool.fetch(sql, guild_id, user_id)
