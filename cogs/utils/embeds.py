@@ -3,6 +3,8 @@ This class will contain all the embeds used for at the very least
 the mod log
 """
 
+# flake8: noqa
+
 import discord
 import datetime
 
@@ -482,6 +484,7 @@ class VoiceChannelMoveEmbed(discord.Embed):
             )
         self.set_footer(text=return_current_time())
 
+
 class WarningEditEmbed(discord.Embed):
     """
     Embed for when someone gets warned
@@ -501,6 +504,7 @@ class WarningEditEmbed(discord.Embed):
         self.set_footer(
             text=f'This is warning number {infraction_count}'
                  f' for {warned_user.name}')
+
 
 class WarningAddEmbed(discord.Embed):
     """
@@ -522,6 +526,7 @@ class WarningAddEmbed(discord.Embed):
             text=f'This is warning number {infraction_count+1}'
                  f' for {warned_user.name}')
 
+
 class WarningRmEmbed(discord.Embed):
     """
     Embed for when someone gets warned
@@ -535,6 +540,7 @@ class WarningRmEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
+
 
 class WarningListEmbed(discord.Embed):
     """
@@ -578,13 +584,14 @@ class WarningListEmbed(discord.Embed):
                         )
         self.set_footer(text=return_current_time())
 
+
 class ModerationListEmbed(discord.Embed):
     """
     Embed that lists all a users ModActions
     """
     def __init__(self, moderated_user: discord.Member, modactions: list, logger):
 
-        local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
+        local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\ 
                       f'**\'s modactions'
         local_desc = f'' if modactions else f'User has no modactions'
         moderation_string = ''
