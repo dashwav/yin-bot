@@ -48,6 +48,20 @@ class InternalErrorEmbed(discord.Embed):
         )
         self.set_footer(text=return_current_time())
 
+class CommandErrorEmbed(discord.Embed):
+    """
+    Embed for when it isn't the users fault
+    """
+    def __init__(self, message):
+        local_title = f'Error Executing Command!'
+        local_desc = message
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc
+        )
+        self.set_footer(text=return_current_time())
+
 
 class LogbanErrorEmbed(discord.Embed):
     """
@@ -591,7 +605,7 @@ class ModerationListEmbed(discord.Embed):
     """
     def __init__(self, moderated_user: discord.Member, modactions: list, logger):
 
-        local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\ 
+        local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
                       f'**\'s modactions'
         local_desc = f'' if modactions else f'User has no modactions'
         moderation_string = ''
