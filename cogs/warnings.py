@@ -104,7 +104,7 @@ class Warnings:
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
-        dtype = True if dtype.lower() is 'major' else False
+        dtype = True if dtype.lower() == 'major' else False
         try:
             count = await self.bot.pg_utils.set_single_warning(
                 ctx.guild.id,
