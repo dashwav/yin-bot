@@ -1046,7 +1046,7 @@ class PostgresController():
         WHERE serverid = $1 AND userid = $2 AND indexid = $3;
         """.format(self.schema)
         try:
-            await self.pool.execute(sql, guild_id, user_id, index)
+            return await self.pool.execute(sql, guild_id, user_id, index)
         except Exception as e:
             logger.warning(f'Error deleting warning {e}')
             return False
