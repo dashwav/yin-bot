@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  postgres-db:
+    image: postgres:10-alpine
+    restart: always
+    environment: 
+      POSTGRES_USER: yinbotuser
+      POSTGRES_PASSWORD: yinbot-password
+      POSTGRES_DB: yinbotdb
+    volumes:
+      - yinbot-db-volume:/var/lib/postgresql/data
+  yinbot:
+    build:
+      context: .
+      dockerfile: yin.dockerfile
+    depends_on: 
+      - postgres-db
+
+
+volumes:
+  yinbot-db-volume:

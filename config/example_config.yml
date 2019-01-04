@@ -9,7 +9,7 @@ owner_id: 164546159140929538
 discord_bots_key: 123456
 
 postgres_credentials:
-    host: "localhost"
-    user: "user"
-    database: "yinbot"
-    password: "password"
+    host: "postgres-db"
+    user: "yinbotuser"
+    database: "yinbotdb"
+    password: "yinbot-password"
