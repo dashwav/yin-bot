@@ -4,7 +4,7 @@ General purpose discord bot with a focus on doing moderation simply and well
 import yaml
 import datetime
 from discord.ext.commands import Bot
-from time import time
+from time import time, sleep
 from logging import Formatter, INFO, StreamHandler, getLogger
 from cogs.utils.db_utils import PostgresController
 
@@ -44,8 +44,16 @@ class Yinbot(Bot):
         logger.addHandler(console_handler)
         logger.setLevel(INFO)
         postgres_cred = config['postgres_credentials']
-        pg_utils = await PostgresController.get_instance(
-            logger=logger, connect_kwargs=postgres_cred)
+        pg_utils = None
+        while not pg_utils:
+            try:
+                pg_utils = await PostgresController.get_instance(
+                    logger=logger, connect_kwargs=postgres_cred)
+            except Exception as e:
+                logger.critical(
+                    f'Error initializing DB - trying again in 5 seconds')
+                logger.debug(f'Error: {e}')
+                sleep(5)
         server_settings = await pg_utils.get_server_settings()
         return cls(config, logger, pg_utils, server_settings)
 
@@ -72,7 +80,7 @@ class Yinbot(Bot):
                 await self.pg_utils.get_server_settings()
             self.slow_channels = \
                 await self.pg_utils.get_slowmode_channels(self.logger)
-            self.logger.info(f'Servers: {len(self.server_settings)}\n'
+            self.logger.info(f'\nServers: {len(self.server_settings)}\n'
                              f'Slowmode Channels: {len(self.slow_channels)}\n')
         except Exception as e:
             self.logger.warning(f'issue getting server settings: {e}')
