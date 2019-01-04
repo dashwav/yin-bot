@@ -948,6 +948,19 @@ class PostgresController():
         """.format(self.schema)
         return await self.pool.fetchval(sql, guild_id, user_id)
 
+    async def get_warning_indexes(self, guild_id, user_id):
+        """
+        Returns a count of infractions a user has
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT indexid FROM {}.warnings
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        sql_i = await self.pool.fetch(sql, guild_id, user_id)
+        return list(map(lambda m: m['indexid'], sql_i))
+
     async def add_warning(
             self, guild_id: int, user_id: str,
             reason: str, major: bool, logger):
@@ -960,6 +973,15 @@ class PostgresController():
         :param major: whether warning is a major/minor warning
         """
         infraction_count = await self.get_warning_count(guild_id, user_id)
+        all_warn_i = await self.get_warning_indexes(guild_id, user_id)
+        index_range = [x+1 for x in range(max(all_warn_i))]
+        for i in all_warn_i:
+            index_range.remove(i)
+        if len(index_range) == 0:
+            index = max(all_warn_i) + 1
+        else:
+            index = min(index_range)
+
         sql = """
         INSERT INTO {}.warnings VALUES ($1, $2, $3, $4, $5);
         """.format(self.schema)
@@ -968,13 +990,68 @@ class PostgresController():
                 sql,
                 guild_id,
                 user_id,
-                infraction_count + 1,
+                index,
                 reason,
                 major
             )
             return infraction_count
         except Exception as e:
             logger.warning(f'Error inserting warning into db: {e}')
+            return False
+
+    async def get_single_warning(self, guild_id: int, user_id: int, index: int, logger):
+        """
+        Returns a single warnings a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        """
+        sql = """
+        SELECT * FROM {}.warnings
+        WHERE serverid = $1 AND userid = $2 AND indexid = $3;
+        """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error retrieving warning {e}')
+            return False
+
+    async def set_single_warning(self, guild_id: int, user_id: str,
+                                 reason: str, major: bool, index: int, logger):
+        """
+        Set a single warnings a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        :param reason: reason for warning
+        :param major: whether warning is a major/minor warning
+        """
+        sql = """
+        UPDATE {}.warnings
+        SET reason=$1, major=$2 WHERE serverid = $3 AND userid = $4 AND indexid = $5;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, reason, major, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error retrieving warnings {e}')
+        return await self.get_warning_count(guild_id, user_id)
+
+    async def delete_single_warning(self, guild_id: int, user_id: str,
+                                    index: int, logger):
+        """
+        Set a single warnings a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        """
+        sql = """
+        DELETE FROM {}.warnings
+        WHERE serverid = $1 AND userid = $2 AND indexid = $3;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error deleting warning {e}')
             return False
 
     async def get_warnings(self, guild_id: int, user_id: int, logger):
