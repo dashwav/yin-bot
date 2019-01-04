@@ -132,12 +132,18 @@ class Warnings:
                 delete_after=5)
             return
         try:
-            count = await self.bot.pg_utils.delete_single_warning(
+            status = await self.bot.pg_utils.delete_single_warning(
                 ctx.guild.id,
                 member.id,
                 index,
                 self.bot.logger
             )
+            if '0' in status:
+                await ctx.send(
+                    embed=embeds.CommandErrorEmbed(
+                        'User has not recieved any warnings.'),
+                    delete_after=3)
+                return
             local_embed = embeds.WarningRmEmbed(member)
             await ctx.send(embed=local_embed)
         except Exception as e:
