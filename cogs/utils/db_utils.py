@@ -974,13 +974,10 @@ class PostgresController():
         """
         infraction_count = await self.get_warning_count(guild_id, user_id)
         all_warn_i = await self.get_warning_indexes(guild_id, user_id)
-        index_range = [x+1 for x in range(max(all_warn_i))]
-        for i in all_warn_i:
-            index_range.remove(i)
-        if len(index_range) == 0:
+        if all_warn_i:
             index = max(all_warn_i) + 1
         else:
-            index = min(index_range)
+            index = 1
 
         sql = """
         INSERT INTO {}.warnings VALUES ($1, $2, $3, $4, $5);
@@ -1039,7 +1036,7 @@ class PostgresController():
     async def delete_single_warning(self, guild_id: int, user_id: str,
                                     index: int, logger):
         """
-        Set a single warnings a user has on a server given the index
+        Delete a single warnings a user has on a server given the index
         :param guild_id: guild to search infractions
         :param user_id: user id to count for
         :param index: index to pull

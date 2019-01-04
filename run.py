@@ -3,7 +3,7 @@ Actually runs the code
 """
 from asyncio import get_event_loop
 from bot import Yinbot
-from cogs import Moderation, Owner, Roles, Slowmode, Stats, RNG
+from cogs import Moderation, Owner, Roles, Slowmode, Stats, RNG, Pings
 from cogs import Admin, Gateway, Info, Logging, Voice, Filter, Warnings
 
 
@@ -27,6 +27,7 @@ def run():
       Voice(bot),
       Owner(bot),
       Warnings(bot),
+      Pings(bot)
     ]
     bot.start_bot(cogs)
 

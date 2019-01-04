@@ -5,6 +5,7 @@ from cogs.info import Info
 from cogs.logging import Logging
 from cogs.moderation import Moderation
 from cogs.owner import Owner
+from cogs.pings import Pings
 from cogs.rng import RNG
 from cogs.roles import Roles
 from cogs.slowmode import Slowmode
@@ -20,6 +21,7 @@ __all__ = [
     'Logging',
     'Moderation',
     'Owner',
+    'Pings',
     'RNG',
     'Roles',
     'Slowmode',

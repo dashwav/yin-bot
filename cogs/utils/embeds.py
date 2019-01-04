@@ -3,6 +3,8 @@ This class will contain all the embeds used for at the very least
 the mod log
 """
 
+# flake8: noqa
+
 import discord
 import datetime
 
@@ -39,6 +41,20 @@ class InternalErrorEmbed(discord.Embed):
         local_desc = f'Contact <@164546159140929538>'\
                      f' or [Click here]({DISCORD}) to join '\
                      f'<@369362004458078208>\'s support server!'
+        super().__init__(
+            color=NEGATIVECOLOR,
+            title=local_title,
+            description=local_desc
+        )
+        self.set_footer(text=return_current_time())
+
+class CommandErrorEmbed(discord.Embed):
+    """
+    Embed for when it isn't the users fault
+    """
+    def __init__(self, message):
+        local_title = f'Error Executing Command!'
+        local_desc = message
         super().__init__(
             color=NEGATIVECOLOR,
             title=local_title,
@@ -482,6 +498,7 @@ class VoiceChannelMoveEmbed(discord.Embed):
             )
         self.set_footer(text=return_current_time())
 
+
 class WarningEditEmbed(discord.Embed):
     """
     Embed for when someone gets warned
@@ -501,6 +518,7 @@ class WarningEditEmbed(discord.Embed):
         self.set_footer(
             text=f'This is warning number {infraction_count}'
                  f' for {warned_user.name}')
+
 
 class WarningAddEmbed(discord.Embed):
     """
@@ -522,6 +540,7 @@ class WarningAddEmbed(discord.Embed):
             text=f'This is warning number {infraction_count+1}'
                  f' for {warned_user.name}')
 
+
 class WarningRmEmbed(discord.Embed):
     """
     Embed for when someone gets warned
@@ -535,6 +554,7 @@ class WarningRmEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
+
 
 class WarningListEmbed(discord.Embed):
     """
@@ -577,6 +597,7 @@ class WarningListEmbed(discord.Embed):
                             value=string
                         )
         self.set_footer(text=return_current_time())
+
 
 class ModerationListEmbed(discord.Embed):
     """
