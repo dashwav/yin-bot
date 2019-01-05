@@ -210,7 +210,7 @@ class UnBanEmbed(discord.Embed):
         """
         Init class for embed
         """
-        local_title = f'{unbanned_user.name} was unbanned by {resp_mod}'
+        local_title = f'{unbanned_user.name} was unbanned by {resp_mod.name}'
         local_desc = f'Reason: {reason}'
         super().__init__(
             color=POSITIVECOLOR,
