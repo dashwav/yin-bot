@@ -19,6 +19,8 @@ class Yinbot(Bot):
         """
         init for bot class
         """
+        file = open('.version', 'r')
+        self.version = file.read()
         self.pg_utils = pg_utils
         self.server_settings = {}
         self.start_time = int(time())
@@ -86,5 +88,5 @@ class Yinbot(Bot):
             self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        self.logger.info(f'\nLogged in as\n{self.user.name}'
+        self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}'
                          f'\n{self.user.id}\n------')

@@ -47,10 +47,12 @@ class Info():
         uptime = now - self.bot.uptime
         total_servers = len(self.bot.guilds)
         total_users = len(self.bot.users)
+        version_number = self.bot.version
         local_embed = discord.Embed(
             title=f'__Stats__',
             description=f'Total Servers: {total_servers}\n'
                         f'Total Users: {total_users}\n'
                         f'Uptime: {uptime}\n'
         )
+        local_embed.set_footer(text=f'yinbot v{version_number}')
         await ctx.send(embed=local_embed)
