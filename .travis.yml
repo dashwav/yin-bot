@@ -1,0 +1,26 @@
+language: python
+
+env:
+  global:
+    - IMAGE_NAME=dashwav/yinbot
+
+services:
+  - docker
+
+before_script:
+  - version="$(cat .version)"
+script:
+  - docker build -f yin.dockerfile --tag "$IMAGE_NAME" .
+
+after_script:
+  - docker images
+
+before_deploy:
+  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:latest"
+  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${version}"
+deploy:
+  provider: script
+  script: docker push "${IMAGE_NAME}:latest" && docker push "${IMAGE_NAME}:${version}"
+  on:
+  branch: master
