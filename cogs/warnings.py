@@ -153,7 +153,7 @@ class Warnings:
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
-    async def warnings(self, ctx, member: discord.Member):
+    async def warnings(self, ctx, member: discord.Member, recent: bool = True):
         """
         Returns all the warnings a user has gotten
         """
@@ -162,20 +162,24 @@ class Warnings:
         try:
             warnings = None
             moderations = None
+            count = [await self.bot.pg_utils.get_warning_count(ctx.guild.id, member.id),
+                     await self.bot.pg_utils.get_moderation_count(ctx.guild.id, member.id)]
             warnings = await self.bot.pg_utils.get_warnings(
                 ctx.guild.id,
                 member.id,
-                self.bot.logger)
+                self.bot.logger,
+                recent = recent)
             moderations = await self.bot.pg_utils.get_moderation(
                 ctx.guild.id,
                 member.id,
-                self.bot.logger)
+                self.bot.logger,
+                recent = recent)
             local_embed = embeds.WarningListEmbed(
-                member, warnings, self.bot.logger)
+                member, warnings, self.bot.logger, count[0] > len(warnings))
             await ctx.send(embed=local_embed)
             if moderations:
                 mod_embed = embeds.ModerationListEmbed(
-                    member, moderations, self.bot.logger)
+                    member, moderations, self.bot.logger, count[1] > len(moderations))
                 await ctx.send(embed=mod_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())

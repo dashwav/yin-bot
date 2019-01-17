@@ -4,6 +4,7 @@ Database utility functions.
 from typing import Optional
 from .enums import Action
 import datetime
+
 try:
     from asyncpg import Record, InterfaceError, create_pool
     from asyncpg.pool import Pool
@@ -185,16 +186,22 @@ class PostgresController():
             reason
         )
 
-    async def get_moderation(self, guild_id: int, user_id: int, logger):
+    async def get_moderation(self, guild_id: int, user_id: int, logger, recent=False):
         """
         Returns all moderation that a user has been done to
         :param guild_id: guild to search moderations
         :param user_id: user id to count for
         """
-        sql = """
-        SELECT * FROM {}.moderation
-        WHERE serverid = $1 AND userid = $2;
-        """.format(self.schema)
+        if recent:
+            sql = """
+            SELECT * FROM {}.moderation
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month');
+            """.format(self.schema)
+        else:
+            sql = """
+            SELECT * FROM {}.moderation
+            WHERE serverid = $1 AND userid = $2;
+            """.format(self.schema)
         try:
             return await self.pool.fetch(sql, guild_id, user_id)
         except Exception as e:
@@ -1051,16 +1058,23 @@ class PostgresController():
             logger.warning(f'Error deleting warning {e}')
             return False
 
-    async def get_warnings(self, guild_id: int, user_id: int, logger):
+    async def get_warnings(self, guild_id: int, user_id: int, logger, recent = False):
         """
         Returns all warnings a user has on a server
         :param guild_id: guild to search infractions
         :param user_id: user id to count for
         """
-        sql = """
-        SELECT * FROM {}.warnings
-        WHERE serverid = $1 AND userid = $2 ORDER BY indexid;
-        """.format(self.schema)
+        if recent:
+            f = '%Y-%m-%d'
+            sql = """
+            SELECT * FROM {}.warnings
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month') ORDER BY indexid;
+            """.format(self.schema)
+        else:
+            sql = """
+            SELECT * FROM {}.warnings
+            WHERE serverid = $1 AND userid = $2 ORDER BY indexid;
+            """.format(self.schema)
         try:
             return await self.pool.fetch(sql, guild_id, user_id)
         except Exception as e:
@@ -1086,22 +1100,6 @@ class PostgresController():
             return True
         except Exception as e:
             logger.warning(f'Error adding mod action to database: {e}')
-            return False
-
-    async def get_all_mod_actions(self, guild_id: int, user_id: int, logger):
-        """
-        Returns all modActions a user has on a server
-        :param guild_id: guild to search infractions
-        :param user_id: user id to count for
-        """
-        sql = """
-        SELECT * FROM {}.moderation
-        WHERE serverid = $1 AND userid = $2;
-        """.format(self.schema)
-        try:
-            return await self.pool.fetch(sql, guild_id, user_id)
-        except Exception as e:
-            logger.warning(f'Error retrieving warnings {e}')
             return False
 
     async def add_slowmode_channel(

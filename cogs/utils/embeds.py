@@ -560,7 +560,7 @@ class WarningListEmbed(discord.Embed):
     """
     Embed that lists all a users infractions
     """
-    def __init__(self, warned_user: discord.Member, infractions: list, logger):
+    def __init__(self, warned_user: discord.Member, infractions: list, logger, count: bool=False):
 
         local_title = f'**{warned_user.name}#{warned_user.discriminator}'\
                       f'**\'s infractions'
@@ -586,6 +586,9 @@ class WarningListEmbed(discord.Embed):
             )
         if string_list[0] != '':
             for index, string in enumerate(string_list):
+                if count:
+                    string = f'{string}\nThere are more warnings > 6 months ago.'
+                string = f'{string}\n**Join Date:** {warned_user.joined_at.strftime("%b %d %Y %H:%M")}'
                 if index == 0:
                     self.add_field(
                         name='Infractions:',
@@ -603,7 +606,7 @@ class ModerationListEmbed(discord.Embed):
     """
     Embed that lists all a users ModActions
     """
-    def __init__(self, moderated_user: discord.Member, modactions: list, logger):
+    def __init__(self, moderated_user: discord.Member, modactions: list, logger, count: bool=False):
 
         local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
                       f'**\'s modactions'
@@ -628,6 +631,9 @@ class ModerationListEmbed(discord.Embed):
             )
         if string_list[0] != '':
             for index, string in enumerate(string_list):
+                if count:
+                    string = f'{string}\nThere are more mod actions > 6 months ago.'
+                string = f'{string}\n**Join Date:** {moderated_user.joined_at.strftime("%b %d %Y %H:%M")}'
                 if index == 0:
                     self.add_field(
                         name='Modactions:',
