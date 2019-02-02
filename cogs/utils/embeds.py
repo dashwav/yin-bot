@@ -560,7 +560,8 @@ class WarningListEmbed(discord.Embed):
     """
     Embed that lists all a users infractions
     """
-    def __init__(self, warned_user: discord.Member, infractions: list, logger, count: bool=False):
+    def __init__(self, warned_user: discord.Member, infractions: list,
+                 logger, count: bool=False):
 
         local_title = f'**{warned_user.name}#{warned_user.discriminator}'\
                       f'**\'s infractions'
@@ -606,7 +607,8 @@ class ModerationListEmbed(discord.Embed):
     """
     Embed that lists all a users ModActions
     """
-    def __init__(self, moderated_user: discord.Member, modactions: list, logger, count: bool=False):
+    def __init__(self, moderated_user: discord.Member,
+                 modactions: list, logger, count: bool=False):
 
         local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
                       f'**\'s modactions'
@@ -651,8 +653,8 @@ class ModEditEmbed(discord.Embed):
     """
     Embed for when someone gets moderation action editted
     """
-    def __init__(self, modded_user: discord.Member, mod_id: discord.Member, 
-                 action_type: Action, 
+    def __init__(self, modded_user: discord.Member, mod_id: discord.Member,
+                 action_type: Action,
                  reason: str, infraction_count: int):
         local_title = f'User ModAction Edited by {mod_id.name}'
         local_desc = f'{modded_user.mention}'\
