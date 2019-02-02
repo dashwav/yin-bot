@@ -149,65 +149,6 @@ class PostgresController():
         logger.info('Tables created.')
         return cls(pool, logger, schema)
 
-    async def get_moderation_count(self, guild_id, user_id):
-        """
-        Returns a count of moderations a user has
-        :param guild_id: guild to search moderations
-        :param user_id: user id to count for
-        """
-        sql = """
-        SELECT COUNT(userid) FROM {}.moderation
-        WHERE serverid = $1 AND userid = $2;
-        """.format(self.schema)
-        return await self.pool.fetchval(sql, guild_id, user_id)
-
-    async def insert_modaction(self, guild_id: int, mod_id: int,
-                               target_id: int, reason: str,
-                               action_type: Action):
-        """
-        Inserts into the roles table a new rolechange
-        :param mod_id: the id of the mod that triggered the action
-        :param target_id: the id of user that action was performed on
-        :param action_type: The type of change that occured
-        """
-        sql = """
-        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
-        """.format(self.schema)
-
-        moderations = await self.get_moderation_count(guild_id, target_id)
-
-        await self.pool.execute(
-            sql, 
-            guild_id,
-            mod_id,
-            target_id,
-            moderations +1,
-            action_type.value,
-            reason
-        )
-
-    async def get_moderation(self, guild_id: int, user_id: int, logger, recent=False):
-        """
-        Returns all moderation that a user has been done to
-        :param guild_id: guild to search moderations
-        :param user_id: user id to count for
-        """
-        if recent:
-            sql = """
-            SELECT * FROM {}.moderation
-            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month');
-            """.format(self.schema)
-        else:
-            sql = """
-            SELECT * FROM {}.moderation
-            WHERE serverid = $1 AND userid = $2;
-            """.format(self.schema)
-        try:
-            return await self.pool.fetch(sql, guild_id, user_id)
-        except Exception as e:
-            logger.warning(f'Error retrieving moderations {e}')
-            return False
-
     async def add_server(self, guild_id: int):
         """
         Inserts into the server table a new server
@@ -940,6 +881,142 @@ class PostgresController():
         return channel_list
 
     """
+    Moderations
+    """
+
+    async def get_modaction_indexes(self, guild_id, user_id):
+        """
+        Returns a count of modactions a user has
+        :param guild_id: guild to search modactions
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT indexid FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        sql_i = await self.pool.fetch(sql, guild_id, user_id)
+        return list(map(lambda m: m['indexid'], sql_i))
+
+    async def get_moderation_count(self, guild_id, user_id):
+        """
+        Returns a count of moderations a user has
+        :param guild_id: guild to search moderations
+        :param user_id: user id to count for
+        """
+        sql = """
+        SELECT COUNT(userid) FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2;
+        """.format(self.schema)
+        return await self.pool.fetchval(sql, guild_id, user_id)
+
+    async def insert_modaction(self, guild_id: int, mod_id: int,
+                               target_id: int, reason: str,
+                               action_type: Action):
+        """
+        Inserts into the roles table a new rolechange
+        :param mod_id: the id of the mod that triggered the action
+        :param target_id: the id of user that action was performed on
+        :param action_type: The type of change that occured
+        """
+        sql = """
+        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
+        """.format(self.schema)
+
+        moderations = await self.get_moderation_count(guild_id, target_id)
+        all_modac_i = await self.get_modaction_indexes(guild_id, target_id)
+        if all_modac_i:
+            index = max(all_modac_i) + 1
+        else:
+            index = 1
+
+        await self.pool.execute(
+            sql, 
+            guild_id,
+            mod_id,
+            target_id,
+            index,
+            action_type.value,
+            reason
+        )
+
+    async def get_moderation(self, guild_id: int, user_id: int, logger, recent=False):
+        """
+        Returns all moderation that a user has been done to
+        :param guild_id: guild to search moderations
+        :param user_id: user id to count for
+        """
+        if recent:
+            sql = """
+            SELECT * FROM {}.moderation
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month');
+            """.format(self.schema)
+        else:
+            sql = """
+            SELECT * FROM {}.moderation
+            WHERE serverid = $1 AND userid = $2;
+            """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id)
+        except Exception as e:
+            logger.warning(f'Error retrieving moderations {e}')
+            return False
+
+    async def get_single_modaction(self, guild_id: int, user_id: int, index: int, logger):
+        """
+        Returns a single modaction a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        """
+        sql = """
+        SELECT * FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2 AND indexid = $3;
+        """.format(self.schema)
+        try:
+            return await self.pool.fetch(sql, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error retrieving moderation action {e}')
+            return False
+
+    async def set_single_modaction(self, guild_id: int, user_id: str,
+                                   mod_id: int, reason: str,
+                                   action_type: Action, index: int, logger):
+        """
+        Set a single modaction a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        :param reason: reason for moderation
+        """
+        sql = """
+        UPDATE {}.moderation
+        SET reason=$1, moderatorid=$2, action=$3 WHERE serverid = $4 AND userid = $5 AND indexid = $6;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, reason, mod_id, action_type.value, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error retrieving moderation action {e}')
+        return await self.get_moderation_count(guild_id, user_id)
+
+    async def delete_single_modaction(self, guild_id: int, user_id: str,
+                                    index: int, logger):
+        """
+        Delete a single modaction a user has on a server given the index
+        :param guild_id: guild to search infractions
+        :param user_id: user id to count for
+        :param index: index to pull
+        """
+        sql = """
+        DELETE FROM {}.moderation
+        WHERE serverid = $1 AND userid = $2 AND indexid = $3;
+        """.format(self.schema)
+        try:
+            return await self.pool.execute(sql, guild_id, user_id, index)
+        except Exception as e:
+            logger.warning(f'Error deleting moderation action {e}')
+            return False
+
+    """
     Warnings
     """
 
@@ -1079,27 +1156,6 @@ class PostgresController():
             return await self.pool.fetch(sql, guild_id, user_id)
         except Exception as e:
             logger.warning(f'Error retrieving warnings {e}')
-            return False
-
-    async def add_mod_action(self, guild_id: int, user_id: int,
-                             mod_id: int, ban: bool, reason: str, logger):
-        """
-        Adds a new mod action to the database
-        :param guild_id: guild to add mod action to
-        :param user_id: user action was taken against
-        :param mod_id: responsible moderator
-        :param ban: whether action was a ban
-        :param reason: reason for mod action
-        """
-        sql = """
-        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5);
-        """.format(self.schema)
-        try:
-            await self.pool.execute(sql, guild_id, user_id, mod_id,
-                                    ban, reason)
-            return True
-        except Exception as e:
-            logger.warning(f'Error adding mod action to database: {e}')
             return False
 
     async def add_slowmode_channel(
