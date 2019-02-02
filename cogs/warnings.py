@@ -125,7 +125,6 @@ class Warnings:
         """
         This command removes a warning from a user at selected index
         """
-        # use .util.db_utils.delete_single_warning
         if member is None or index is None:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1)>, try again.",
