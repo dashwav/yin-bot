@@ -12,6 +12,7 @@ import re
 class MemberID(commands.Converter):
     async def convert(self, ctx, argument):
         try:
+            argument = extract_member_id(argument)
             m = await commands.MemberConverter().convert(ctx, argument)
         except commands.BadArgument:
             try:
@@ -30,22 +31,45 @@ class MemberID(commands.Converter):
             return m.id
 
 
+def extract_member_id(argument):
+    """Check if argument is # or <@#> or <@!>."""
+    regexes = (
+        r'\\?\<\@!?([0-9]{18})\>',  # '<@!?#18+>'
+        r'\\?\<\@!?([0-9]+)\>',  # '<@!?#+>'
+        r'!?([0-9]{18})',  # '!?#18+>'
+        r'!?([0-9]+)',  # '!?#18+>'
+    )
+    i = 0
+    member_id = None
+    while i < len(regexes):
+        regex = regexes[i]
+        match = re.findall(regex, argument)
+        i += 1
+        if (match is not None) and (len(match) > 0):
+            member_id = int(match[0], base=10)
+            return member_id
+    return member_id
+
+class GeneralMember(commands.Converter):
+    async def convert(self, ctx, argument):
+        member_id = extract_member_id(argument)
+        if member_id != None:
+            entity = ctx.guild.get_member(member_id)
+            return entity
+        else:
+            raise commands.BadArgument("Not a valid member.")
+
+
 class BannedMember(commands.Converter):
     async def convert(self, ctx, argument):
-        # check if argument is # or <@#>
         ban_list = await ctx.guild.bans()
-        match = re.match(r'<@!?([0-9]+)>$', argument)
-        entity = None
-        if match is None:  # If not <@#>
-            match = re.match(r'!?([0-9]+)$', argument)
-        if match is not None:
-            member_id = int(match.group(1), base=10)
+        member_id = extract_member_id(argument)
+        if member_id != None:
             entity = discord.utils.find(
                 lambda u: u.user.id == member_id, ban_list)
-
-        if entity is None:
+            return entity
+        else:
             raise commands.BadArgument("Not a valid previously-banned member.")
-        return entity
 
 
 class ActionReason(commands.Converter):
@@ -116,7 +140,7 @@ class Moderation:
     @commands.group(invoke_without_command=True)
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def moderate(self, ctx, member: discord.Member, *,
+    async def moderate(self, ctx, member: GeneralMember, *,
                        reason: ActionReason=None):
         """
         Edits a punishment for a user
@@ -155,7 +179,7 @@ class Moderation:
         return
 
     @moderate.command(aliases=['e'])
-    async def edit(self, ctx, member: discord.Member, index: int=None,
+    async def edit(self, ctx, member: GeneralMember, index: int=None,
                    action_type: str=None, *, reason: str=None):
         """
         Edits a Moderated actions
@@ -201,7 +225,7 @@ class Moderation:
             self.bot.logger.warning(f'Error trying edit modactions for user: {e}')
 
     @moderate.command(aliases=['rm', 'rem', 'remove', 'delete'])
-    async def remove_modaction(self, ctx, member: discord.Member, index: int=None):
+    async def remove_modaction(self, ctx, member: GeneralMember, index: int=None):
         """
         This command removes a modaction from a user at selected index
         """
@@ -364,7 +388,7 @@ class Moderation:
 
     @commands.command()
     @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *,
+    async def kick(self, ctx, member: GeneralMember, *,
                    reason: ActionReason=None):
         """
         Kicks a user.
