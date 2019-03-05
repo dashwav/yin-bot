@@ -5,12 +5,14 @@ kicking/banning users.
 import discord
 from discord.ext import commands
 from .utils import helpers, checks, embeds, enums
+from .utils.enums import Action
 import re
 
 
 class MemberID(commands.Converter):
     async def convert(self, ctx, argument):
         try:
+            argument = extract_member_id(argument)
             m = await commands.MemberConverter().convert(ctx, argument)
         except commands.BadArgument:
             try:
@@ -20,8 +22,8 @@ class MemberID(commands.Converter):
                                             'member or member ID.") from None
         else:
             can_execute = ctx.author.id == ctx.bot.owner_id or \
-                          ctx.author == ctx.guild.owner or \
-                          ctx.author.top_role > m.top_role
+                ctx.author == ctx.guild.owner or \
+                ctx.author.top_role > m.top_role
 
             if not can_execute:
                 raise commands.BadArgument('You cannot do this action on this'
@@ -29,28 +31,50 @@ class MemberID(commands.Converter):
             return m.id
 
 
+def extract_member_id(argument):
+    """Check if argument is # or <@#> or <@!>."""
+    regexes = (
+        r'\\?\<\@!?([0-9]{18})\>',  # '<@!?#18+>'
+        r'\\?\<\@!?([0-9]+)\>',  # '<@!?#+>'
+        r'!?([0-9]{18})',  # '!?#18+>'
+        r'!?([0-9]+)',  # '!?#18+>'
+    )
+    i = 0
+    member_id = None
+    while i < len(regexes):
+        regex = regexes[i]
+        match = re.findall(regex, argument)
+        i += 1
+        if (match is not None) and (len(match) > 0):
+            member_id = int(match[0], base=10)
+            return member_id
+    return member_id
+
+class GeneralMember(commands.Converter):
+    async def convert(self, ctx, argument):
+        member_id = extract_member_id(argument)
+        if member_id != None:
+            entity = ctx.guild.get_member(member_id)
+            return entity
+        else:
+            raise commands.BadArgument("Not a valid member.")
+
+
 class BannedMember(commands.Converter):
     async def convert(self, ctx, argument):
-        # check if argument is # or <@#>
         ban_list = await ctx.guild.bans()
-        match = re.match(r'<@!?([0-9]+)>$', argument)
-        entity = None
-        if match is None:  # If not <@#>
-            match = re.match(r'!?([0-9]+)$', argument)
-        if match is not None:
-            member_id = int(match.group(1), base=10)
+        member_id = extract_member_id(argument)
+        if member_id != None:
             entity = discord.utils.find(
                 lambda u: u.user.id == member_id, ban_list)
-
-        if entity is None:
+            return entity
+        else:
             raise commands.BadArgument("Not a valid previously-banned member.")
-        return entity
 
 
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
         ret = argument
-
         if len(ret) > 512:
             reason_max = 512 - len(ret) - len(argument)
             raise commands.BadArgument(
@@ -70,7 +94,7 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, *,
-                     reason: ActionReason = None):
+                     reason: ActionReason=None):
         """
         Logs a right-click ban to modlog channels
         """
@@ -86,8 +110,7 @@ class Moderation:
                 ban_reason = reason if reason else member.reason
                 local_embed = embeds.BanEmbed(
                     member.user, resp_mod, ban_reason)
-                mod_logs = await self.bot.pg_utils.get_modlogs(
-                        ctx.guild.id)
+                mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
                 for channel_id in mod_logs:
                     try:
                         await self.bot.pg_utils.insert_modaction(
@@ -114,43 +137,121 @@ class Moderation:
             delete_after=3
         )
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
-    async def moderate(self, ctx, member: discord.Member, *,
-                       reason: ActionReason = None):
+    async def moderate(self, ctx, member: GeneralMember, *,
+                       reason: ActionReason=None):
         """
-        Logs a punishment for a user
+        Edits a punishment for a user
         """
-        if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
-            try:
-                confirm = await helpers.custom_confirm(
-                    ctx,
-                    f'```\nUser: {member}\nReason: {reason}\n```'
-                )
-                if not confirm:
-                    return
-                local_embed = embeds.ModerationEmbed(
-                    member, ctx.author, reason)
-                mod_logs = await self.bot.pg_utils.get_modlogs(
-                        ctx.guild.id)
-                for channel_id in mod_logs:
-                    try:
-                        await self.bot.pg_utils.insert_modaction(
-                            ctx.guild.id,
-                            ctx.author.id,
-                            member.id,
-                            reason,
-                            enums.Action.MISC
-                        )
-                    except Exception as e:
-                        self.bot.logger.warning(f'Error storing modaction: {e}')
-                    await (self.bot.get_channel(channel_id)).send(
-                        embed=local_embed)
-            except Exception as e:
-                self.bot.logger.warning(f'Issue posting to mod log: {e}')
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
+        if ctx.invoked_subcommand is None:
+            if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
+                try:
+                    confirm = await helpers.custom_confirm(
+                        ctx,
+                        f'```\nUser: {member}\nReason: {reason}\n```'
+                    )
+                    if not confirm:
+                        return
+                    local_embed = embeds.ModerationEmbed(
+                        member, ctx.author, reason)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
+                    for channel_id in mod_logs:
+                        try:
+                            await self.bot.pg_utils.insert_modaction(
+                                ctx.guild.id,
+                                ctx.author.id,
+                                member.id,
+                                reason,
+                                enums.Action.MISC
+                            )
+                        except Exception as e:
+                            self.bot.logger.warning(f'Error storing modaction: {e}')
+                        await (self.bot.get_channel(channel_id)).send(
+                            embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.warning(f'Issue posting to mod log: {e}')
+            else:
+                await ctx.send(f'No modlog channels detected', delete_after=3)
+        return
+
+    @moderate.command(aliases=['e'])
+    async def edit(self, ctx, member: GeneralMember, index: int=None,
+                   action_type: str=None, *, reason: str=None):
+        """
+        Edits a Moderated actions
+        @params member Discord member to change
+        @params index  Index of the mod action to change
+        @params action Type The new modaction type
+        @params reason The new reason for why the modaction is taken against them
+        @returns embed
+        """
+        if not reason or not index or not action_type:
+            await ctx.send(
+                "You need to supply the correct parameters <member, index (from 1), action_type, reason>, try again.",
+                delete_after=5)
+            return
+        action_type = action_type.upper()
+        actions = [str(x).strip("Action.") for x in Action]
+        if action_type not in actions:
+            await ctx.send(
+                f'You need to supply the correct Action parameter. Must be within: {actions}',
+                delete_after=5)
+            return
         else:
-            await ctx.send(f'No modlog channels detected', delete_after=3)
+            action_type = Action[action_type]
+        if len(reason) > 500:
+            await ctx.send(
+                "Reason must be shorter than 500 char",
+                delete_after=5
+            )
+        try:
+            count = await self.bot.pg_utils.set_single_modaction(
+                ctx.guild.id,
+                member.id,
+                ctx.author.id,
+                reason,
+                action_type,
+                index,
+                self.bot.logger
+            )
+            local_embed = embeds.ModEditEmbed(member, ctx.author, action_type, reason, count)
+            await ctx.send(embed=local_embed)
+        except Exception as e:
+            await ctx.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying edit modactions for user: {e}')
+
+    @moderate.command(aliases=['rm', 'rem', 'remove', 'delete'])
+    async def remove_modaction(self, ctx, member: GeneralMember, index: int=None):
+        """
+        This command removes a modaction from a user at selected index
+        """
+        if member is None or index is None:
+            await ctx.send(
+                "You need to supply the correct parameters <member, index (from 1)>, try again.",
+                delete_after=5)
+            return
+        try:
+            status = await self.bot.pg_utils.delete_single_modaction(
+                ctx.guild.id,
+                member.id,
+                index,
+                self.bot.logger
+            )
+            if '0' in status:
+                await ctx.send(
+                    embed=embeds.CommandErrorEmbed(
+                        'User has not recieved any modactions.'),
+                    delete_after=3)
+                return
+            local_embed = embeds.ModRmEmbed(member)
+            await ctx.send(embed=local_embed)
+        except Exception as e:
+            await ctx.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error removing modaction for user: {e}')
 
     @commands.group()
     @commands.guild_only()
@@ -251,7 +352,7 @@ class Moderation:
 
     @commands.command()
     @checks.has_permissions(manage_messages=True)
-    async def purge(self, ctx, *args,  mentions=None):
+    async def purge(self, ctx, *args, mentions=None):
         """
         Purges a set number of messages.
         """
@@ -287,8 +388,8 @@ class Moderation:
 
     @commands.command()
     @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *,
-                   reason: ActionReason = None):
+    async def kick(self, ctx, member: GeneralMember, *,
+                   reason: ActionReason=None):
         """
         Kicks a user.
         """
@@ -328,8 +429,7 @@ class Moderation:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.KickEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(
-                            ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -341,7 +441,7 @@ class Moderation:
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member_id: MemberID, *,
-                  reason: ActionReason = None):
+                  reason: ActionReason=None):
         """
         Bans a user.
         """
@@ -385,8 +485,7 @@ class Moderation:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.BanEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(
-                            ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -398,7 +497,7 @@ class Moderation:
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *,
-                    reason: ActionReason = None):
+                    reason: ActionReason=None):
         """
         Unbans a user.
         """
@@ -435,8 +534,7 @@ class Moderation:
                 try:
                     local_embed = embeds.UnBanEmbed(
                         member.user, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(
-                            ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -445,7 +543,8 @@ class Moderation:
         else:
             await ctx.send("Cancelled unban", delete_after=3)
 
-    async def create_embed(self, command_type, server_name, server_id, reason):
+    async def create_embed(self, command_type, server_name,
+                           server_id, reason):
         try:
             embed = discord.Embed(
                 title=f'❗ {command_type} Reason ❗', type='rich')

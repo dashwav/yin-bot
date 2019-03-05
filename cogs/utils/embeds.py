@@ -543,7 +543,7 @@ class WarningAddEmbed(discord.Embed):
 
 class WarningRmEmbed(discord.Embed):
     """
-    Embed for when someone gets warned
+    Embed for when someone gets a warning removed
     """
     def __init__(self, warned_user: discord.Member):
         local_title = f'User Warning Removed'
@@ -560,7 +560,8 @@ class WarningListEmbed(discord.Embed):
     """
     Embed that lists all a users infractions
     """
-    def __init__(self, warned_user: discord.Member, infractions: list, logger):
+    def __init__(self, warned_user: discord.Member, infractions: list,
+                 logger, count: bool=False):
 
         local_title = f'**{warned_user.name}#{warned_user.discriminator}'\
                       f'**\'s infractions'
@@ -586,6 +587,9 @@ class WarningListEmbed(discord.Embed):
             )
         if string_list[0] != '':
             for index, string in enumerate(string_list):
+                if count:
+                    string = f'{string}\nThere are more warnings > 6 months ago.'
+                string = f'{string}\n**Join Date:** {warned_user.joined_at.strftime("%b %d %Y %H:%M")}'
                 if index == 0:
                     self.add_field(
                         name='Infractions:',
@@ -603,7 +607,8 @@ class ModerationListEmbed(discord.Embed):
     """
     Embed that lists all a users ModActions
     """
-    def __init__(self, moderated_user: discord.Member, modactions: list, logger):
+    def __init__(self, moderated_user: discord.Member,
+                 modactions: list, logger, count: bool=False):
 
         local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
                       f'**\'s modactions'
@@ -611,9 +616,10 @@ class ModerationListEmbed(discord.Embed):
         moderation_string = ''
         string_list = []
         for index, moderation in enumerate(modactions):
+            index = moderation['indexid']
             level = Action(moderation['action']).name
             date = moderation['logtime'].strftime('%b %d %Y %H:%M')
-            tmp_warning_string = f'**{index+1}.** ({level})'\
+            tmp_warning_string = f'**{index}.** ({level})'\
                                  f' {moderation["reason"]} '\
                                  f'[{date}]\n'
             if len(tmp_warning_string) + len(moderation_string) > 1000:
@@ -628,6 +634,9 @@ class ModerationListEmbed(discord.Embed):
             )
         if string_list[0] != '':
             for index, string in enumerate(string_list):
+                if count:
+                    string = f'{string}\nThere are more mod actions > 6 months ago.'
+                string = f'{string}\n**Join Date:** {moderated_user.joined_at.strftime("%b %d %Y %H:%M")}'
                 if index == 0:
                     self.add_field(
                         name='Modactions:',
@@ -639,3 +648,37 @@ class ModerationListEmbed(discord.Embed):
                             value=string
                         )
         self.set_footer(text=return_current_time())
+
+class ModEditEmbed(discord.Embed):
+    """
+    Embed for when someone gets moderation action editted
+    """
+    def __init__(self, modded_user: discord.Member, mod_id: discord.Member,
+                 action_type: Action,
+                 reason: str, infraction_count: int):
+        local_title = f'User ModAction Edited by {mod_id.name}'
+        local_desc = f'{modded_user.mention}'\
+                     f' previous modaction has been changed to a **{action_type.name}** action for:\n'\
+                     f'\'**{reason}**\''
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+        self.set_footer(
+            text=f'This is infraction number {infraction_count}'
+                 f' for {modded_user.name}')
+
+class ModRmEmbed(discord.Embed):
+    """
+    Embed for when someone gets a modaction removed
+    """
+    def __init__(self, warned_user: discord.Member):
+        local_title = f'User Modaction Removed'
+        local_desc = f'{warned_user.mention}'\
+                     f' has been forgiven for a modaction.'
+        super().__init__(
+            color=SLIGHTLYNEGATIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
