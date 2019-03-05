@@ -47,14 +47,14 @@ def extract_member_id(argument):
         i += 1
         if (match is not None) and (len(match) > 0):
             member_id = int(match[0], base=10)
-            return str(member_id)
-    return str(member_id)
+            return str(member_id).strip(' ')
+    return str(member_id).strip(' ')
 
 class GeneralMember(commands.Converter):
     async def convert(self, ctx, argument):
         member_id = extract_member_id(argument)
         if member_id != None:
-            entity = ctx.guild.get_member(member_id)
+            entity = await commands.MemberConverter().convert(ctx, member_id)
             return entity
         else:
             raise commands.BadArgument("Not a valid member.")
