@@ -16,7 +16,7 @@ class MemberID(commands.Converter):
             m = await commands.MemberConverter().convert(ctx, argument)
         except commands.BadArgument:
             try:
-                return int(argument, base=10)
+                return str(int(argument, base=10))
             except ValueError:
                 raise commands.BadArgument(f"{argument} is not a valid'\
                                             'member or member ID.") from None
@@ -47,8 +47,8 @@ def extract_member_id(argument):
         i += 1
         if (match is not None) and (len(match) > 0):
             member_id = int(match[0], base=10)
-            return member_id
-    return member_id
+            return str(member_id)
+    return str(member_id)
 
 class GeneralMember(commands.Converter):
     async def convert(self, ctx, argument):
@@ -66,7 +66,7 @@ class BannedMember(commands.Converter):
         member_id = extract_member_id(argument)
         if member_id != None:
             entity = discord.utils.find(
-                lambda u: u.user.id == member_id, ban_list)
+                lambda u: str(u.user.id) == str(member_id), ban_list)
             return entity
         else:
             raise commands.BadArgument("Not a valid previously-banned member.")
