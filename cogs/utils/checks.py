@@ -88,6 +88,7 @@ def is_in_guilds(*guild_ids):
         return guild.id in guild_ids
     return commands.check(predicate)
 
+
 async def is_channel_blacklisted(self, ctx):
     blacklist_channels = await self.bot.pg_utils.get_blacklist_channels(
         ctx.guild.id)
@@ -96,7 +97,6 @@ async def is_channel_blacklisted(self, ctx):
     if ctx.channel.id in blacklist_channels:
         return False
     return True
-
 
 
 def is_lounge_cpp():

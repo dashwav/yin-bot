@@ -92,6 +92,8 @@ class Gateway:
         """
         Enables the welcome message in this channel
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         success = await self.bot.pg_utils.add_welcome_channel(
             ctx.guild.id, ctx.message.channel.id, self.bot.logger
         )
@@ -115,6 +117,8 @@ class Gateway:
         """
         Enables the welcome message in this channel
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         try:
             success = await self.bot.pg_utils.rem_welcome_channel(
                 ctx.guild.id, ctx.message.channel.id, self.bot.logger

@@ -22,6 +22,8 @@ class Owner():
     @commands.command(hidden=True)
     @commands.is_owner()
     async def set_playing(self, ctx, *, game: str = None):
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if game:
             await self.bot.change_presence(activity=discord.Game(game))
         ctx.delete()
@@ -32,6 +34,8 @@ class Owner():
         """
         Changes bot username
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         bot_user = self.bot.user
         try:
             await bot_user.edit(username=new_username)
@@ -46,6 +50,8 @@ class Owner():
         """
         Adds a server to the db
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         try:
             await self.bot.pg_utils.add_server(ctx.guild.id)
             self.bot.server_settings[ctx.guild.id] = {
@@ -64,6 +70,8 @@ class Owner():
         """
         Fixes servers that are not in the database
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         wrong_guilds = []
         for server in self.bot.guilds:
             try:
@@ -115,6 +123,8 @@ class Owner():
         :params channel: channel to echo into
         :params message: message to echo
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not ctx.message.channel_mentions:
             return await ctx.send(
                 f'<command> <channel mention> <message> u idiot')
@@ -128,6 +138,8 @@ class Owner():
     @commands.is_owner()
     async def load(self, ctx, *, module):
         """Loads a module."""
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         try:
             self.bot.load_extension(module)
         except Exception as e:
@@ -139,6 +151,8 @@ class Owner():
     @commands.is_owner()
     async def unload(self, ctx, *, module):
         """Unloads a module."""
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         try:
             self.bot.unload_extension(module)
         except Exception as e:
@@ -150,6 +164,8 @@ class Owner():
     @commands.is_owner()
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         try:
             self.bot.unload_extension(module)
             self.bot.load_extension(module)

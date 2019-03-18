@@ -267,8 +267,6 @@ class Moderation:
         Ban/kick footer command. If no subcommand is
         invoked, it will return the current ban/kick footer
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         ban_footer = await self.bot.pg_utils.get_ban_footer(
             ctx.guild.id,
             self.bot.logger
@@ -291,8 +289,6 @@ class Moderation:
         """
         Attempts to set kick/ban footer to string passed in
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -328,8 +324,6 @@ class Moderation:
         """
         Attempts to set kick/ban footer to string passed in
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -366,8 +360,6 @@ class Moderation:
         """
         Purges a set number of messages.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not await checks.is_channel_blacklisted(self, ctx):
             return
         deleted = []

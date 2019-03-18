@@ -41,6 +41,8 @@ class Logging():
         """
         Adds channel to the log channel list.
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         added_channels = []
         desc = ''
         try:
@@ -81,6 +83,8 @@ class Logging():
         """
         Removes channel from the log channel list
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         removed_channels = []
         absent_channels = []
         desc = ''
@@ -169,6 +173,8 @@ class Logging():
         """
         Adds channel to the log channel list.
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         added_channels = []
         desc = ''
         try:
@@ -207,6 +213,8 @@ class Logging():
         """
         Removes channel from the log channel list
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         removed_channels = []
         absent_channels = []
         desc = ''
