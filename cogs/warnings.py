@@ -35,6 +35,8 @@ class Warnings:
         """
         Gives a major warning
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -64,6 +66,8 @@ class Warnings:
         """
         Gives a minor warning
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -94,6 +98,8 @@ class Warnings:
         Edits a warning
         user set and then display set
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not reason or not index or not dtype:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1), warning type, reason>, try again.",
@@ -125,6 +131,8 @@ class Warnings:
         """
         This command removes a warning from a user at selected index
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if member is None or index is None:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1)>, try again.",

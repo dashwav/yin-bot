@@ -32,6 +32,8 @@ class RNG():
     @commands.group(pass_context=True)
     async def random(self, ctx):
         """Displays a random thing you request."""
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if ctx.invoked_subcommand is None:
             await ctx.send(f'Incorrect random subcommand passed. Try '
                            f'{ctx.prefix}help random')

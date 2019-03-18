@@ -98,6 +98,8 @@ class Moderation:
         """
         Logs a right-click ban to modlog channels
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
                 confirm = await helpers.custom_confirm(
@@ -189,6 +191,8 @@ class Moderation:
         @params reason The new reason for why the modaction is taken against them
         @returns embed
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not reason or not index or not action_type:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1), action_type, reason>, try again.",
@@ -229,6 +233,8 @@ class Moderation:
         """
         This command removes a modaction from a user at selected index
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if member is None or index is None:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1)>, try again.",
@@ -285,6 +291,8 @@ class Moderation:
         """
         Attempts to set kick/ban footer to string passed in
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -320,6 +328,8 @@ class Moderation:
         """
         Attempts to set kick/ban footer to string passed in
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -356,6 +366,8 @@ class Moderation:
         """
         Purges a set number of messages.
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not await checks.is_channel_blacklisted(self, ctx):
             return
         deleted = []

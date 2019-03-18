@@ -39,6 +39,8 @@ class Voice():
         Sets voiceroles to enabled for server and creates the
         role if it doesn't exits
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if ctx.author.voice.channel is None:
             local_embed = discord.Embed(
                 title=f'You must be in a voice channel to use this command',
@@ -94,6 +96,8 @@ class Voice():
         """
         Removes the given role from the voice channel.
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if ctx.author.voice.channel is None:
             local_embed = discord.Embed(
                 title=f'You must be in a voice channel to use this command',
@@ -144,6 +148,8 @@ class Voice():
         """
         Disables all voice roles for server
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         vcrole_enabled = await\
             self.bot.pg_utils.get_voice_enabled(ctx.guild.id)
         if not vcrole_enabled:
@@ -175,6 +181,8 @@ class Voice():
         Checks if a user has recently joined or left a voice channel and adds
         role if necessary
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         vc_enabled = await self.bot.pg_utils.get_voice_enabled(
             member.guild.id)
         if not vc_enabled:

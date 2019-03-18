@@ -3,8 +3,7 @@ This cog will handle logging all server actions to a specific channel
 """
 import discord
 from discord.ext import commands
-from .utils import checks
-from .utils import embeds
+from .utils import checks, embeds
 
 
 class Logging():

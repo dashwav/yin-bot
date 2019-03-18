@@ -55,6 +55,8 @@ class Gateway:
         """
         Attempts to set welcome message to string passed in
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         if not welcome_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',

@@ -173,6 +173,8 @@ class Roles():
         """
         Adds a role to the servers assignable roles list
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -216,6 +218,8 @@ class Roles():
         """
         Removes a role from the serves assignable roles list
         """
+        if not await checks.is_channel_blacklisted(self, ctx):
+            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
