@@ -948,7 +948,7 @@ class PostgresController():
         if recent:
             sql = """
             SELECT * FROM {}.moderation
-            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month');
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month');
             """.format(self.schema)
         else:
             sql = """
@@ -1145,7 +1145,7 @@ class PostgresController():
             f = '%Y-%m-%d'
             sql = """
             SELECT * FROM {}.warnings
-            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '3 month') ORDER BY indexid;
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month') ORDER BY indexid;
             """.format(self.schema)
         else:
             sql = """
