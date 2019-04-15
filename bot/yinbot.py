@@ -90,3 +90,12 @@ class Yinbot(Bot):
             self.uptime = datetime.datetime.utcnow()
         self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}'
                          f'\n{self.user.id}\n------')
+
+    async def on_message(self, ctx):
+        if ctx.author.bot:
+            return
+        elif not await checks.is_channel_blacklisted(self, ctx):
+            if not isinstance(ctx.guild, type(None)):
+                await self.process_commands(ctx)
+        else:
+            return
