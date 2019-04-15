@@ -3,10 +3,14 @@ General purpose discord bot with a focus on doing moderation simply and well
 """
 import yaml
 import datetime
-from discord.ext.commands import Bot
 from time import time, sleep
+import re
+
 from logging import Formatter, INFO, StreamHandler, getLogger
+from discord.ext.commands import Bot
+
 from cogs.utils.db_utils import PostgresController
+from cogs.utils import checks
 
 
 class Yinbot(Bot):
@@ -94,8 +98,29 @@ class Yinbot(Bot):
     async def on_message(self, ctx):
         if ctx.author.bot:
             return
-        elif not await checks.is_channel_blacklisted(self, ctx):
-            if not isinstance(ctx.guild, type(None)):
-                await self.process_commands(ctx)
-        else:
+        elif isinstance(ctx.guild, type(None)):
             return
+        elif not await checks.is_channel_blacklisted(self, ctx):
+            await self.process_commands(ctx)
+        else:
+            perms = {'administrator': True}
+            permis = False
+            is_owner = await self.is_owner(ctx.author)
+            if is_owner:
+                permis = True
+            resolved = ctx.channel.permissions_for(ctx.author)
+            if getattr(resolved, 'administrator', None) == perms['administrator']:
+                permis = True
+                regexp = re.compile(
+                    r'(^.bloverride)')
+                if bool(regexp.search(ctx.content)) and permis:
+                    try:
+                        success = await \
+                            self.pg_utils.rem_blacklist_channel(
+                            ctx.guild.id, ctx.channel.id, self.logger
+                        )
+                        await ctx.delete()
+                    except:
+                        await ctx.delete()
+                        return
+        return

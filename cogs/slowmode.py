@@ -8,7 +8,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Slowmode():
+class Slowmode(commands.Cog):
     """
     Main class wrapper
     """
@@ -63,8 +63,6 @@ class Slowmode():
         """
         Adds or removes a channel to slowmode list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             return
 

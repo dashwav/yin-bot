@@ -9,7 +9,7 @@ from discord.ext import commands
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'
 
 
-class Info():
+class Info(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -20,8 +20,6 @@ class Info():
         """
         Prints out a clickable link to invite yin
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         await ctx.send(embed=embeds.InviteEmbed())
 
     @commands.command()
@@ -29,8 +27,6 @@ class Info():
         """
         Prints out uptime of bot
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         now = datetime.datetime.utcnow()
         uptime = now - self.bot.uptime
         await ctx.send(f'Uptime: {uptime}')
@@ -40,8 +36,6 @@ class Info():
         """
         Links support server
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         await ctx.send(embed=embeds.SupportEmbed())
 
     @commands.command()
@@ -49,8 +43,6 @@ class Info():
         """
         Prints out stats embed
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         now = datetime.datetime.utcnow()
         uptime = now - self.bot.uptime
         total_servers = len(self.bot.guilds)

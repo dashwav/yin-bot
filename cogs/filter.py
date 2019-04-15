@@ -7,7 +7,7 @@ from .utils import checks, embeds
 import re
 
 
-class Filter:
+class Filter(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
@@ -70,31 +70,7 @@ class Filter:
         await ctx.send(embed=local_embed)
 
     async def on_message(self, message):
-        perms = {'administrator': True}
-        permis = False
-        is_owner = await self.bot.is_owner(message.author)
-        if is_owner:
-            permis = True
-
-        resolved = message.channel.permissions_for(message.author)
-        if getattr(resolved, 'administrator', None) == perms['administrator']:
-            permis = True
         try:
-            regexp = re.compile(
-                r'(^.bloverride)')
-            if bool(regexp.search(message.content)) and permis and not await checks.is_channel_blacklisted(self, message):
-                try:
-                    success = await \
-                        self.bot.pg_utils.rem_blacklist_channel(
-                        message.guild.id, message.channel.id, self.bot.logger
-                    )
-                    await message.delete()
-                except:
-                    await message.delete()
-                    return
-            elif not await checks.is_channel_blacklisted(self, message):
-                return
-
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return
             if message.author.guild_permissions.manage_messages:

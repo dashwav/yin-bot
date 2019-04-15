@@ -6,7 +6,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Logging():
+class Logging(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()
@@ -20,8 +20,6 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_logger_channels(
@@ -41,8 +39,6 @@ class Logging():
         """
         Adds channel to the log channel list.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         added_channels = []
         desc = ''
         try:
@@ -83,8 +79,6 @@ class Logging():
         """
         Removes channel from the log channel list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         removed_channels = []
         absent_channels = []
         desc = ''
@@ -152,8 +146,6 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             voicelogs = await self.bot.pg_utils.get_voice_channels(
@@ -173,8 +165,6 @@ class Logging():
         """
         Adds channel to the log channel list.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         added_channels = []
         desc = ''
         try:
@@ -213,8 +203,6 @@ class Logging():
         """
         Removes channel from the log channel list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         removed_channels = []
         absent_channels = []
         desc = ''

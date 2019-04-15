@@ -4,7 +4,7 @@ from .utils import checks
 import discord
 
 
-class RNG():
+class RNG(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -32,8 +32,6 @@ class RNG():
     @commands.group(pass_context=True)
     async def random(self, ctx):
         """Displays a random thing you request."""
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             await ctx.send(f'Incorrect random subcommand passed. Try '
                            f'{ctx.prefix}help random')
@@ -44,8 +42,6 @@ class RNG():
         The minimum must be smaller than the maximum and the maximum number
         accepted is 1000.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         maximum = min(maximum, 1000)
         if minimum >= maximum:
             await ctx.send('Maximum is smaller than minimum.')
@@ -58,8 +54,6 @@ class RNG():
         """Chooses between multiple choices.
         To denote multiple choices, you should use double quotes.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         choices = text.split(';')
         if len(choices) < 2:
             return await ctx.send('Not enough choices to pick from.')
@@ -76,8 +70,6 @@ class RNG():
         """
         Uses magic to determine the answer to a question
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not question:
             return
         answer = rng.choice(self.answers)

@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Warnings:
+class Warnings(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
@@ -19,8 +19,6 @@ class Warnings:
         """
         Base command for warning system
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Command Error',
@@ -35,8 +33,6 @@ class Warnings:
         """
         Gives a major warning
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -66,8 +62,6 @@ class Warnings:
         """
         Gives a minor warning
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if reason is None:
                 await ctx.send(
                     "You need to supply a reason, try again.",
@@ -98,8 +92,6 @@ class Warnings:
         Edits a warning
         user set and then display set
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not reason or not index or not dtype:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1), warning type, reason>, try again.",
@@ -131,8 +123,6 @@ class Warnings:
         """
         This command removes a warning from a user at selected index
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if member is None or index is None:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1)>, try again.",
@@ -164,8 +154,6 @@ class Warnings:
         """
         Returns all the warnings a user has gotten
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         try:
             warnings = None
             moderations = None

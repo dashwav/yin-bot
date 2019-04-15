@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Roles():
+class Roles(commands.Cog):
     """
     Cog to handle the ability of users to
     add roles to themselves through use of a command
@@ -27,8 +27,6 @@ class Roles():
         """
         (Testing) Removes all members from a certain role
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -62,8 +60,6 @@ class Roles():
         """
         Adds self-assignable role to user
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -107,8 +103,6 @@ class Roles():
         """
         Removes self-assignable role from user
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -149,8 +143,6 @@ class Roles():
         """
         manages servers assignable roles
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             message = ' \n'
             assignable_roles = []
@@ -173,8 +165,6 @@ class Roles():
         """
         Adds a role to the servers assignable roles list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -218,8 +208,6 @@ class Roles():
         """
         Removes a role from the serves assignable roles list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():

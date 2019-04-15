@@ -8,7 +8,7 @@ from discord.ext import commands
 from .utils import checks
 
 
-class Gateway:
+class Gateway(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()
@@ -37,8 +37,6 @@ class Gateway:
         Welcome message command. If no subcommand is
         invoked, it will return the current welcome message
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         welcome_msg = await self.bot.pg_utils.get_welcome_message(
             ctx.guild.id,
             self.bot.logger
@@ -55,8 +53,6 @@ class Gateway:
         """
         Attempts to set welcome message to string passed in
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not welcome_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -92,8 +88,6 @@ class Gateway:
         """
         Enables the welcome message in this channel
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         success = await self.bot.pg_utils.add_welcome_channel(
             ctx.guild.id, ctx.message.channel.id, self.bot.logger
         )
@@ -117,8 +111,6 @@ class Gateway:
         """
         Enables the welcome message in this channel
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         try:
             success = await self.bot.pg_utils.rem_welcome_channel(
                 ctx.guild.id, ctx.message.channel.id, self.bot.logger
