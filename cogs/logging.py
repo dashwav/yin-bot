@@ -263,6 +263,7 @@ class Logging(commands.Cog):
             )
             await ctx.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
         """
         sends message on user ban
@@ -275,6 +276,7 @@ class Logging(commands.Cog):
                 ch = self.bot.get_channel(channel)
                 await ch.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         Sends message on a user join
@@ -287,6 +289,7 @@ class Logging(commands.Cog):
                 ch = self.bot.get_channel(channel)
                 await ch.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_member_remove(self, member):
         """
         Sends message on a user leaving
@@ -299,6 +302,7 @@ class Logging(commands.Cog):
                 ch = self.bot.get_channel(channel)
                 await ch.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """
         sends message on a user editing messages
@@ -324,6 +328,7 @@ class Logging(commands.Cog):
         except AttributeError:
             pass
 
+    @commands.Cog.listener()
     async def on_message_delete(self, message):
         """
         sends message on a user editing messages
@@ -345,6 +350,7 @@ class Logging(commands.Cog):
             except Exception as e:
                 self.bot.logger.warning(f'Issue logging message edit: {e}')
 
+    @commands.Cog.listener()
     async def on_member_update(self, before, after):
         """
         sends message on a user editing messages
@@ -388,6 +394,7 @@ class Logging(commands.Cog):
                 ch = self.bot.get_channel(channel)
                 await ch.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         vc_logging = await self.bot.pg_utils.get_voice_logging(
             member.guild.id)

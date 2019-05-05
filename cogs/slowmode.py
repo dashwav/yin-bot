@@ -16,6 +16,7 @@ class Slowmode(commands.Cog):
         super().__init__()
         self.bot = bot
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         try:
             if message.channel.id not in self.bot.slow_channels:

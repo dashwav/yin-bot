@@ -46,6 +46,7 @@ class Stats(commands.Cog):
             self.bot.logger.info(
                 f'DBots statistics returned {resp.status} for {payload}')
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         """
         await self.update()

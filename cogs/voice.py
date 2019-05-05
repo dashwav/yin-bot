@@ -170,6 +170,7 @@ class Voice(commands.Cog):
         except Exception as e:
             self.bot.logger.warning(f'Error deleting voice role: {e}')
 
+    @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """
         Checks if a user has recently joined or left a voice channel and adds

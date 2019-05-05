@@ -14,6 +14,7 @@ class Gateway(commands.Cog):
         super().__init__()
         self.bot = bot
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         Actually handles printing the welcome message
