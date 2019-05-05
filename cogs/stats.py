@@ -2,7 +2,7 @@
 Cog that will print out various bot statistics
 """
 import json
-
+from discord.ext import commands
 
 CARBONITEX_API_BOTDATA = 'https://www.carbonitex.net/discord/data/botdata.php'
 DISCORD_BOTS_API = 'https://bots.discord.pw/api'

@@ -2,6 +2,7 @@
 General purpose discord bot with a focus on doing moderation simply and well
 """
 import yaml
+import subprocess
 import datetime
 from discord.ext.commands import Bot
 from time import time, sleep
@@ -19,6 +20,10 @@ class Yinbot(Bot):
         """
         init for bot class
         """
+        try:
+            self.commit = f"-{subprocess.check_output(['git', 'describe', '--always']).strip().decode()}"
+        except:
+            self.commit = ''
         file = open('.version', 'r')
         self.version = file.read()
         self.pg_utils = pg_utils
@@ -88,5 +93,5 @@ class Yinbot(Bot):
             self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}'
+        self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}{self.commit}'
                          f'\n{self.user.id}\n------')
