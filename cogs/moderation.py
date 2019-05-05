@@ -452,7 +452,7 @@ class Moderation(commands.Cog):
                     "You need to supply a reason, try again.",
                     delete_after=5)
                 return
-        member = await self.bot.get_user_info(member_id)
+        member = await self.bot.fetch_user_profile(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
             embed = await self.create_embed(
