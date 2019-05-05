@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Roles():
+class Roles(commands.Cog):
     """
     Cog to handle the ability of users to
     add roles to themselves through use of a command

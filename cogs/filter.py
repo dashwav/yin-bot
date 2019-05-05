@@ -7,7 +7,7 @@ from .utils import checks, embeds
 import re
 
 
-class Filter:
+class Filter(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot

@@ -82,7 +82,7 @@ class ActionReason(commands.Converter):
         return ret
 
 
-class Moderation:
+class Moderation(commands.Cog):
     """
     Main cog class for moderation tools (kicking, banning, unbanning)
     """

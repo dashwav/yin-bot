@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Warnings:
+class Warnings(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot

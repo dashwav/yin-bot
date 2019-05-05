@@ -9,7 +9,7 @@ from discord.ext import commands
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'
 
 
-class Info():
+class Info(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

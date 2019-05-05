@@ -8,7 +8,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Slowmode():
+class Slowmode(commands.Cog):
     """
     Main class wrapper
     """

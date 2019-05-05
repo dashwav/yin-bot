@@ -7,7 +7,7 @@ from .utils import helpers
 from discord.ext import commands
 
 
-class Owner():
+class Owner(commands.Cog):
     """
     Cog with misc owner commands
     """

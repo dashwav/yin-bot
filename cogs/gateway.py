@@ -8,7 +8,7 @@ from discord.ext import commands
 from .utils import checks
 
 
-class Gateway:
+class Gateway(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()

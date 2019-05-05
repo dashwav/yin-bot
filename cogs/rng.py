@@ -4,7 +4,7 @@ from .utils import checks
 import discord
 
 
-class RNG():
+class RNG(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

@@ -7,7 +7,7 @@ from .utils import checks
 from .utils import embeds
 
 
-class Logging():
+class Logging(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()
