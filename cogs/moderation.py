@@ -5,72 +5,9 @@ kicking/banning users.
 import discord
 from discord.ext import commands
 from .utils import helpers, checks, embeds, enums
+from .utils.functions import GeneralMember, MemberID, BannedMember
 from .utils.enums import Action
 import re
-
-
-class MemberID(commands.Converter):
-    async def convert(self, ctx, argument):
-        try:
-            argument = extract_member_id(argument)
-            m = await commands.MemberConverter().convert(ctx, argument)
-        except commands.BadArgument:
-            try:
-                return str(int(argument, base=10))
-            except ValueError:
-                raise commands.BadArgument(f"{argument} is not a valid'\
-                                            'member or member ID.") from None
-        else:
-            can_execute = ctx.author.id == ctx.bot.owner_id or \
-                ctx.author == ctx.guild.owner or \
-                ctx.author.top_role > m.top_role
-
-            if not can_execute:
-                raise commands.BadArgument('You cannot do this action on this'
-                                           ' user due to role hierarchy.')
-            return m.id
-
-
-def extract_member_id(argument):
-    """Check if argument is # or <@#> or <@!>."""
-    regexes = (
-        r'\\?\<\@!?([0-9]{18})\>',  # '<@!?#18+>'
-        r'\\?\<\@!?([0-9]+)\>',  # '<@!?#+>'
-        r'!?([0-9]{18})',  # '!?#18+>'
-        r'!?([0-9]+)',  # '!?#18+>'
-    )
-    i = 0
-    member_id = None
-    while i < len(regexes):
-        regex = regexes[i]
-        match = re.findall(regex, argument)
-        i += 1
-        if (match is not None) and (len(match) > 0):
-            member_id = int(match[0], base=10)
-            return str(member_id).strip(' ')
-    return str(member_id).strip(' ')
-
-class GeneralMember(commands.Converter):
-    async def convert(self, ctx, argument):
-        member_id = extract_member_id(argument)
-        if member_id != None:
-            entity = await commands.MemberConverter().convert(ctx, member_id)
-            return entity
-        else:
-            raise commands.BadArgument("Not a valid member.")
-
-
-class BannedMember(commands.Converter):
-    async def convert(self, ctx, argument):
-        ban_list = await ctx.guild.bans()
-        member_id = extract_member_id(argument)
-        if member_id != None:
-            entity = discord.utils.find(
-                lambda u: str(u.user.id) == str(member_id), ban_list)
-            return entity
-        else:
-            raise commands.BadArgument("Not a valid previously-banned member.")
-
 
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
@@ -382,7 +319,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @checks.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: GeneralMember, *,
+    async def kick(self, ctx, member: MemberID, *,
                    reason: ActionReason=None):
         """
         Kicks a user.
@@ -432,7 +369,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @checks.has_permissions(ban_members=True)
-    async def ban(self, ctx, member_id: MemberID, *,
+    async def ban(self, ctx, member: MemberID, *,
                   reason: ActionReason=None):
         """
         Bans a user.
@@ -442,7 +379,6 @@ class Moderation(commands.Cog):
                     "You need to supply a reason, try again.",
                     delete_after=5)
                 return
-        member = await self.bot.get_user_info(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
             embed = await self.create_embed(
@@ -454,7 +390,7 @@ class Moderation(commands.Cog):
                 except Exception as e:
                     self.bot.logger.warning(f'Error messaging user!: {e}')
                 await ctx.guild.ban(
-                    discord.Object(id=member_id),
+                    discord.Object(id=member.id),
                     delete_message_days=0,
                     reason=f'by: {ctx.author} for: {reason}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
