@@ -66,7 +66,7 @@ async def make_tables(pool: Pool, schema: str):
     );
     """
 
-    voice_channels = f"""
+    voice_logging = f"""
     CREATE TABLE IF NOT EXISTS {schema}.voice_logging (
       serverid BIGINT references {schema}.servers(serverid),
       channel_id BIGINT,
@@ -154,7 +154,8 @@ async def make_tables(pool: Pool, schema: str):
     );"""
 
     await pool.execute(servers)
-    await pool.execute(voice_channels)
+    await pool.execute(voice_roles)
+    await pool.execute(voice_logging)
     await pool.execute(modlog_channels)
     await pool.execute(welcome_channels)
     await pool.execute(logging_channels)
