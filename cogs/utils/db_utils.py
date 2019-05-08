@@ -59,9 +59,10 @@ async def make_tables(pool: Pool, schema: str):
     voice_channels = f"""
     CREATE TABLE IF NOT EXISTS {schema}.voice_channels (
       serverid BIGINT references {schema}.servers(serverid),
-      channel_id bigint,
+      channel_id BIGINT,
+      role_id BIGINT,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (channel_id, role_id)
     );
     """
 
@@ -70,7 +71,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT references {schema}.servers(serverid),
       channel_id bigint,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (channel_id)
     );"""
 
     welcome_channels = f"""
@@ -78,7 +79,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT references {schema}.servers(serverid), 
       channel_id bigint references {schema}.servers(serverid),
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (channel_id)
     );"""
 
     logging_channels = f"""
@@ -86,7 +87,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT references {schema}.servers(serverid),
       channel_id bigint,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (channel_id)
     );"""
 
     assignableroles = f"""
@@ -94,7 +95,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT references {schema}.servers(serverid),
       role_id bigint,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (role_id)
     );"""
 
     blacklist_channels = f"""
@@ -102,7 +103,7 @@ async def make_tables(pool: Pool, schema: str):
       serverid BIGINT references {schema}.servers(serverid),
       channel_id bigint,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (serverid)
+      PRIMARY KEY (channel_id)
     );"""
 
     """
@@ -110,15 +111,6 @@ async def make_tables(pool: Pool, schema: str):
     #################################################################################
     """
 
-    # TODO: refactor vplust into two tables
-
-    vplust = f"""
-    CREATE TABLE IF NOT EXISTS {schema}.roles (
-        serverid BIGINT references {schema}.servers(serverid),
-        roleid BIGINT,
-        channels BIGINT ARRAY,
-        PRIMARY KEY(roleid)
-    );"""
 
     warnings = f"""
     CREATE TABLE IF NOT EXISTS {schema}.warnings(
@@ -798,13 +790,13 @@ class PostgresController():
         Returns a list of enabled voice roles for a guild
         """
         sql = """
-        SELECT roleid FROM {}.roles
+        SELECT role_id FROM {}.voice_channels
         WHERE serverid = $1;
         """.format(self.schema)
         role_list = []
         records = await self.pool.fetch(sql, guild_id)
         for rec in records:
-            role_list.append(rec['roleid'])
+            role_list.append(rec['role_id'])
         return role_list
 
     async def get_role_channels(self, guild_id: int, role_id: int):
@@ -812,23 +804,30 @@ class PostgresController():
         Returns a list of channels for a given role
         """
         sql = """
-        SELECT channels FROM {}.roles
+        SELECT * FROM {}.voice_channels
         WHERE serverid = $1 AND roleid = $2;
         """.format(self.schema)
-        return await self.pool.fetchval(sql, guild_id, role_id)
+        channel_list = []
+        try:
+            rows = await self.pool.fetch(sql, guild_id, role_id)
+            for row in rows:
+                channel_list.append(row['channel_id'])
+            return channel_list
+        except Exception:
+            return []
 
     async def get_channel_roles(self, guild_id: int, channel_id: int):
         """
         Returns a list of roles that have a channel_id in them
         """
         sql = """
-        SELECT roleid FROM {}.roles
-        WHERE serverid = $1 AND $2::bigint = ANY(channels);
+        SELECT role_id FROM {}.voice_roles
+        WHERE serverid = $1 AND channel_id = $2
         """.format(self.schema)
         records = await self.pool.fetch(sql, guild_id, channel_id)
         role_list = []
         for rec in records:
-            role_list.append(rec['roleid'])
+            role_list.append(rec['role_id'])
         return role_list
 
     async def add_role_channel(self, guild_id: int, channel_id: int, role_id):
@@ -836,15 +835,12 @@ class PostgresController():
         Adds a given channel_id to a given roleod
         :param guild_id: guild to pull role from
         """
-        channel_array = [channel_id]
         sql = """
-        INSERT INTO {}.roles VALUES ($1, $2, $3)
-        ON CONFLICT (roleid) DO UPDATE
-        SET channels = (SELECT array_agg(distinct e)
-        FROM unnest(array_append({}.roles.channels,$4::bigint)) e);
+        INSERT INTO {}.voice_channels VALUES ($1, $2, $3)
+        ON CONFLICT (role_id, channel_id) DO NOTHING;
         """.format(self.schema, self.schema)
         await self.pool.execute(
-            sql, guild_id, role_id, channel_array, channel_id)
+            sql, guild_id, channel_id, role_id)
         return True
 
     async def rem_role_channel(
@@ -854,39 +850,23 @@ class PostgresController():
         :param guild_id: guild to remove modlog channel from
         :param channel_id: channel id to remove
         """
-        channel_list = await self.get_role_channels(guild_id, role_id)
-        channel_list.remove(channel_id)
         sql = """
-        UPDATE {}.roles
-        SET channels = $1
-        WHERE serverid = $2 AND roleid = $3;
+        DELETE FROM {}.voice_channels
+        WHERE channel_id = $1 AND role_id = $2
         """.format(self.schema)
         try:
-            await self.pool.execute(sql, channel_list, guild_id, role_id)
+            await self.pool.execute(sql, channel_id, role_id)
         except Exception as e:
             logger.warning(f'Error removing role channel: {e}')
             return False
         return True
-
-    async def add_voice_role(self, guild_id: int, role_id: int):
-        """
-        Sets the role id for the given guild
-        :param guild_id: guild to set role for
-        :param role_id: role to add to guild
-        """
-        sql = """
-        INSERT INTO {}.roles VALUES ($1, $2, $3)
-        ON CONFLICT (roleid)
-        DO nothing;
-        """.format(self.schema)
-        await self.pool.execute(sql, guild_id, role_id, [])
 
     async def purge_voice_roles(self, guild_id: int):
         """
         Removes all roles from a given server.
         """
         sql = """
-        DELETE FROM {}.roles
+        DELETE FROM {}.voice_channels
         WHERE serverid = $1;
         """.format(self.schema)
         await self.pool.execute(sql, guild_id)
