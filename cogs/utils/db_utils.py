@@ -56,13 +56,22 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (serverid)
     );"""
 
+    voice_roles = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.voice_roles (
+      serverid BIGINT references {schema}.servers(serverid),
+      role_id BIGINT,
+      channel_id BIGINT,
+      addtime TIMESTAMP DEFAULT current_timestamp,
+      PRIMARY KEY (role_id, channel_id)
+    );
+    """
+
     voice_channels = f"""
-    CREATE TABLE IF NOT EXISTS {schema}.voice_channels (
+    CREATE TABLE IF NOT EXISTS {schema}.voice_logging (
       serverid BIGINT references {schema}.servers(serverid),
       channel_id BIGINT,
-      role_id BIGINT,
       addtime TIMESTAMP DEFAULT current_timestamp,
-      PRIMARY KEY (channel_id, role_id)
+      PRIMARY KEY (channel_id)
     );
     """
 
@@ -145,7 +154,12 @@ async def make_tables(pool: Pool, schema: str):
     );"""
 
     await pool.execute(servers)
-    await pool.execute(vplust)
+    await pool.execute(voice_channels)
+    await pool.execute(modlog_channels)
+    await pool.execute(welcome_channels)
+    await pool.execute(logging_channels)
+    await pool.execute(assignableroles)
+    await pool.execute(blacklist_channels)
     await pool.execute(warnings)
     await pool.execute(moderation)
     await pool.execute(slowchannels)
@@ -251,18 +265,6 @@ class PostgresController():
         """
         sql = f"""
         SELECT * FROM {self.schema}.servers as servers
-        LEFT JOIN {self.schema}.voice_channels as voice 
-        ON servers.server_id = voice.server_id
-        LEFT JOIN {self.schema}.modlog_channels as modlogs
-        ON servers.server_id = modlogs.server_id
-        LEFT JOIN {self.schema}.welcome_channels as welcome
-        ON servers.server_id = welcome.server_id
-        LEFT JOIN {self.schema}.logging_channels as logging
-        ON servers.server_id = logging.server_id
-        LEFT JOIN {self.schema}.assignable_roles as roles
-        ON servers.server_id = roles.server_id
-        LEFT JOIN {self.schema}.blacklist_channels as blacklist
-        ON servers.server_id = blacklist.server_id 
         WHERE serverid = $1
         """
         try:
@@ -325,7 +327,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.assignable_roles
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         try:
@@ -382,7 +384,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.modlog_channels
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         boolsql = """
@@ -576,7 +578,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.welcome_channels
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         try:
@@ -634,7 +636,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.logging_channels
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         boolsql = """
@@ -722,9 +724,9 @@ class PostgresController():
         :param channel_id: channel to add
         """
         sql = """
-        INSERT INTO {}.voice_channels
+        INSERT INTO {}.voice_logging
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         boolsql = """
@@ -749,7 +751,7 @@ class PostgresController():
         channel_list = await self.get_voice_channels(guild_id)
         channel_list.remove(channel_id)
         sql = """
-        DELETE FROM {}.voice_channels
+        DELETE FROM {}.voice_logging
         WHERE serverid = $1
         AND channel_id = $2;
         """.format(self.schema)
@@ -773,7 +775,7 @@ class PostgresController():
         :param guild_id: guild to search roles for
         """
         sql = """
-        SELECT * FROM {}.voice_channels
+        SELECT * FROM {}.voice_logging
         WHERE serverid = $1;
         """.format(self.schema)
         channel_list = []
@@ -790,7 +792,7 @@ class PostgresController():
         Returns a list of enabled voice roles for a guild
         """
         sql = """
-        SELECT role_id FROM {}.voice_channels
+        SELECT role_id FROM {}.voice_roles
         WHERE serverid = $1;
         """.format(self.schema)
         role_list = []
@@ -804,7 +806,7 @@ class PostgresController():
         Returns a list of channels for a given role
         """
         sql = """
-        SELECT * FROM {}.voice_channels
+        SELECT * FROM {}.voice_roles
         WHERE serverid = $1 AND roleid = $2;
         """.format(self.schema)
         channel_list = []
@@ -836,11 +838,11 @@ class PostgresController():
         :param guild_id: guild to pull role from
         """
         sql = """
-        INSERT INTO {}.voice_channels VALUES ($1, $2, $3)
+        INSERT INTO {}.voice_roles VALUES ($1, $2, $3)
         ON CONFLICT (role_id, channel_id) DO NOTHING;
         """.format(self.schema, self.schema)
         await self.pool.execute(
-            sql, guild_id, channel_id, role_id)
+            sql, guild_id, role_id, channel_id)
         return True
 
     async def rem_role_channel(
@@ -851,7 +853,7 @@ class PostgresController():
         :param channel_id: channel id to remove
         """
         sql = """
-        DELETE FROM {}.voice_channels
+        DELETE FROM {}.voice_roles
         WHERE channel_id = $1 AND role_id = $2
         """.format(self.schema)
         try:
@@ -866,7 +868,7 @@ class PostgresController():
         Removes all roles from a given server.
         """
         sql = """
-        DELETE FROM {}.voice_channels
+        DELETE FROM {}.voice_roles
         WHERE serverid = $1;
         """.format(self.schema)
         await self.pool.execute(sql, guild_id)
@@ -907,7 +909,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.blacklist_channels
         VALUES ($1, $2)
-        ON CONFLICT (serverid)
+        ON CONFLICT (channel_id)
         DO nothing;
         """.format(self.schema)
         try:
