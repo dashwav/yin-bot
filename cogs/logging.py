@@ -3,8 +3,7 @@ This cog will handle logging all server actions to a specific channel
 """
 import discord
 from discord.ext import commands
-from .utils import checks
-from .utils import embeds
+from .utils import checks, embeds
 
 
 class Logging(commands.Cog):
@@ -21,8 +20,6 @@ class Logging(commands.Cog):
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_logger_channels(
@@ -149,8 +146,6 @@ class Logging(commands.Cog):
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             voicelogs = await self.bot.pg_utils.get_voice_channels(

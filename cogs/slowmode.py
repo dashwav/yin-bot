@@ -64,8 +64,6 @@ class Slowmode(commands.Cog):
         """
         Adds or removes a channel to slowmode list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             return
 

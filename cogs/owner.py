@@ -3,7 +3,7 @@ Misc commands that I want to run
 """
 import traceback
 import discord
-from .utils import helpers
+from .utils import checks, helpers
 from discord.ext import commands
 
 

@@ -19,8 +19,6 @@ class Filter(commands.Cog):
         """
         Enables/Disables autodeletion of invites
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             allowed = self.bot.server_settings[ctx.guild.id]["invites_allowed"]
             local_embed = discord.Embed(
