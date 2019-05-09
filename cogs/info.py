@@ -3,7 +3,7 @@ Cog for giving out useful info: bot invite link, stats, ping, etc
 """
 import discord
 import datetime
-from .utils import embeds
+from .utils import checks, embeds
 from discord.ext import commands
 
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'

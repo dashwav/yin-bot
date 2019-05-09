@@ -19,8 +19,6 @@ class Warnings(commands.Cog):
         """
         Base command for warning system
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Command Error',
@@ -156,8 +154,6 @@ class Warnings(commands.Cog):
         """
         Returns all the warnings a user has gotten
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         try:
             warnings = None
             moderations = None
