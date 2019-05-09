@@ -11,7 +11,7 @@ from logging import Formatter, INFO, StreamHandler, getLogger
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
-from cogs.utils import checks
+from cogs.utils import checks, embeds
 
 
 class Yinbot(Bot):
@@ -105,6 +105,12 @@ class Yinbot(Bot):
             return
         elif isinstance(ctx.guild, type(None)):
             return
+        elif self.user in ctx.mentions:
+            await ctx.channel.send(
+                embed=embeds.MentionHelpEmbed(
+                    await self.get_pre(self, ctx)
+                    )
+                )
         elif not await checks.is_channel_blacklisted(self, ctx):
             await self.process_commands(ctx)
         else:
