@@ -38,7 +38,86 @@ async def get_postgres():
 async def migrate():
     pg_utils, logger = await get_postgres()
     print(await pg_utils.get_server_settings())
-    # TODO migrate script
+
+    get_servers_sql = f"""
+    SELECT * FROM yinbot.servers;
+    """
+
+    get_voice_roles = f"""
+    SELECT * FROM yinbot.roles;
+    """
+
+    servers = await pg_utils.pool.fetch(get_servers_sql)
+    roles = await pg_utils.pool.fetch(get_voice_roles)
+    errors = 0
+    for row in servers:
+        try:
+            for channel in row['modlog_channels']:
+                await pg_utils.add_modlog_channel(row['serverid'], channel, logger)
+            for channel in row['welcome_channels']:
+                await pg_utils.add_welcome_channel(row['serverid'], channel, logger)
+            for channel in row['logging_channels']:
+                await pg_utils.add_logger_channel(row['serverid'], channel, logger)
+            for channel in row['blacklist_channels']:
+                await pg_utils.add_blacklist_channel(row['serverid'], channel, logger)
+            for role in row['assignableroles']:
+                await pg_utils.add_assignable_role(row['serverid'], role, logger)
+            for channel in row['voice_channels']:
+                await pg_utils.add_voice_channel(row['serverid'], channel, logger)
+        except Exception as e:
+            errors += 1
+            print(e)
+    for row in roles:
+        try:
+            for channel in row['channels']:
+                await pg_utils.add_role_channel(row['serverid'], channel, row['roleid']) 
+        except Exception as e:
+            errors += 1
+            print(e)
+
+    if not errors == 0:
+        logger.critical("Errors when migrating, skipping destructive actions")
+        return
+    
+    drop_unnecessary_columns = f"""
+    ALTER TABLE yinbot.servers
+    DROP COLUMN voice_channels,
+    DROP COLUMN modlog_channels,
+    DROP COLUMN welcome_channels,
+    DROP COLUMN logging_channels,
+    DROP COLUMN assignableroles,
+    DROP COLUMN blacklist_channels;
+    """
+
+    drop_old_voice_table = f"""
+    DROP TABLE yinbot.roles;
+    """
+
+    add_temp_table = f"""
+    ALTER TABLE yinbot.servers ADD COLUMN addtime_t TIMESTAMP;
+    """
+
+    update_temp_table = f"""
+    UPDATE yinbot.servers set addtime_t = addtime;
+    """
+
+    drop_old_table = f"""
+    ALTER TABLE yinbot.servers DROP COLUMN addtime;
+    """
+
+    rename_temp_table = f"""
+    ALTER TABLE yinbot.servers RENAME COLUMN addtime_t TO addtime;
+    """
+    try:
+        await pg_utils.pool.execute(drop_unnecessary_columns)
+        await pg_utils.pool.execute(drop_old_voice_table)
+        await pg_utils.pool.execute(add_temp_table)
+        await pg_utils.pool.execute(update_temp_table)
+        await pg_utils.pool.execute(drop_old_table)
+        await pg_utils.pool.execute(rename_temp_table)
+    except Exception as e:
+        logger.critical("Error doing final migration:")
+        logger.critical(e)
     return
 
 def run():
