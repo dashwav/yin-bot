@@ -41,7 +41,7 @@ class Admin(commands.Cog):
                 description=' ',
                 color=0x651111
             )
-            await ctx.send(embed=local_embed)
+            await ctx.send(embed=local_embed, delete_after=3)
             return
         try:
             success = await self.bot.pg_utils.set_prefix(
@@ -56,6 +56,7 @@ class Admin(commands.Cog):
                     description=' ',
                     color=0x419400
                 )
+                await ctx.send(embed=local_embed, delete_after=3)
         except Exception as e:
             local_embed = embeds.InternalErrorEmbed()
             ctx.send(local_embed)
