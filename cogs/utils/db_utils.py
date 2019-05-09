@@ -86,7 +86,7 @@ async def make_tables(pool: Pool, schema: str):
     welcome_channels = f"""
     CREATE TABLE IF NOT EXISTS {schema}.welcome_channels (
       serverid BIGINT references {schema}.servers(serverid), 
-      channel_id bigint references {schema}.servers(serverid),
+      channel_id BIGINT,
       addtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (channel_id)
     );"""
@@ -328,7 +328,7 @@ class PostgresController():
         sql = """
         INSERT INTO {}.assignable_roles
         VALUES ($1, $2)
-        ON CONFLICT (channel_id)
+        ON CONFLICT (role_id)
         DO nothing;
         """.format(self.schema)
         try:
