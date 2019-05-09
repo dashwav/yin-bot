@@ -5,7 +5,6 @@ import json
 
 from discord.ext import commands
 
-
 CARBONITEX_API_BOTDATA = 'https://www.carbonitex.net/discord/data/botdata.php'
 DISCORD_BOTS_API = 'https://bots.discord.pw/api'
 
@@ -48,6 +47,7 @@ class Stats(commands.Cog):
             self.bot.logger.info(
                 f'DBots statistics returned {resp.status} for {payload}')
 
+    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         """
         await self.update()

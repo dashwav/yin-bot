@@ -69,6 +69,7 @@ class Filter(commands.Cog):
             )
         await ctx.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
