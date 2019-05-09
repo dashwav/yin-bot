@@ -682,3 +682,19 @@ class ModRmEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
+
+class MentionHelpEmbed(discord.Embed):
+    """
+    Embed for when someone gets a modaction removed
+    """
+    def __init__(self, prefix: str):
+        local_title = f'Yinbot Help'
+        local_desc = f'Prefix for this server is: `{prefix}`\n'\
+                     f'For more help please use `{prefix}help` '\
+                     f'or join the discord [here]({INVITE})'
+        super().__init__(
+            color=POSITIVECOLOR,
+            title=local_title,
+            description=local_desc,
+            )
+
