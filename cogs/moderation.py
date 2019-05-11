@@ -410,7 +410,7 @@ class Moderation(commands.Cog):
                     await member.dm_channel.send(embed=embed)
                 except Exception as e:
                     self.bot.logger.warning(f'Error messaging user!: {e}')
-                await member.kick(reason=f'by: {ctx.author} for: {reason}')
+                await member.kick(reason=f'by: {ctx.author} for: {reason[0:480]}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
                 try:
                     await self.bot.pg_utils.insert_modaction(
@@ -466,7 +466,7 @@ class Moderation(commands.Cog):
                 await ctx.guild.ban(
                     discord.Object(id=member_id),
                     delete_message_days=0,
-                    reason=f'by: {ctx.author} for: {reason}')
+                    reason=f'by: {ctx.author} for: {reason[0:480]}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
                 try:
                     await self.bot.pg_utils.insert_modaction(
@@ -513,7 +513,7 @@ class Moderation(commands.Cog):
             try:
                 await ctx.guild.unban(
                     member.user,
-                    reason=f'by: {ctx.author} for: {reason}')
+                    reason=f'by: {ctx.author} for: {reason[0:480]}')
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
             except Exception as e:
                 self.bot.logger.warning(f'Error unbanning user!: {e}')
