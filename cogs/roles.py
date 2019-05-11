@@ -27,8 +27,6 @@ class Roles(commands.Cog):
         """
         (Testing) Removes all members from a certain role
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -62,8 +60,6 @@ class Roles(commands.Cog):
         """
         Adds self-assignable role to user
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -107,8 +103,6 @@ class Roles(commands.Cog):
         """
         Removes self-assignable role from user
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -149,8 +143,6 @@ class Roles(commands.Cog):
         """
         manages servers assignable roles
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             message = ' \n'
             assignable_roles = []

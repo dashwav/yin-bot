@@ -42,8 +42,6 @@ class RNG(commands.Cog):
         The minimum must be smaller than the maximum and the maximum number
         accepted is 1000.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         maximum = min(maximum, 1000)
         if minimum >= maximum:
             await ctx.send('Maximum is smaller than minimum.')
@@ -56,8 +54,6 @@ class RNG(commands.Cog):
         """Chooses between multiple choices.
         To denote multiple choices, you should use double quotes.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         choices = text.split(';')
         if len(choices) < 2:
             return await ctx.send('Not enough choices to pick from.')
@@ -74,8 +70,6 @@ class RNG(commands.Cog):
         """
         Uses magic to determine the answer to a question
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if not question:
             return
         answer = rng.choice(self.answers)

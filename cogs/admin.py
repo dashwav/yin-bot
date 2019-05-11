@@ -19,8 +19,6 @@ class Admin(commands.Cog):
         """
         Either returns current prefix or sets new one
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Current prefix is: '
@@ -41,7 +39,7 @@ class Admin(commands.Cog):
                 description=' ',
                 color=0x651111
             )
-            await ctx.send(embed=local_embed)
+            await ctx.send(embed=local_embed, delete_after=3)
             return
         try:
             success = await self.bot.pg_utils.set_prefix(
@@ -56,6 +54,7 @@ class Admin(commands.Cog):
                     description=' ',
                     color=0x419400
                 )
+                await ctx.send(embed=local_embed, delete_after=3)
         except Exception as e:
             local_embed = embeds.InternalErrorEmbed()
             ctx.send(local_embed)
@@ -67,8 +66,6 @@ class Admin(commands.Cog):
         """
         Adds or removes a channel to modlog list
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_modlogs(
