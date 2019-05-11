@@ -12,10 +12,10 @@ import re
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
         ret = argument
-        if len(ret) > 512:
-            reason_max = 512 - len(ret) - len(argument)
-            raise commands.BadArgument(
-                f'reason is too long ({len(argument)}/{reason_max})')
+        # if len(ret) > 512:
+        #     reason_max = 512 - len(ret) - len(argument)
+        #     raise commands.BadArgument(
+        #         f'reason is too long ({len(argument)}/{reason_max})')
         return ret
 
 
@@ -379,7 +379,6 @@ class Moderation(commands.Cog):
                     "You need to supply a reason, try again.",
                     delete_after=5)
                 return
-        member = await self.bot.fetch_user_profile(member_id)
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
             embed = await self.create_embed(
