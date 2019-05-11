@@ -1,5 +1,5 @@
 """
-Handling the auto assignable roles and such
+Handling the auto assignable roles
 """
 
 import discord
@@ -9,8 +9,8 @@ from .utils import checks, embeds
 
 class Roles(commands.Cog):
     """
-    Cog to handle the ability of users to
-    add roles to themselves through use of a command
+    Cog to handle the ability of server owners
+    to create a list of roles that should be added on guild join
     """
 
     def __init__(self, bot):
@@ -23,17 +23,22 @@ class Roles(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         """
-        Actually handles printing the welcome message
+        Actually adds the autoassign roles
         """
-        # TODO: add auto assign logic
-        return
-
+        autoassign_roles = []
+        autoassign_role_ids = await \
+                self.bot.pg_utils.get_autoassign_roles(ctx.guild.id)
+        for role in ctx.guild.roles:
+            if role.id in autoassign_role_ids:
+                autoassign_roles.append(role)
+        await member.add_roles(autoassign_roles)
+        
     @commands.group(aliases=['aar', 'autoassign'])
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
     async def autoassignroles(self, ctx):
         """
-        manages servers autoassign roles
+        Manages server's autoassign roles
         """
         if ctx.invoked_subcommand is None:
             message = ' \n'
@@ -55,7 +60,7 @@ class Roles(commands.Cog):
     @assignableroles.command()
     async def add(self, ctx, *, role_name):
         """
-        Adds a role to the servers assignable roles list
+        Adds a role to the servers auto-assignable roles list
         """
         found_role = None
         for role in ctx.guild.roles:
@@ -98,7 +103,7 @@ class Roles(commands.Cog):
     @assignableroles.command()
     async def remove(self, ctx, *, role_name):
         """
-        Removes a role from the serves assignable roles list
+        Removes a role from the serves auto-assignable roles list
         """
         found_role = None
         for role in ctx.guild.roles:
