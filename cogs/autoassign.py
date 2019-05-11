@@ -28,6 +28,8 @@ class Roles(commands.Cog):
         autoassign_roles = []
         autoassign_role_ids = await \
                 self.bot.pg_utils.get_autoassign_roles(ctx.guild.id)
+        if not autoassign_role_ids:
+            return
         for role in ctx.guild.roles:
             if role.id in autoassign_role_ids:
                 autoassign_roles.append(role)
