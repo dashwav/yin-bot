@@ -121,6 +121,15 @@ async def make_tables(pool: Pool, schema: str):
     """
 
 
+    autoassign = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.autoassign(
+      serverid BIGINT references {schema}.servers(serverid),
+      role_id BIGINT,
+      addtime TIMESTAMP DEFAULT current_timestamp,
+      PRIMARY KEY (role_id)
+    );
+    """
+
     warnings = f"""
     CREATE TABLE IF NOT EXISTS {schema}.warnings(
       serverid BIGINT,
@@ -1287,3 +1296,61 @@ class PostgresController():
         except Exception as e:
             logger.warning(f'Error retrieving slowmode channels {e}')
             return False
+
+
+    async def add_autoassign_role(self, guild_id: int, role_id: int, logger):
+        """
+        Adds a role to the autoassign roles array for the server
+        :param guild_id: guild to add role to
+        :param role_id: role to add
+        """
+        sql = """
+        INSERT INTO {}.autoassign
+        VALUES ($1, $2)
+        ON CONFLICT (role_id)
+        DO nothing;
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, guild_id, role_id)
+            return True
+        except Exception as e:
+            logger.warning(f'Error adding role to server {guild_id}: {e}')
+            return False
+
+    async def remove_autoassign_role(
+            self, guild_id: int, role_id: int, logger):
+        """
+        Removes a role from the autoassign roles array for the server
+        :param guild_id: guild to remove role from
+        :param role_id: role to remove
+        """
+        sql = """
+        DELETE from {}.autoassign
+        WHERE server_id = $1
+        AND role_id = $2
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, guild_id, role_id)
+        except Exception as e:
+            logger.warning(f'Error removing roles: {e}')
+            return False
+        return True
+
+    async def get_autoassign_roles(self, guild_id: int):
+        """
+        returns a list of autoassign roles array for the server
+        :param guild_id: guild to remove role from
+        """
+        sql = """
+        SELECT * FROM {}.autoassign
+        WHERE serverid = $1;
+        """.format(self.schema)
+
+        role_list = []
+        try:
+            rows = await self.pool.fetch(sql, guild_id)
+            for row in rows:
+                role_list.append(row['role_id'])
+            return role_list
+        except Exception:
+            return []
