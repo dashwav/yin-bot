@@ -15,7 +15,7 @@ class Logging():
         self.logger = bot.logger
 
     @commands.group(aliases=['ldbc', 'get_these_errors_outta_here'])
-    @checks.is_owner()
+    @commands.is_owner()
     async def log_db_cleaning(self, ctx):
         """
         Cleans a deleted channel from the voice log and server log databases.
@@ -47,7 +47,7 @@ class Logging():
                     guild_id, remove_id, self.bot.logger
                 )
                 was_voice_removed = True
-        if was_log_removed or was_voice_removed
+        if was_log_removed or was_voice_removed:
             local_embed = discord.Embed(
             title = embed_title,
             description = f'Channel was removed from database',
@@ -541,22 +541,30 @@ class Logging():
                 self.bot.pg_utils.rem_logger_channel(
                     server_del, channel, self.bot.logger
                 )
-        if success:
+            if success:
+                self.bot.logger.info(
+                    f'Channel deleted from server {server_del}'
+                    f', removed from log db'
+                )
+        except Exception as e:
             self.bot.logger.info(
-                f'Channel deleted from server {server_del}'
-                f', removed from log db'
-            )
+                f'Issue removing channel {channel} from log database'
+                f' after deletion error: {e}'
         try:
             success = false
             success = await \
                 self.bot.pg_utils.rem_voice_channel(
                     server_del, channel, self.bot.logger
                 )
-        if success:
+            if success:
+                self.bot.logger.info(
+                    f'Channel deleted from server {server_del}'
+                    f', removed from voice log db'
+                )
+        except Exception as e:
             self.bot.logger.info(
-                f'Channel deleted from server {server_del}'
-                f', removed from log db'
-            )
+                f'Issue removing channel {channel} from voice database'
+                f' after deletion error: {e}'
             
             
 def setup(bot):
