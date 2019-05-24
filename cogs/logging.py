@@ -550,6 +550,7 @@ class Logging():
             self.bot.logger.info(
                 f'Issue removing channel {channel} from log database'
                 f' after deletion error: {e}'
+            )
         try:
             success = false
             success = await \
@@ -565,6 +566,7 @@ class Logging():
             self.bot.logger.info(
                 f'Issue removing channel {channel} from voice database'
                 f' after deletion error: {e}'
+            )
             
             
 def setup(bot):
