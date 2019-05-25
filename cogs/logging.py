@@ -383,12 +383,18 @@ class Logging():
                         before.content,
                         after.content
                     )
-                    for channel in channels:
-                        ch = self.bot.get_channel(channel)
-                        await ch.send(embed=local_embed)
+                    try:
+                        for channel in channels:
+                            ch = self.bot.get_channel(channel)
+                            await ch.send(embed=local_embed)
+                    except Exception as e:
+                        self.bot.logger.warning(
+                            f'Issue logging message edit in channel {channel}'
+                            f', error: {e}'
+                        )
                 except Exception as e:
                     self.bot.logger.warning(
-                        f'Issue logging message edit in channel {channel}'
+                        f'Issue making embed for channel {channel}'
                         f', error: {e}'
                     )
         except AttributeError:
@@ -409,12 +415,18 @@ class Logging():
                     message.channel.name,
                     message.content,
                 )
-                for channel in channels:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed=local_embed)
+                try:
+                    for channel in channels:
+                        ch = self.bot.get_channel(channel)
+                        await ch.send(embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.warning(
+                        f'Issue logging message delete in channel {channel}'
+                        f', error: {e}'
+                    )
             except Exception as e:
                 self.bot.logger.warning(
-                    f'Issue logging message delete in channel {channel}'
+                    f'Issue making embed for channel {channel}'
                     f', error: {e}'
                 )
 
@@ -529,7 +541,7 @@ class Logging():
                         f'Error logging voice move in'
                         f' channel {channel}, error: {e}'
                     )
-                    
+    @commands.Cog.listener()
     async def on_guild_channel_delete(channel):
         """
         attempts to remove deleted channel from the logging databases
