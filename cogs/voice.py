@@ -6,7 +6,7 @@ from .utils import checks, embeds
 from discord.ext import commands
 
 
-class Voice():
+class Voice(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
@@ -19,8 +19,6 @@ class Voice():
         """
         Returns whether voice_roles are enabled for the server
         """
-        if not await checks.is_channel_blacklisted(self,ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             vcrole_enabled = await\
@@ -170,6 +168,7 @@ class Voice():
         except Exception as e:
             self.bot.logger.warning(f'Error deleting voice role: {e}')
 
+    @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """
         Checks if a user has recently joined or left a voice channel and adds

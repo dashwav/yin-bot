@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Warnings:
+class Warnings(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
@@ -19,8 +19,6 @@ class Warnings:
         """
         Base command for warning system
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Command Error',
@@ -156,8 +154,6 @@ class Warnings:
         """
         Returns all the warnings a user has gotten
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         try:
             warnings = None
             moderations = None

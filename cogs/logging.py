@@ -3,11 +3,10 @@ This cog will handle logging all server actions to a specific channel
 """
 import discord
 from discord.ext import commands
-from .utils import checks
-from .utils import embeds
+from .utils import checks, embeds
 
 
-class Logging():
+class Logging(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()
@@ -70,8 +69,6 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_logger_channels(
@@ -198,8 +195,6 @@ class Logging():
         """
         Enables and disables logging to channel.
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             desc = ''
             voicelogs = await self.bot.pg_utils.get_voice_channels(
@@ -312,6 +307,7 @@ class Logging():
             )
             await ctx.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
         """
         sends message on user ban
@@ -329,7 +325,8 @@ class Logging():
                         f'Error logging user ban in channel {channel}'
                         f', error: {e}'
                     )
-                    
+
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         Sends message on a user join
@@ -348,6 +345,7 @@ class Logging():
                         f', error: {e}'
                     )
 
+    @commands.Cog.listener()
     async def on_member_remove(self, member):
         """
         Sends message on a user leaving
@@ -366,6 +364,7 @@ class Logging():
                         f', error: {e}'
                     )
 
+    @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """
         sends message on a user editing messages
@@ -400,6 +399,7 @@ class Logging():
         except AttributeError:
             pass
 
+    @commands.Cog.listener()
     async def on_message_delete(self, message):
         """
         sends message on a user editing messages
@@ -430,6 +430,7 @@ class Logging():
                     f', error: {e}'
                 )
 
+    @commands.Cog.listener()
     async def on_member_update(self, before, after):
         """
         sends message on a user role or name update
@@ -491,6 +492,7 @@ class Logging():
                         f' in channel {channel}, error {e}'
                     )  
 
+    @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """
         Sends a message on user vc update
