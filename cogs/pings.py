@@ -3,7 +3,7 @@ from discord.utils import find
 from .utils import checks, embeds
 
 
-class Pings():
+class Pings(commands.Cog):
 
     def __init__(self, bot):
         """

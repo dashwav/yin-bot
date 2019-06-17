@@ -7,7 +7,7 @@ from .utils import checks, embeds
 import re
 
 
-class Filter:
+class Filter(commands.Cog):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
@@ -19,8 +19,6 @@ class Filter:
         """
         Enables/Disables autodeletion of invites
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         if ctx.invoked_subcommand is None:
             allowed = self.bot.server_settings[ctx.guild.id]["invites_allowed"]
             local_embed = discord.Embed(
@@ -71,6 +69,7 @@ class Filter:
             )
         await ctx.send(embed=local_embed)
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:

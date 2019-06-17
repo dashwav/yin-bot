@@ -2,12 +2,13 @@
 Misc commands that I want to run
 """
 import traceback
+import yappi
 import discord
-from .utils import helpers
+from .utils import checks, helpers
 from discord.ext import commands
 
 
-class Owner():
+class Owner(commands.Cog):
     """
     Cog with misc owner commands
     """
@@ -123,6 +124,18 @@ class Owner():
                 await channel.send(f'{message}')
         except Exception as e:
             ctx.send('Error when trying to send fam')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def perf(self, ctx):
+        """
+        Prints callgrind file to callgrind.out
+        """
+        try:
+            yappi.get_func_stats().save('callgrind.out', 'CALLGRIND')
+            await ctx.send(":okansdf")
+        except Exception as e:
+            await ctx.send(f"Error doing that: {e}")
 
     @commands.command(hidden=True)
     @commands.is_owner()

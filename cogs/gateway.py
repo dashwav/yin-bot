@@ -8,12 +8,13 @@ from discord.ext import commands
 from .utils import checks
 
 
-class Gateway:
+class Gateway(commands.Cog):
 
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         Actually handles printing the welcome message
@@ -37,8 +38,6 @@ class Gateway:
         Welcome message command. If no subcommand is
         invoked, it will return the current welcome message
         """
-        if not await checks.is_channel_blacklisted(self, ctx):
-            return
         welcome_msg = await self.bot.pg_utils.get_welcome_message(
             ctx.guild.id,
             self.bot.logger

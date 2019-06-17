@@ -64,14 +64,14 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# MKDOCS
+documentation/site/
+
 # PyBuilder
 target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# pyenv
-.python-version
 
 # celery beat schedule file
 celerybeat-schedule

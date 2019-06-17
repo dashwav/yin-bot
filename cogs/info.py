@@ -3,13 +3,13 @@ Cog for giving out useful info: bot invite link, stats, ping, etc
 """
 import discord
 import datetime
-from .utils import embeds
+from .utils import checks, embeds
 from discord.ext import commands
 
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'
 
 
-class Info():
+class Info(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -48,11 +48,12 @@ class Info():
         total_servers = len(self.bot.guilds)
         total_users = len(self.bot.users)
         version_number = self.bot.version
+        commit = self.bot.commit
         local_embed = discord.Embed(
             title=f'__Stats__',
             description=f'Total Servers: {total_servers}\n'
                         f'Total Users: {total_users}\n'
                         f'Uptime: {uptime}\n'
         )
-        local_embed.set_footer(text=f'yinbot v{version_number}')
+        local_embed.set_footer(text=f'yinbot v{version_number}{commit}')
         await ctx.send(embed=local_embed)
