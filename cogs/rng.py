@@ -52,7 +52,7 @@ class RNG(commands.Cog):
     @commands.command()
     async def choose(self, ctx, *, text):
         """Chooses between multiple choices.
-        To denote multiple choices, you should use double quotes.
+        To denote multiple choices, you should use a semicolon ;.
         """
         choices = text.split(';')
         if len(choices) < 2:

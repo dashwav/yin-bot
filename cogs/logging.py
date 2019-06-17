@@ -13,7 +13,7 @@ class Logging(commands.Cog):
         self.bot = bot
         self.logger = bot.logger
 
-    @commands.group(aliases=['ldbc', 'get_these_errors_outta_here'])
+    @commands.group(hidden=True,aliases=['ldbc', 'get_these_errors_outta_here'])
     @commands.is_owner()
     async def log_db_cleaning(self, ctx):
         """

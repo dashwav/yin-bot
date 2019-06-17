@@ -2,6 +2,7 @@
 General purpose discord bot with a focus on doing moderation simply and well
 """
 import yaml
+import yappi
 import subprocess
 import datetime
 from time import time, sleep
@@ -81,6 +82,7 @@ class Yinbot(Bot):
         """
         for cog in cogs:
             self.add_cog(cog)
+        yappi.start()
         self.run(self.credentials)
 
     async def on_ready(self):

@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils import checks, embeds
 
 
-class Roles(commands.Cog):
+class AutoAssign(commands.Cog):
     """
     Cog to handle the ability of server owners
     to create a list of roles that should be added on guild join
@@ -27,13 +27,13 @@ class Roles(commands.Cog):
         """
         autoassign_roles = []
         autoassign_role_ids = await \
-                self.bot.pg_utils.get_autoassign_roles(ctx.guild.id)
+                self.bot.pg_utils.get_autoassign_roles(member.guild.id)
         if not autoassign_role_ids:
             return
-        for role in ctx.guild.roles:
+        for role in member.guild.roles:
             if role.id in autoassign_role_ids:
                 autoassign_roles.append(role)
-        await member.add_roles(autoassign_roles)
+        await member.add_roles(*autoassign_roles)
         
     @commands.group(aliases=['aar', 'autoassign'])
     @commands.guild_only()
@@ -59,7 +59,7 @@ class Roles(commands.Cog):
             )
             await ctx.send(embed=local_embed)
 
-    @assignableroles.command()
+    @autoassignroles.command()
     async def add(self, ctx, *, role_name):
         """
         Adds a role to the servers auto-assignable roles list
@@ -102,7 +102,7 @@ class Roles(commands.Cog):
             )
         await ctx.send(embed=local_embed)
 
-    @assignableroles.command()
+    @autoassignroles.command()
     async def remove(self, ctx, *, role_name):
         """
         Removes a role from the serves auto-assignable roles list

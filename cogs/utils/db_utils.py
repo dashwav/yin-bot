@@ -172,6 +172,7 @@ async def make_tables(pool: Pool, schema: str):
     await pool.execute(blacklist_channels)
     await pool.execute(warnings)
     await pool.execute(moderation)
+    await pool.execute(autoassign)
     await pool.execute(slowchannels)
 
 
@@ -356,7 +357,7 @@ class PostgresController():
         """
         sql = """
         DELETE from {}.assignable_roles
-        WHERE server_id = $1
+        WHERE serverid = $1
         AND role_id = $2
         """.format(self.schema)
         try:
@@ -1326,7 +1327,7 @@ class PostgresController():
         """
         sql = """
         DELETE from {}.autoassign
-        WHERE server_id = $1
+        WHERE serverid = $1
         AND role_id = $2
         """.format(self.schema)
         try:
