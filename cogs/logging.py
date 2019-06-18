@@ -444,6 +444,8 @@ class Logging(commands.Cog):
             return
         if before.roles == after.roles:
             return
+        channels = await self.bot.pg_utils.get_logger_channels(
+                before.guild.id)
         role_diff = set(after.roles) - (set(before.roles))
         for role in role_diff:
             local_embed = embeds.RoleAddEmbed(
@@ -493,8 +495,6 @@ class Logging(commands.Cog):
             extended_channels.extend(
                 await self.bot.pg_utils.get_logger_channels(
                     guild_id))
-        channels = await self.bot.pg_utils.get_logger_channels(
-                before.guild.id)
         local_embed = embeds.UsernameUpdateEmbed(
             after, before.name, after.name)
         for channel in extended_channels:
