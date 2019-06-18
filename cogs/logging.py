@@ -437,17 +437,6 @@ class Logging(commands.Cog):
         """
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
-        user_mutuals = []
-        for guild in self.bot.guilds:
-            if before in guild.members:
-                user_mutuals.append(guild.id)
-        extended_channels = []
-        for guild_id in user_mutuals:
-            extended_channels.extend(
-                await self.bot.pg_utils.get_logger_channels(
-                    guild_id))
-        channels = await self.bot.pg_utils.get_logger_channels(
-                before.guild.id)
         if before.roles != after.roles:
             role_diff = set(after.roles) - (set(before.roles))
             for role in role_diff:
@@ -479,18 +468,38 @@ class Logging(commands.Cog):
                             f'Error logging role remove in'
                             f' channel {channel}, error: {e}'
                         )
-        if before.name != after.name:
-            local_embed = embeds.UsernameUpdateEmbed(
-                after, before.name, after.name)
-            for channel in extended_channels:
-                try:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed=local_embed)
-                except Exception as e:
-                    self.bot.logger.info(
-                        f'Error logging name change'
-                        f' in channel {channel}, error {e}'
-                    )  
+
+    @commands.Cog.listener()
+    async def on_user_update(self, before, after):
+        """
+        sends message on a username update
+        """
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
+        if before.name == after.name:
+            return
+        user_mutuals = []
+        for guild in self.bot.guilds:
+            if before in guild.members:
+                user_mutuals.append(guild.id)
+        extended_channels = []
+        for guild_id in user_mutuals:
+            extended_channels.extend(
+                await self.bot.pg_utils.get_logger_channels(
+                    guild_id))
+        channels = await self.bot.pg_utils.get_logger_channels(
+                before.guild.id)
+        local_embed = embeds.UsernameUpdateEmbed(
+            after, before.name, after.name)
+        for channel in extended_channels:
+            try:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed=local_embed)
+            except Exception as e:
+                self.bot.logger.info(
+                    f'Error logging name change'
+                    f' in channel {channel}, error {e}'
+                )
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
