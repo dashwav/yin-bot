@@ -312,90 +312,94 @@ class Logging(commands.Cog):
         """
         sends message on user ban
         """
-        if self.bot.server_settings[guild.id]['logging_enabled']:
-            channels = await self.bot.pg_utils.get_logger_channels(
-                guild.id)
-            local_embed = embeds.LogBanEmbed(user)
-            for channel in channels:
-                try:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed = local_embed)
-                except Exception as e:
-                    self.bot.logger.info(
-                        f'Error logging user ban in channel {channel}'
-                        f', error: {e}'
-                    )
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
+        channels = await self.bot.pg_utils.get_logger_channels(
+            guild.id)
+        local_embed = embeds.LogBanEmbed(user)
+        for channel in channels:
+            try:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed = local_embed)
+            except Exception as e:
+                self.bot.logger.info(
+                    f'Error logging user ban in channel {channel}'
+                    f', error: {e}'
+                )
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
         """
         Sends message on a user join
         """
-        if self.bot.server_settings[member.guild.id]['logging_enabled']:
-            channels = await self.bot.pg_utils.get_logger_channels(
-                member.guild.id)
-            local_embed = embeds.JoinEmbed(member)
-            for channel in channels:
-                try:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed = local_embed)
-                except Exception as e:
-                    self.bot.logger.info(
-                        f'Error logging user join in channel {channel}'
-                        f', error: {e}'
-                    )
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
+        channels = await self.bot.pg_utils.get_logger_channels(
+            member.guild.id)
+        local_embed = embeds.JoinEmbed(member)
+        for channel in channels:
+            try:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed = local_embed)
+            except Exception as e:
+                self.bot.logger.info(
+                    f'Error logging user join in channel {channel}'
+                    f', error: {e}'
+                )
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         """
         Sends message on a user leaving
         """
-        if self.bot.server_settings[member.guild.id]['logging_enabled']:
-            channels = await self.bot.pg_utils.get_logger_channels(
-                member.guild.id)
-            local_embed = embeds.LeaveEmbed(member)
-            for channel in channels:
-                try:
-                    ch = self.bot.get_channel(channel)
-                    await ch.send(embed = local_embed)
-                except Exception as e:
-                    self.bot.logger.info(
-                        f'Error logging user leave in channel {channel}'
-                        f', error: {e}'
-                    )
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
+        channels = await self.bot.pg_utils.get_logger_channels(
+            member.guild.id)
+        local_embed = embeds.LeaveEmbed(member)
+        for channel in channels:
+            try:
+                ch = self.bot.get_channel(channel)
+                await ch.send(embed = local_embed)
+            except Exception as e:
+                self.bot.logger.info(
+                    f'Error logging user leave in channel {channel}'
+                    f', error: {e}'
+                )
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """
         sends message on a user editing messages
         """
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
         try:
-            if self.bot.server_settings[before.guild.id]['logging_enabled']:
-                if not before.content.strip() != after.content.strip():
-                    return
-                channels = await self.bot.pg_utils.get_logger_channels(
-                    before.guild.id)
+            if not before.content.strip() != after.content.strip():
+                return
+            channels = await self.bot.pg_utils.get_logger_channels(
+                before.guild.id)
+            try:
+                local_embed = embeds.MessageEditEmbed(
+                    before.author,
+                    before.channel.name,
+                    before.content,
+                    after.content
+                )
                 try:
-                    local_embed = embeds.MessageEditEmbed(
-                        before.author,
-                        before.channel.name,
-                        before.content,
-                        after.content
-                    )
-                    try:
-                        for channel in channels:
-                            ch = self.bot.get_channel(channel)
-                            await ch.send(embed=local_embed)
-                    except Exception as e:
-                        self.bot.logger.warning(
-                            f'Issue logging message edit in channel {channel}'
-                            f', error: {e}'
-                        )
+                    for channel in channels:
+                        ch = self.bot.get_channel(channel)
+                        await ch.send(embed=local_embed)
                 except Exception as e:
                     self.bot.logger.warning(
-                        f'Issue making embed for channel {channel}'
+                        f'Issue logging message edit in channel {channel}'
                         f', error: {e}'
                     )
+            except Exception as e:
+                self.bot.logger.warning(
+                    f'Issue making embed for channel {channel}'
+                    f', error: {e}'
+                )
         except AttributeError:
             pass
 
@@ -404,31 +408,32 @@ class Logging(commands.Cog):
         """
         sends message on a user editing messages
         """
-        if self.bot.server_settings[message.guild.id]['logging_enabled']:
-            if message.author.bot:
-                return
-            channels = await self.bot.pg_utils.get_logger_channels(
-                message.guild.id)
+        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+            return
+        if message.author.bot:
+            return
+        channels = await self.bot.pg_utils.get_logger_channels(
+            message.guild.id)
+        try:
+            local_embed = embeds.MessageDeleteEmbed(
+                message.author,
+                message.channel.name,
+                message.content,
+            )
             try:
-                local_embed = embeds.MessageDeleteEmbed(
-                    message.author,
-                    message.channel.name,
-                    message.content,
-                )
-                try:
-                    for channel in channels:
-                        ch = self.bot.get_channel(channel)
-                        await ch.send(embed=local_embed)
-                except Exception as e:
-                    self.bot.logger.warning(
-                        f'Issue logging message delete in channel {channel}'
-                        f', error: {e}'
-                    )
+                for channel in channels:
+                    ch = self.bot.get_channel(channel)
+                    await ch.send(embed=local_embed)
             except Exception as e:
                 self.bot.logger.warning(
-                    f'Issue making embed for channel {channel}'
+                    f'Issue logging message delete in channel {channel}'
                     f', error: {e}'
                 )
+        except Exception as e:
+            self.bot.logger.warning(
+                f'Issue making embed for channel {channel}'
+                f', error: {e}'
+            )
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -437,37 +442,38 @@ class Logging(commands.Cog):
         """
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
-        if before.roles != after.roles:
-            role_diff = set(after.roles) - (set(before.roles))
-            for role in role_diff:
-                local_embed = embeds.RoleAddEmbed(
-                    after,
-                    role.name
-                )
-                for channel in channels:
-                    try:
-                        ch = self.bot.get_channel(channel)
-                        await ch.send(embed=local_embed)
-                    except Exception as e:
-                        self.bot.logger.info(
-                            f'Error logging role change'
-                            f' in channel {channel}, error: {e}'
-                        )
-            role_diff = set(before.roles) - (set(after.roles))
-            for role in role_diff:
-                local_embed = embeds.RoleRemoveEmbed(
-                    after,
-                    role.name
-                )
-                for channel in channels:
-                    try:
-                        ch = self.bot.get_channel(channel)
-                        await ch.send(embed=local_embed)
-                    except Exception as e:
-                        self.bot.logger.info(
-                            f'Error logging role remove in'
-                            f' channel {channel}, error: {e}'
-                        )
+        if before.roles == after.roles:
+            return
+        role_diff = set(after.roles) - (set(before.roles))
+        for role in role_diff:
+            local_embed = embeds.RoleAddEmbed(
+                after,
+                role.name
+            )
+            for channel in channels:
+                try:
+                    ch = self.bot.get_channel(channel)
+                    await ch.send(embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.info(
+                        f'Error logging role change'
+                        f' in channel {channel}, error: {e}'
+                    )
+        role_diff = set(before.roles) - (set(after.roles))
+        for role in role_diff:
+            local_embed = embeds.RoleRemoveEmbed(
+                after,
+                role.name
+            )
+            for channel in channels:
+                try:
+                    ch = self.bot.get_channel(channel)
+                    await ch.send(embed=local_embed)
+                except Exception as e:
+                    self.bot.logger.info(
+                        f'Error logging role remove in'
+                        f' channel {channel}, error: {e}'
+                    )
 
     @commands.Cog.listener()
     async def on_user_update(self, before, after):
