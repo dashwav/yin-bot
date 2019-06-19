@@ -312,7 +312,7 @@ class Logging(commands.Cog):
         """
         sends message on user ban
         """
-        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+        if not self.bot.server_settings[guild.id]['logging_enabled']:
             return
         channels = await self.bot.pg_utils.get_logger_channels(
             guild.id)
@@ -332,7 +332,7 @@ class Logging(commands.Cog):
         """
         Sends message on a user join
         """
-        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+        if not self.bot.server_settings[guild.id]['logging_enabled']:
             return
         channels = await self.bot.pg_utils.get_logger_channels(
             member.guild.id)
@@ -352,7 +352,7 @@ class Logging(commands.Cog):
         """
         Sends message on a user leaving
         """
-        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+        if not self.bot.server_settings[member.guild.id]['logging_enabled']:
             return
         channels = await self.bot.pg_utils.get_logger_channels(
             member.guild.id)
@@ -408,7 +408,7 @@ class Logging(commands.Cog):
         """
         sends message on a user editing messages
         """
-        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
+        if not self.bot.server_settings[message.guild.id]['logging_enabled']:
             return
         if message.author.bot:
             return
@@ -482,8 +482,6 @@ class Logging(commands.Cog):
         """
         sends message on a username update
         """
-        if not self.bot.server_settings[before.guild.id]['logging_enabled']:
-            return
         if before.name == after.name:
             return
         user_mutuals = []
