@@ -332,7 +332,7 @@ class Logging(commands.Cog):
         """
         Sends message on a user join
         """
-        if not self.bot.server_settings[guild.id]['logging_enabled']:
+        if not self.bot.server_settings[member.guild.id]['logging_enabled']:
             return
         channels = await self.bot.pg_utils.get_logger_channels(
             member.guild.id)
