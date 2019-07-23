@@ -21,7 +21,7 @@ class Yinbot(Bot):
     """
     def __init__(self, config, logger,
                  pg_utils: PostgresController,
-                 server_settings: dict):
+                 server_settings: dict, blacklist: list=[]):
         """
         init for bot class
         """
@@ -39,6 +39,7 @@ class Yinbot(Bot):
         self.bot_owner_id = config['owner_id']
         self.base_voice = config['base_voice']
         self.logger = logger
+        self.blchannels = blacklist
         super().__init__(command_prefix=self.get_pre)
 
     @classmethod
@@ -67,7 +68,8 @@ class Yinbot(Bot):
                 logger.debug(f'Error: {e}')
                 sleep(5)
         server_settings = await pg_utils.get_server_settings()
-        return cls(config, logger, pg_utils, server_settings)
+        blchannels = await pg_utils.get_all_blacklist_channels()
+        return cls(config, logger, pg_utils, server_settings, blchannels)
 
     async def get_pre(self, bot, message):
         try:
@@ -113,7 +115,7 @@ class Yinbot(Bot):
                     await self.get_pre(self, ctx)
                     )
                 )
-        elif not await checks.is_channel_blacklisted(self, ctx):
+        elif not ctx.channel.id in self.blchannels:
             await self.process_commands(ctx)
         else:
             permis = False
