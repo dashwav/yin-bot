@@ -116,24 +116,15 @@ class Yinbot(Bot):
         elif not await checks.is_channel_blacklisted(self, ctx):
             await self.process_commands(ctx)
         else:
-            perms = {'administrator': True}
             permis = False
             is_owner = await self.is_owner(ctx.author)
             if is_owner:
                 permis = True
-            resolved = ctx.channel.permissions_for(ctx.author)
-            if getattr(resolved, 'administrator', None) == perms['administrator']:
-                permis = True
-                regexp = re.compile(
-                    r'(^.bloverride)')
-                if bool(regexp.search(ctx.content)) and permis:
-                    try:
-                        success = await \
-                            self.pg_utils.rem_blacklist_channel(
-                            ctx.guild.id, ctx.channel.id, self.logger
-                        )
-                        await ctx.delete()
-                    except:
-                        await ctx.delete()
-                        return
+            if not permis:
+                resolved = ctx.channel.permissions_for(ctx.author)
+                if getattr(resolved, 'administrator', None) or getattr(resolved, 'kick_members', None):
+                    permis = True
+            if permis:
+                await self.process_commands(ctx)
+            return
         return
