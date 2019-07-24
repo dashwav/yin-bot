@@ -967,7 +967,7 @@ class PostgresController():
         except Exception:
             return []
 
-    async def get_all_blacklist_channels(self, guild_id: int):
+    async def get_all_blacklist_channels(self):
         """
         Returns a list of channel ids for posting mod actions
         :param guild_id: guild to search roles for
@@ -977,7 +977,7 @@ class PostgresController():
         """.format(self.schema)
         channel_list = []
         try:
-            rows = await self.pool.fetch(sql, guild_id)
+            rows = await self.pool.fetch(sql)
             for row in rows:
                 channel_list.append(row['channel_id'])
             return channel_list
