@@ -208,6 +208,7 @@ class Admin(commands.Cog):
                 )
             if success:
                 added_channels.append(ctx.message.channel.name)
+                self.bot.blchannels.append(ctx.message.channel.id)
             if added_channels:
                 for channel in added_channels:
                     desc += f'{channel} \n'
@@ -244,6 +245,8 @@ class Admin(commands.Cog):
                 absent_channels.append(ctx.message.channel.name)
             if success:
                 removed_channels.append(ctx.message.channel.name)
+                if ctx.message.channel.id in self.bot.blchannels:
+                    del self.bot.blchannels[self.bot.blchannels.index(ctx.message.channel.id)]
             if removed_channels:
                 for channel in removed_channels:
                     desc += f'{channel} \n'

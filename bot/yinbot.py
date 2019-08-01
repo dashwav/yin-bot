@@ -21,7 +21,7 @@ class Yinbot(Bot):
     """
     def __init__(self, config, logger,
                  pg_utils: PostgresController,
-                 server_settings: dict):
+                 server_settings: dict, blacklist: list=[]):
         """
         init for bot class
         """
@@ -39,6 +39,7 @@ class Yinbot(Bot):
         self.bot_owner_id = config['owner_id']
         self.base_voice = config['base_voice']
         self.logger = logger
+        self.blchannels = blacklist
         super().__init__(command_prefix=self.get_pre)
 
     @classmethod
@@ -67,7 +68,8 @@ class Yinbot(Bot):
                 logger.debug(f'Error: {e}')
                 sleep(5)
         server_settings = await pg_utils.get_server_settings()
-        return cls(config, logger, pg_utils, server_settings)
+        blchannels = await pg_utils.get_all_blacklist_channels()
+        return cls(config, logger, pg_utils, server_settings, blchannels)
 
     async def get_pre(self, bot, message):
         try:
@@ -113,27 +115,18 @@ class Yinbot(Bot):
                     await self.get_pre(self, ctx)
                     )
                 )
-        elif not await checks.is_channel_blacklisted(self, ctx):
+        elif not ctx.channel.id in self.blchannels:
             await self.process_commands(ctx)
         else:
-            perms = {'administrator': True}
             permis = False
             is_owner = await self.is_owner(ctx.author)
             if is_owner:
                 permis = True
-            resolved = ctx.channel.permissions_for(ctx.author)
-            if getattr(resolved, 'administrator', None) == perms['administrator']:
-                permis = True
-                regexp = re.compile(
-                    r'(^.bloverride)')
-                if bool(regexp.search(ctx.content)) and permis:
-                    try:
-                        success = await \
-                            self.pg_utils.rem_blacklist_channel(
-                            ctx.guild.id, ctx.channel.id, self.logger
-                        )
-                        await ctx.delete()
-                    except:
-                        await ctx.delete()
-                        return
+            if not permis:
+                resolved = ctx.channel.permissions_for(ctx.author)
+                if getattr(resolved, 'administrator', None) or getattr(resolved, 'kick_members', None):
+                    permis = True
+            if permis:
+                await self.process_commands(ctx)
+            return
         return
