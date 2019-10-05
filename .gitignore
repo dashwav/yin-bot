@@ -100,7 +100,7 @@ ENV/
 # mypy
 .mypy_cache/
 .vscode
-.DS_Store
+*.DS_Store
 
 # Config
 config.yml
