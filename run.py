@@ -3,8 +3,8 @@ Actually runs the code
 """
 from asyncio import get_event_loop
 from bot import Yinbot
-from cogs import Moderation, Owner, Roles, Slowmode, Stats, RNG, Pings, AutoAssign
-from cogs import Admin, Gateway, Info, Logging, Voice, Filter, Warnings
+from cogs import Admin, AutoAssign, Filter, Gateway, Info, Logging, Moderation
+from cogs import Owner, Pings, RNG, Roles, Slowmode, Stats, Voice, Warnings
 
 
 def run():
@@ -21,14 +21,14 @@ def run():
       Info(bot),
       Logging(bot),
       Moderation(bot),
+      Owner(bot),
+      Pings(bot),
       RNG(bot),
       Roles(bot),
       Slowmode(bot),
       Stats(bot),
-      Voice(bot),
-      Owner(bot),
-      Warnings(bot),
-      Pings(bot)
+      Voice(bot),  
+      Warnings(bot)
     ]
     bot.start_bot(cogs)
 
