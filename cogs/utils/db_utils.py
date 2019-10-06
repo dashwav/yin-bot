@@ -36,7 +36,8 @@ async def make_tables(pool: Pool, schema: str):
 
     """
     #################################################################################
-    This section is to be used for creating tables meant for server info and settings
+    This section is to be used for creating tables
+    meant for server info and settings
     #################################################################################
     """
 
@@ -85,7 +86,7 @@ async def make_tables(pool: Pool, schema: str):
 
     welcome_channels = f"""
     CREATE TABLE IF NOT EXISTS {schema}.welcome_channels (
-      serverid BIGINT references {schema}.servers(serverid), 
+      serverid BIGINT references {schema}.servers(serverid),
       channel_id BIGINT,
       addtime TIMESTAMP DEFAULT current_timestamp,
       PRIMARY KEY (channel_id)
@@ -119,7 +120,6 @@ async def make_tables(pool: Pool, schema: str):
     #################################################################################
     #################################################################################
     """
-
 
     autoassign = f"""
     CREATE TABLE IF NOT EXISTS {schema}.autoassign(
@@ -1026,7 +1026,7 @@ class PostgresController():
         INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
         """.format(self.schema)
 
-        moderations = await self.get_moderation_count(guild_id, target_id)
+        # moderations = await self.get_moderation_count(guild_id, target_id)
         all_modac_i = await self.get_modaction_indexes(guild_id, target_id)
         if all_modac_i:
             index = max(all_modac_i) + 1
@@ -1034,7 +1034,7 @@ class PostgresController():
             index = 1
 
         await self.pool.execute(
-            sql, 
+            sql,
             guild_id,
             mod_id,
             target_id,
@@ -1043,7 +1043,8 @@ class PostgresController():
             reason
         )
 
-    async def get_moderation(self, guild_id: int, user_id: int, logger, recent=False):
+    async def get_moderation(
+            self, guild_id: int, user_id: int, logger, recent=False):
         """
         Returns all moderation that a user has been done to
         :param guild_id: guild to search moderations
@@ -1052,7 +1053,7 @@ class PostgresController():
         if recent:
             sql = """
             SELECT * FROM {}.moderation
-            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month');
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month'); # noqa
             """.format(self.schema)
         else:
             sql = """
@@ -1065,7 +1066,8 @@ class PostgresController():
             logger.warning(f'Error retrieving moderations {e}')
             return False
 
-    async def get_single_modaction(self, guild_id: int, user_id: int, index: int, logger):
+    async def get_single_modaction(
+            self, guild_id: int, user_id: int, index: int, logger):
         """
         Returns a single modaction a user has on a server given the index
         :param guild_id: guild to search infractions
@@ -1094,16 +1096,18 @@ class PostgresController():
         """
         sql = """
         UPDATE {}.moderation
-        SET reason=$1, moderatorid=$2, action=$3 WHERE serverid = $4 AND userid = $5 AND indexid = $6;
+        SET reason=$1, moderatorid=$2, action=$3 WHERE serverid = $4 AND userid = $5 AND indexid = $6; # noqa
         """.format(self.schema)
         try:
-            await self.pool.execute(sql, reason, mod_id, action_type.value, guild_id, user_id, index)
+            await self.pool.execute(
+                sql, reason, mod_id, action_type.value,
+                guild_id, user_id, index)
         except Exception as e:
             logger.warning(f'Error retrieving moderation action {e}')
         return await self.get_moderation_count(guild_id, user_id)
 
     async def delete_single_modaction(self, guild_id: int, user_id: str,
-                                    index: int, logger):
+                                      index: int, logger):
         """
         Delete a single modaction a user has on a server given the index
         :param guild_id: guild to search infractions
@@ -1184,7 +1188,8 @@ class PostgresController():
             logger.warning(f'Error inserting warning into db: {e}')
             return False
 
-    async def get_single_warning(self, guild_id: int, user_id: int, index: int, logger):
+    async def get_single_warning(
+            self, guild_id: int, user_id: int, index: int, logger):
         """
         Returns a single warnings a user has on a server given the index
         :param guild_id: guild to search infractions
@@ -1213,10 +1218,11 @@ class PostgresController():
         """
         sql = """
         UPDATE {}.warnings
-        SET reason=$1, major=$2 WHERE serverid = $3 AND userid = $4 AND indexid = $5;
+        SET reason=$1, major=$2 WHERE serverid = $3 AND userid = $4 AND indexid = $5; # noqa
         """.format(self.schema)
         try:
-            await self.pool.execute(sql, reason, major, guild_id, user_id, index)
+            await self.pool.execute(
+                sql, reason, major, guild_id, user_id, index)
         except Exception as e:
             logger.warning(f'Error retrieving warnings {e}')
         return await self.get_warning_count(guild_id, user_id)
@@ -1239,17 +1245,18 @@ class PostgresController():
             logger.warning(f'Error deleting warning {e}')
             return False
 
-    async def get_warnings(self, guild_id: int, user_id: int, logger, recent = False):
+    async def get_warnings(
+            self, guild_id: int, user_id: int, logger, recent=False):
         """
         Returns all warnings a user has on a server
         :param guild_id: guild to search infractions
         :param user_id: user id to count for
         """
         if recent:
-            f = '%Y-%m-%d'
+            # f = '%Y-%m-%d'
             sql = """
             SELECT * FROM {}.warnings
-            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month') ORDER BY indexid;
+            WHERE serverid = $1 AND userid = $2 AND (logtime >= DATE_TRUNC('month', now()) - INTERVAL '6 month') ORDER BY indexid; # noqa
             """.format(self.schema)
         else:
             sql = """
@@ -1314,7 +1321,6 @@ class PostgresController():
         except Exception as e:
             logger.warning(f'Error retrieving slowmode channels {e}')
             return False
-
 
     async def add_autoassign_role(self, guild_id: int, role_id: int, logger):
         """
