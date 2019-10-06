@@ -4,7 +4,6 @@ Handling the auto assignable roles
 
 import discord
 from discord.ext import commands
-from .utils import checks, embeds
 
 
 class AutoAssign(commands.Cog):
@@ -27,14 +26,14 @@ class AutoAssign(commands.Cog):
         """
         autoassign_roles = []
         autoassign_role_ids = await \
-                self.bot.pg_utils.get_autoassign_roles(member.guild.id)
+            	self.bot.pg_utils.get_autoassign_roles(member.guild.id)
         if not autoassign_role_ids:
             return
         for role in member.guild.roles:
             if role.id in autoassign_role_ids:
                 autoassign_roles.append(role)
         await member.add_roles(*autoassign_roles)
-        
+
     @commands.group(aliases=['aar', 'autoassign'])
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
@@ -148,5 +147,6 @@ class AutoAssign(commands.Cog):
             )
             await ctx.send(embed=local_embed)
 
+
 def setup(bot):
-    bot.add_cog(Roles(bot))
+	bot.add_cog(AutoAssign(bot))
