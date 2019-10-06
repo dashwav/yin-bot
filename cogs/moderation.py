@@ -7,7 +7,8 @@ from discord.ext import commands
 from .utils import helpers, checks, embeds, enums
 from .utils.functions import GeneralMember, MemberID, BannedMember
 from .utils.enums import Action
-import re
+# import never used; import re
+
 
 class ActionReason(commands.Converter):
     async def convert(self, ctx, argument):
@@ -31,7 +32,7 @@ class Moderation(commands.Cog):
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, *,
-                     reason: ActionReason=None):
+                     reason: ActionReason = None):
         """
         Logs a right-click ban to modlog channels
         """
@@ -78,7 +79,7 @@ class Moderation(commands.Cog):
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def moderate(self, ctx, member: GeneralMember, *,
-                       reason: ActionReason=None):
+                       reason: ActionReason = None):
         """
         Edits a punishment for a user
         """
@@ -114,8 +115,8 @@ class Moderation(commands.Cog):
         return
 
     @moderate.command(aliases=['e'])
-    async def edit(self, ctx, member: GeneralMember, index: int=None,
-                   action_type: str=None, *, reason: str=None):
+    async def edit(self, ctx, member: GeneralMember, index: int = None,
+                   action_type: str = None, *, reason: str = None):
         """
         Edits a Moderated actions
         @params member Discord member to change
@@ -160,7 +161,7 @@ class Moderation(commands.Cog):
             self.bot.logger.warning(f'Error trying edit modactions for user: {e}')
 
     @moderate.command(aliases=['rm', 'rem', 'remove', 'delete'])
-    async def remove_modaction(self, ctx, member: GeneralMember, index: int=None):
+    async def remove_modaction(self, ctx, member: GeneralMember, index: int = None):
         """
         This command removes a modaction from a user at selected index
         """
@@ -303,7 +304,7 @@ class Moderation(commands.Cog):
                         limit=count,
                         check=lambda x: x.author == user
                     )
-                except discord.Forbidden as e:
+                 except discord.Forbidden as e:
                     return await ctx.send(
                         'I do not have sufficient permissions to purge.')
                 except Exception as e:
@@ -311,7 +312,7 @@ class Moderation(commands.Cog):
         else:
             try:
                 deleted += await ctx.channel.purge(limit=count)
-            except discord.Forbidden as e:
+            Varialbe 'e ' is never used commented out block; except discord.Forbidden as e:
                 return await ctx.send(
                     'I do not have sufficient permissions to purge.')
             except Exception as e:
@@ -320,7 +321,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: MemberID, *,
-                   reason: ActionReason=None):
+                   reason: ActionReason = None):
         """
         Kicks a user.
         """
@@ -370,7 +371,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *,
-                  reason: ActionReason=None):
+                  reason: ActionReason = None):
         """
         Bans a user.
         """
@@ -423,7 +424,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *,
-                    reason: ActionReason=None):
+                    reason: ActionReason  = None):
         """
         Unbans a user.
         """

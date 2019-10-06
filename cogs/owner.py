@@ -4,7 +4,7 @@ Misc commands that I want to run
 import traceback
 import yappi
 import discord
-from .utils import checks, helpers
+#Imported but never used; from .utils import checks, helpers
 from discord.ext import commands
 
 
@@ -122,7 +122,7 @@ class Owner(commands.Cog):
         try:
             for channel in ctx.message.channel_mentions:
                 await channel.send(f'{message}')
-        except Exception as e:
+        #Variable never used; except Exception as e:
             ctx.send('Error when trying to send fam')
 
     @commands.command(hidden=True)
@@ -143,7 +143,7 @@ class Owner(commands.Cog):
         """Loads a module."""
         try:
             self.bot.load_extension(module)
-        except Exception as e:
+        #Variable never used; except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('\N{OK HAND SIGN}')
@@ -154,7 +154,7 @@ class Owner(commands.Cog):
         """Unloads a module."""
         try:
             self.bot.unload_extension(module)
-        except Exception as e:
+        #Variable never used; except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('\N{OK HAND SIGN}')
@@ -166,7 +166,7 @@ class Owner(commands.Cog):
         try:
             self.bot.unload_extension(module)
             self.bot.load_extension(module)
-        except Exception as e:
+        #Varialbe never used; except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('\N{OK HAND SIGN}')

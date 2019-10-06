@@ -55,7 +55,7 @@ class Admin(commands.Cog):
                     color=0x419400
                 )
                 await ctx.send(embed=local_embed, delete_after=3)
-        except Exception as e:
+        #Variable 'e' is never used; except Exception as e:
             local_embed = embeds.InternalErrorEmbed()
             ctx.send(local_embed)
 
