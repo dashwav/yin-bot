@@ -29,12 +29,12 @@ class Warnings(commands.Cog):
             await ctx.send(embed=local_embed, delete_after=5)
 
     @warn.command(aliases=['!'])
-    async def major(self, ctx, member: discord.Member, *, reason: str=None):
+    async def major(self, ctx, member: discord.Member, *, reason: str = None):
         """
         Gives a major warning
         """
         if reason is None:
-                await ctx.send(
+                await ctx.send( # noqa 
                     "You need to supply a reason, try again.",
                     delete_after=5)
                 return
@@ -58,12 +58,12 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
     @warn.command(aliases=['?'])
-    async def minor(self, ctx, member: discord.Member, *, reason: str=None):
+    async def minor(self, ctx, member: discord.Member, *, reason: str = None):
         """
         Gives a minor warning
         """
         if reason is None:
-                await ctx.send(
+                await ctx.send( # noqa 
                     "You need to supply a reason, try again.",
                     delete_after=5)
                 return
@@ -87,7 +87,7 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
     @warn.command(aliases=['e'])
-    async def edit(self, ctx, member: discord.Member, index: int=None, dtype: str=None, *, reason: str=None):
+    async def edit(self, ctx, member: discord.Member, index: int = None, dtype: str = None, *, reason: str = None):
         """
         Edits a warning
         user set and then display set
@@ -119,7 +119,7 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error trying edit warnings for user: {e}')
 
     @warn.command(aliases=['rm', 'rem', 'remove', 'delete'])
-    async def remove_warning(self, ctx, member: discord.Member, index: int=None):
+    async def remove_warning(self, ctx, member: discord.Member, index: int = None):
         """
         This command removes a warning from a user at selected index
         """
@@ -163,12 +163,12 @@ class Warnings(commands.Cog):
                 ctx.guild.id,
                 member.id,
                 self.bot.logger,
-                recent = recent)
+                recent=recent)
             moderations = await self.bot.pg_utils.get_moderation(
                 ctx.guild.id,
                 member.id,
                 self.bot.logger,
-                recent = recent)
+                recent=recent)
             local_embed = embeds.WarningListEmbed(
                 member, warnings, self.bot.logger, count[0] > len(warnings))
             await ctx.send(embed=local_embed)

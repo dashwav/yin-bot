@@ -1,6 +1,5 @@
 from discord.ext import commands
 import random as rng
-from .utils import checks
 import discord
 
 
