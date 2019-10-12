@@ -1,33 +1,28 @@
-"""
-General purpose discord bot with a focus on doing moderation simply and well
-"""
+"""General purpose discord bot with a focus on doing moderation simply and well."""  # noqa
+
 import yaml
 import yappi
 import subprocess
 import datetime
 from time import time, sleep
-import re
 
 from logging import Formatter, INFO, StreamHandler, getLogger
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
-from cogs.utils import checks, embeds
+from cogs.utils import embeds
 
 
 class Yinbot(Bot):
-    """
-    actual bot class
-    """
+    """Actual bot class."""
+
     def __init__(self, config, logger,
                  pg_utils: PostgresController,
-                 server_settings: dict, blacklist: list=[]):
-        """
-        init for bot class
-        """
+                 server_settings: dict, blacklist: list = []):
+        """Init for bot class."""
         try:
-            self.commit = f"-{subprocess.check_output(['git', 'describe', '--always']).strip().decode()}"
-        except:
+            self.commit = f"-{subprocess.check_output(['git', 'describe', '--always']).strip().decode()}"  # noqa
+        except Exception:
             self.commit = ''
         file = open('.version', 'r')
         self.version = file.read()
@@ -40,13 +35,11 @@ class Yinbot(Bot):
         self.base_voice = config['base_voice']
         self.logger = logger
         self.blchannels = blacklist
-        super().__init__(command_prefix=self.get_pre)
+        super().__init__(command_prefix=self.get_pre, case_insensitive=True)
 
     @classmethod
     async def get_instance(cls):
-        """
-        async method to initialize the pg_utils class
-        """
+        """Async method to initialize the pg_utils class."""
         with open("config/config.yml", 'r') as yml_config:
             config = yaml.load(yml_config)
         logger = getLogger('yinbot')
@@ -72,6 +65,7 @@ class Yinbot(Bot):
         return cls(config, logger, pg_utils, server_settings, blchannels)
 
     async def get_pre(self, bot, message):
+        """Gather Prefix."""
         try:
             return self.server_settings[message.guild.id]['prefix']
         except Exception as e:
@@ -79,15 +73,14 @@ class Yinbot(Bot):
             return '-'
 
     def start_bot(self, cogs):
-        """
-        actually start the bot
-        """
+        """Actually start the bot."""
         for cog in cogs:
             self.add_cog(cog)
         yappi.start()
         self.run(self.credentials)
 
     async def on_ready(self):
+        """Gather settings."""
         try:
             self.server_settings = {}
             self.slow_channels = {}
@@ -101,10 +94,11 @@ class Yinbot(Bot):
             self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}{self.commit}'
+        self.logger.info(f'\nLogged in as\n{self.user.name} v{self.version}{self.commit}'  # noqa
                          f'\n{self.user.id}\n------')
 
     async def on_message(self, ctx):
+        """On all messages."""
         if ctx.author.bot:
             return
         elif isinstance(ctx.guild, type(None)):
@@ -115,7 +109,7 @@ class Yinbot(Bot):
                     await self.get_pre(self, ctx)
                     )
                 )
-        elif not ctx.channel.id in self.blchannels:
+        elif ctx.channel.id not in self.blchannels:
             await self.process_commands(ctx)
         else:
             permis = False
@@ -124,7 +118,7 @@ class Yinbot(Bot):
                 permis = True
             if not permis:
                 resolved = ctx.channel.permissions_for(ctx.author)
-                if getattr(resolved, 'administrator', None) or getattr(resolved, 'kick_members', None):
+                if getattr(resolved, 'administrator', None) or getattr(resolved, 'kick_members', None):  # noqa
                     permis = True
             if permis:
                 await self.process_commands(ctx)
