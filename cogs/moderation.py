@@ -89,20 +89,20 @@ class Moderation(commands.Cog):
                     )
                     if not confirm:
                         return
+                    try:
+                        await self.bot.pg_utils.insert_modaction(
+                            ctx.guild.id,
+                            ctx.author.id,
+                            member.id,
+                            reason,
+                            enums.Action.MISC
+                        )
+                    except Exception as e:
+                        self.bot.logger.warning(f'Error storing modaction: {e}')  # noqa
                     local_embed = embeds.ModerationEmbed(
                         member, ctx.author, reason)
                     mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
-                        try:
-                            await self.bot.pg_utils.insert_modaction(
-                                ctx.guild.id,
-                                ctx.author.id,
-                                member.id,
-                                reason,
-                                enums.Action.MISC
-                            )
-                        except Exception as e:
-                            self.bot.logger.warning(f'Error storing modaction: {e}')  # noqa
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
                 except Exception as e:
