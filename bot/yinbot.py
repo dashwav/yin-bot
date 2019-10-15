@@ -83,13 +83,9 @@ class Yinbot(Bot):
         """Gather settings."""
         try:
             self.server_settings = {}
-            self.slow_channels = {}
             self.server_settings = \
                 await self.pg_utils.get_server_settings()
-            self.slow_channels = \
-                await self.pg_utils.get_slowmode_channels(self.logger)
-            self.logger.info(f'\nServers: {len(self.server_settings)}\n'
-                             f'Slowmode Channels: {len(self.slow_channels)}\n')
+            self.logger.info(f'\nServers: {len(self.server_settings)}')
         except Exception as e:
             self.logger.warning(f'issue getting server settings: {e}')
         if not hasattr(self, 'uptime'):

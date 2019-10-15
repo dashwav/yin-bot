@@ -1,16 +1,12 @@
-"""
-Actually runs the code
-"""
+"""Actually runs the code."""
 from asyncio import get_event_loop
 from bot import Yinbot
 from cogs import Admin, AutoAssign, Filter, Gateway, Info, Logging, Moderation
-from cogs import Owner, Pings, RNG, Roles, Slowmode, Stats, Voice, Warnings
+from cogs import Owner, Pings, RNG, Roles, Stats, Voice, Warnings
 
 
 def run():
-    """
-    Builds the bot object using the various cogs
-    """
+    """Build the bot object using the various cogs."""
     loop = get_event_loop()
     bot = loop.run_until_complete(Yinbot.get_instance())
     cogs = [
@@ -25,7 +21,6 @@ def run():
       Pings(bot),
       RNG(bot),
       Roles(bot),
-      Slowmode(bot),
       Stats(bot),
       Voice(bot),  
       Warnings(bot)

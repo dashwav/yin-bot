@@ -9,7 +9,6 @@ from cogs.pings import Pings
 from cogs.rng import RNG
 from cogs.roles import Roles
 from cogs.autoassign import AutoAssign
-from cogs.slowmode import Slowmode
 from cogs.stats import Stats
 from cogs.voice import Voice
 from cogs.warnings import Warnings
@@ -26,7 +25,6 @@ __all__ = [
     'Pings',
     'RNG',
     'Roles',
-    'Slowmode',
     'Stats',
     'Voice',
     'Warnings'
