@@ -12,3 +12,5 @@ class Change(Enum):
 class Action(Enum):
     KICK = 1
     BAN = 2
+    MISC = 3
+    UNBAN = 4
