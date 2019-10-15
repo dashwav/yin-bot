@@ -1,6 +1,4 @@
-"""
-Handling the auto assignable roles and such
-"""
+"""Handling the self-assignable roles and such."""
 
 import discord
 from discord.ext import commands
@@ -8,15 +6,10 @@ from .utils import checks, embeds
 
 
 class Roles(commands.Cog):
-    """
-    Cog to handle the ability of users to
-    add roles to themselves through use of a command
-    """
+    """Handle self-assignable roles."""
 
     def __init__(self, bot):
-        """
-        Init class
-        """
+        """Init class."""
         super().__init__()
         self.bot = bot
 
@@ -24,9 +17,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
     async def cleanrole(self, ctx, *, role_name):
-        """
-        (Testing) Removes all members from a certain role
-        """
+        """(Testing) Removes all members from a certain role."""
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -57,9 +48,7 @@ class Roles(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def iam(self, ctx, *, role_name):
-        """
-        Adds self-assignable role to user
-        """
+        """Add self-assignable role to user."""
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -100,9 +89,7 @@ class Roles(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def iamnot(self, ctx, *, role_name):
-        """
-        Removes self-assignable role from user
-        """
+        """Remove self-assignable role from user."""
         found_role = None
         users_roles = ctx.message.author.roles.copy()
         for role in ctx.guild.roles:
@@ -140,9 +127,7 @@ class Roles(commands.Cog):
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
     async def assignableroles(self, ctx):
-        """
-        manages servers assignable roles
-        """
+        """Manage server's self-assignable roles."""
         if ctx.invoked_subcommand is None:
             message = ' \n'
             assignable_roles = []
@@ -162,9 +147,7 @@ class Roles(commands.Cog):
 
     @assignableroles.command()
     async def add(self, ctx, *, role_name):
-        """
-        Adds a role to the servers assignable roles list
-        """
+        """Add a role to the server's self-assignable roles list."""
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -205,9 +188,7 @@ class Roles(commands.Cog):
 
     @assignableroles.command()
     async def remove(self, ctx, *, role_name):
-        """
-        Removes a role from the serves assignable roles list
-        """
+        """Remove a role from the server's self-assignable roles list."""
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -251,4 +232,5 @@ class Roles(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Roles(bot))

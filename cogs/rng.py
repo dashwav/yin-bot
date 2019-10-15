@@ -1,12 +1,14 @@
+"""Various fun RNG Commands."""
+import discord
 from discord.ext import commands
 import random as rng
-from .utils import checks
-import discord
 
 
 class RNG(commands.Cog):
+    """Various fun RNG Commands."""
 
     def __init__(self, bot):
+        """Init method."""
         self.bot = bot
         self.answers = [
             'For sure',
@@ -31,15 +33,15 @@ class RNG(commands.Cog):
 
     @commands.group(pass_context=True)
     async def random(self, ctx):
-        """Displays a random thing you request."""
+        """Display a random thing you request."""
         if ctx.invoked_subcommand is None:
             await ctx.send(f'Incorrect random subcommand passed. Try '
                            f'{ctx.prefix}help random')
 
     @random.command()
     async def number(self, ctx, minimum=0, maximum=100):
-        """Displays a random number within an optional range.
-        The minimum must be smaller than the maximum and the maximum number
+        """Display a random number within an optional range."""
+        """The minimum must be smaller than the maximum and the maximum number
         accepted is 1000.
         """
         maximum = min(maximum, 1000)
@@ -51,8 +53,8 @@ class RNG(commands.Cog):
 
     @commands.command()
     async def choose(self, ctx, *, text):
-        """Chooses between multiple choices.
-        To denote multiple choices, you should use a semicolon ;.
+        """Choose between multiple choices."""
+        """To denote multiple choices, you should use a semicolon ;.
         """
         choices = text.split(';')
         if len(choices) < 2:
@@ -67,9 +69,7 @@ class RNG(commands.Cog):
 
     @commands.command(name='8ball')
     async def eightball(self, ctx, *, question):
-        """
-        Uses magic to determine the answer to a question
-        """
+        """Use magic to determine the answer to a question."""
         if not question:
             return
         answer = rng.choice(self.answers)
@@ -83,4 +83,5 @@ class RNG(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(RNG(bot))

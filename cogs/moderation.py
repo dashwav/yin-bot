@@ -1,16 +1,17 @@
-"""
-This cog is the moderation toolkit this is for tasks such as
-kicking/banning users.
-"""
+"""Moderation toolkit this is for tasks such as kicking/banning users."""
+
 import discord
 from discord.ext import commands
 from .utils import helpers, checks, embeds, enums
 from .utils.functions import GeneralMember, MemberID, BannedMember
 from .utils.enums import Action
-import re
+
 
 class ActionReason(commands.Converter):
+    """Generalized converter to reduce  arguments."""
+
     async def convert(self, ctx, argument):
+        """."""
         ret = argument
         # if len(ret) > 512:
         #     reason_max = 512 - len(ret) - len(argument)
@@ -20,10 +21,10 @@ class ActionReason(commands.Converter):
 
 
 class Moderation(commands.Cog):
-    """
-    Main cog class for moderation tools (kicking, banning, unbanning)
-    """
+    """Main cog class for moderation tools (kicking, banning, unbanning)."""
+
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
 
@@ -31,10 +32,8 @@ class Moderation(commands.Cog):
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def logban(self, ctx, member: BannedMember, *,
-                     reason: ActionReason=None):
-        """
-        Logs a right-click ban to modlog channels
-        """
+                     reason: ActionReason = None):
+        """Log a right-click ban to modlog channels."""
         if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
             try:
                 confirm = await helpers.custom_confirm(
@@ -58,7 +57,7 @@ class Moderation(commands.Cog):
                             enums.Action.BAN
                         )
                     except Exception as e:
-                        self.bot.logger.warning(f'Error storing modaction: {e}')
+                        self.bot.logger.warning(f'Error storing modaction: {e}')  # noqa
                     await (self.bot.get_channel(channel_id)).send(
                         embed=local_embed)
             except Exception as e:
@@ -68,6 +67,7 @@ class Moderation(commands.Cog):
 
     @logban.error
     async def logban_error(self, ctx, error):
+        """Logban error catcher."""
         self.bot.logger.warning(f'Banned_user argument not found in ban list.')
         await ctx.send(
             embed=embeds.LogbanErrorEmbed(),
@@ -78,10 +78,8 @@ class Moderation(commands.Cog):
     @checks.has_permissions(ban_members=True)
     @commands.guild_only()
     async def moderate(self, ctx, member: GeneralMember, *,
-                       reason: ActionReason=None):
-        """
-        Edits a punishment for a user
-        """
+                       reason: ActionReason = None):
+        """Moderate a user."""
         if ctx.invoked_subcommand is None:
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
@@ -93,7 +91,7 @@ class Moderation(commands.Cog):
                         return
                     local_embed = embeds.ModerationEmbed(
                         member, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
                         try:
                             await self.bot.pg_utils.insert_modaction(
@@ -104,7 +102,7 @@ class Moderation(commands.Cog):
                                 enums.Action.MISC
                             )
                         except Exception as e:
-                            self.bot.logger.warning(f'Error storing modaction: {e}')
+                            self.bot.logger.warning(f'Error storing modaction: {e}')  # noqa
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
                 except Exception as e:
@@ -114,26 +112,19 @@ class Moderation(commands.Cog):
         return
 
     @moderate.command(aliases=['e'])
-    async def edit(self, ctx, member: GeneralMember, index: int=None,
-                   action_type: str=None, *, reason: str=None):
-        """
-        Edits a Moderated actions
-        @params member Discord member to change
-        @params index  Index of the mod action to change
-        @params action Type The new modaction type
-        @params reason The new reason for why the modaction is taken against them
-        @returns embed
-        """
+    async def edit(self, ctx, member: GeneralMember, index: int = None,
+                   action_type: str = None, *, reason: str = None):
+        """Edit a Moderated actions."""
         if not reason or not index or not action_type:
             await ctx.send(
-                "You need to supply the correct parameters <member, index (from 1), action_type, reason>, try again.",
+                "You need to supply the correct parameters <member, index (from 1), action_type, reason>, try again.",  # noqa
                 delete_after=5)
             return
         action_type = action_type.upper()
         actions = [str(x).strip("Action.") for x in Action]
         if action_type not in actions:
             await ctx.send(
-                f'You need to supply the correct Action parameter. Must be within: {actions}',
+                f'You need to supply the correct Action parameter. Must be within: {actions}',  # noqa
                 delete_after=5)
             return
         else:
@@ -153,20 +144,18 @@ class Moderation(commands.Cog):
                 index,
                 self.bot.logger
             )
-            local_embed = embeds.ModEditEmbed(member, ctx.author, action_type, reason, count)
+            local_embed = embeds.ModEditEmbed(member, ctx.author, action_type, reason, count)  # noqa
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
-            self.bot.logger.warning(f'Error trying edit modactions for user: {e}')
+            self.bot.logger.warning(f'Error trying edit modactions for user: {e}')  # noqa
 
     @moderate.command(aliases=['rm', 'rem', 'remove', 'delete'])
-    async def remove_modaction(self, ctx, member: GeneralMember, index: int=None):
-        """
-        This command removes a modaction from a user at selected index
-        """
+    async def remove_modaction(self, ctx, member: GeneralMember, index: int=None):  # noqa
+        """Remove a modaction from a user at selected index."""
         if member is None or index is None:
             await ctx.send(
-                "You need to supply the correct parameters <member, index (from 1)>, try again.",
+                "You need to supply the correct parameters <member, index (from 1)>, try again.",  # noqa
                 delete_after=5)
             return
         try:
@@ -192,10 +181,9 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def footer(self, ctx):
-        """
-        Ban/kick footer command. If no subcommand is
-        invoked, it will return the current ban/kick footer
-        """
+        """Ban/kick footer command."""
+        """If no subcommand is
+        invoked, it will return the current ban/kick footer."""
         ban_footer = await self.bot.pg_utils.get_ban_footer(
             ctx.guild.id,
             self.bot.logger
@@ -215,9 +203,7 @@ class Moderation(commands.Cog):
 
     @footer.command(name='set_ban')
     async def set_ban_footer(self, ctx, *, footer_string):
-        """
-        Attempts to set kick/ban footer to string passed in
-        """
+        """Set ban footer to string passed in."""
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -250,9 +236,7 @@ class Moderation(commands.Cog):
 
     @footer.command(name='set_kick')
     async def set_kick_footer(self, ctx, *, footer_string):
-        """
-        Attempts to set kick/ban footer to string passed in
-        """
+        """Set kick footer to string passed in."""
         if not footer_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -286,9 +270,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx, *args, mentions=None):
-        """
-        Purges a set number of messages.
-        """
+        """Purge a set number of messages."""
         deleted = []
         try:
             count = int(next(iter(args or []), 'fugg'))
@@ -303,7 +285,7 @@ class Moderation(commands.Cog):
                         limit=count,
                         check=lambda x: x.author == user
                     )
-                except discord.Forbidden as e:
+                except discord.Forbidden:
                     return await ctx.send(
                         'I do not have sufficient permissions to purge.')
                 except Exception as e:
@@ -311,24 +293,22 @@ class Moderation(commands.Cog):
         else:
             try:
                 deleted += await ctx.channel.purge(limit=count)
-            except discord.Forbidden as e:
+            except discord.Forbidden:
                 return await ctx.send(
                     'I do not have sufficient permissions to purge.')
             except Exception as e:
-                    self.bot.logger.warning(f'Error purging messages: {e}')
+                self.bot.logger.warning(f'Error purging messages: {e}')
 
     @commands.command()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: MemberID, *,
-                   reason: ActionReason=None):
-        """
-        Kicks a user.
-        """
+                   reason: ActionReason = None):
+        """Kick a user."""
         if reason is None:
-                await ctx.send(
-                    "You need to supply a reason, try again.",
-                    delete_after=5)
-                return
+            await ctx.send(
+                "You need to supply a reason, try again.",
+                delete_after=5)
+            return
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
             embed = await self.create_embed(
@@ -339,7 +319,7 @@ class Moderation(commands.Cog):
                     await member.dm_channel.send(embed=embed)
                 except Exception as e:
                     self.bot.logger.warning(f'Error messaging user!: {e}')
-                await member.kick(reason=f'by: {ctx.author} for: {reason[0:480]}')
+                await member.kick(reason=f'by: {ctx.author} for: {reason[0:480]}')  # noqa
                 await ctx.send('\N{OK HAND SIGN}', delete_after=3)
                 try:
                     await self.bot.pg_utils.insert_modaction(
@@ -358,7 +338,7 @@ class Moderation(commands.Cog):
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.KickEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -370,15 +350,13 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *,
-                  reason: ActionReason=None):
-        """
-        Bans a user.
-        """
+                  reason: ActionReason = None):
+        """Ban a user."""
         if reason is None:
-                await ctx.send(
-                    "You need to supply a reason, try again.",
-                    delete_after=5)
-                return
+            await ctx.send(
+                "You need to supply a reason, try again.",
+                delete_after=5)
+            return
         confirm = await helpers.confirm(ctx, member, reason)
         if confirm:
             embed = await self.create_embed(
@@ -411,7 +389,7 @@ class Moderation(commands.Cog):
             if self.bot.server_settings[ctx.guild.id]['modlog_enabled']:
                 try:
                     local_embed = embeds.BanEmbed(member, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -423,15 +401,13 @@ class Moderation(commands.Cog):
     @commands.command()
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *,
-                    reason: ActionReason=None):
-        """
-        Unbans a user.
-        """
+                    reason: ActionReason = None):
+        """Unban a user.."""
         if reason is None:
-                await ctx.send(
-                    "You need to supply a reason, try again.",
-                    delete_after=5)
-                return
+            await ctx.send(
+                "You need to supply a reason, try again.",
+                delete_after=5)
+            return
         confirm = await helpers.confirm(ctx, member.user, reason)
         if confirm:
             try:
@@ -458,7 +434,7 @@ class Moderation(commands.Cog):
                 try:
                     local_embed = embeds.UnBanEmbed(
                         member.user, ctx.author, reason)
-                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)
+                    mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
                             embed=local_embed)
@@ -469,6 +445,7 @@ class Moderation(commands.Cog):
 
     async def create_embed(self, command_type, server_name,
                            server_id, reason):
+        """Generalized embed method."""
         try:
             embed = discord.Embed(
                 title=f'❗ {command_type} Reason ❗', type='rich')
@@ -500,4 +477,5 @@ class Moderation(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Moderation(bot))

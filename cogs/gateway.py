@@ -1,7 +1,4 @@
-"""
-This cog will be used for setting up both the welcome message for each
-guild as well as the gateway channel/role
-"""
+"""Gateway for entry message and joining role/channel."""
 
 import discord
 from discord.ext import commands
@@ -9,16 +6,16 @@ from .utils import checks
 
 
 class Gateway(commands.Cog):
+    """Gateway Cog."""
 
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        """
-        Actually handles printing the welcome message
-        """
+        """Actually handles printing the welcome message."""
         welcome_channels = await \
             self.bot.pg_utils.get_welcome_channels(
                 member.guild.id, self.bot.logger)
@@ -34,10 +31,9 @@ class Gateway(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def welcome(self, ctx):
-        """
-        Welcome message command. If no subcommand is
-        invoked, it will return the current welcome message
-        """
+        """Welcome message command."""
+        """If no subcommand is
+        invoked, it will return the current welcome message."""
         welcome_msg = await self.bot.pg_utils.get_welcome_message(
             ctx.guild.id,
             self.bot.logger
@@ -51,9 +47,7 @@ class Gateway(commands.Cog):
 
     @welcome.command(name='set')
     async def setwelcome(self, ctx, *, welcome_string):
-        """
-        Attempts to set welcome message to string passed in
-        """
+        """Attempt to set welcome message to string passed in."""
         if not welcome_string:
             local_embed = discord.Embed(
                 title=f'No string detected, I need a string parameter to work',
@@ -86,9 +80,7 @@ class Gateway(commands.Cog):
 
     @welcome.command(aliases=['on'])
     async def enable(self, ctx):
-        """
-        Enables the welcome message in this channel
-        """
+        """Enable the welcome message in this channel."""
         success = await self.bot.pg_utils.add_welcome_channel(
             ctx.guild.id, ctx.message.channel.id, self.bot.logger
         )
@@ -109,9 +101,7 @@ class Gateway(commands.Cog):
 
     @welcome.command(aliases=['off'])
     async def disable(self, ctx):
-        """
-        Enables the welcome message in this channel
-        """
+        """Enable the welcome message in this channel."""
         try:
             success = await self.bot.pg_utils.rem_welcome_channel(
                 ctx.guild.id, ctx.message.channel.id, self.bot.logger
@@ -142,4 +132,5 @@ class Gateway(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Gateway(bot))

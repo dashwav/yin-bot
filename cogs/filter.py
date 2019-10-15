@@ -1,6 +1,4 @@
-"""
-Cog for filtering, primarily discord links, but maybe more later
-"""
+"""Cog for filtering, primarily discord links, but maybe more later."""
 import discord
 from discord.ext import commands
 from .utils import checks, embeds
@@ -8,7 +6,13 @@ import re
 
 
 class Filter(commands.Cog):
+    """Filtering of misc chats."""
+
+    """It should be noted, this cog is called after
+    run.py (obviously) so blacklisting
+    cannot be done at this level, else it misses the help commands."""
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
 
@@ -16,9 +20,7 @@ class Filter(commands.Cog):
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
     async def invites(self, ctx):
-        """
-        Enables/Disables autodeletion of invites
-        """
+        """Enables/Disables autodeletion of invites."""
         if ctx.invoked_subcommand is None:
             allowed = self.bot.server_settings[ctx.guild.id]["invites_allowed"]
             local_embed = discord.Embed(
@@ -30,9 +32,7 @@ class Filter(commands.Cog):
 
     @invites.command(aliases=['enable'])
     async def allow(self, ctx):
-        """
-        Disables autodeletion of invites
-        """
+        """Disables autodeletion of invites."""
         try:
             await self.bot.pg_utils.set_invites_allowed(
                 ctx.guild.id, True)
@@ -50,9 +50,7 @@ class Filter(commands.Cog):
 
     @invites.command(aliases=['disable', 'delete'])
     async def disallow(self, ctx):
-        """
-        Enables autodeletion of invites
-        """
+        """Enable autodeletion of invites."""
         try:
             await self.bot.pg_utils.set_invites_allowed(
                 ctx.guild.id, False)
@@ -71,6 +69,7 @@ class Filter(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """General message catcher for filtering."""
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return
@@ -84,3 +83,8 @@ class Filter(commands.Cog):
                 await message.delete()
         except AttributeError:
             pass
+
+
+def setup(bot):
+    """General cog loading."""
+    bot.add_cog(Filter(bot))

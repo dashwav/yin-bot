@@ -1,3 +1,4 @@
+"""Init file."""
 from cogs.admin import Admin
 from cogs.filter import Filter
 from cogs.gateway import Gateway

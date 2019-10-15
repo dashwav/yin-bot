@@ -9,7 +9,7 @@ class AutoAssign(commands.Cog):
     """Allow server owners to create a list of roles that are added on guild join."""  # noqa
 
     def __init__(self, bot):
-        """Init class."""
+        """Init method."""
         super().__init__()
         self.bot = bot
 
@@ -135,5 +135,5 @@ class AutoAssign(commands.Cog):
 
 
 def setup(bot):
-    """For cog hot-loading."""
+    """General cog loading."""
     bot.add_cog(AutoAssign(bot))

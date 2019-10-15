@@ -1,14 +1,14 @@
-"""
-Basic bot administration commands
-"""
+"""Basic bot administration commands."""
 import discord
 from discord.ext import commands
 from .utils import checks, embeds
 
 
 class Admin(commands.Cog):
+    """Cogs for admins."""
 
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
 
@@ -16,9 +16,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def prefix(self, ctx):
-        """
-        Either returns current prefix or sets new one
-        """
+        """Either returns current prefix or sets new one."""
         if ctx.invoked_subcommand is None:
             local_embed = discord.Embed(
                 title=f'Current prefix is: '
@@ -30,9 +28,7 @@ class Admin(commands.Cog):
 
     @prefix.command()
     async def change(self, ctx, prefix):
-        """
-        Sets the prefix for the server
-        """
+        """Set the prefix for the server."""
         if len(prefix.strip()) > 2:
             local_embed = discord.Embed(
                 title=f'Prefix must be less than or equal to two characters',
@@ -55,7 +51,7 @@ class Admin(commands.Cog):
                     color=0x419400
                 )
                 await ctx.send(embed=local_embed, delete_after=3)
-        except Exception as e:
+        except Exception:
             local_embed = embeds.InternalErrorEmbed()
             ctx.send(local_embed)
 
@@ -63,9 +59,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def modlog(self, ctx):
-        """
-        Adds or removes a channel to modlog list
-        """
+        """Add or remove a channel to modlog list."""
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_modlogs(
@@ -82,9 +76,7 @@ class Admin(commands.Cog):
 
     @modlog.command(aliases=['add'])
     async def add_channel(self, ctx):
-        """
-        Adds channel to modlog list
-        """
+        """Add channel to modlog list."""
         added_channels = []
         desc = ''
         try:
@@ -114,9 +106,7 @@ class Admin(commands.Cog):
 
     @modlog.command(aliases=['rem', 'remove'])
     async def remove_channel(self, ctx):
-        """
-        Removes a channel from the modlog list
-        """
+        """Remove a channel from the modlog list."""
         removed_channels = []
         absent_channels = []
         desc = ''
@@ -177,9 +167,7 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def blacklist(self, ctx):
-        """
-        Adds or removes a channel to blacklist channel list
-        """
+        """Add or remove a channel to blacklist channel list."""
         if ctx.invoked_subcommand is None:
             desc = ''
             modlogs = await self.bot.pg_utils.get_blacklist_channels(
@@ -196,9 +184,7 @@ class Admin(commands.Cog):
 
     @blacklist.command()
     async def add(self, ctx):
-        """
-        Adds channel to blacklist
-        """
+        """Add channel to blacklist."""
         added_channels = []
         desc = ''
         try:
@@ -228,9 +214,7 @@ class Admin(commands.Cog):
 
     @blacklist.command(aliases=['rem'])
     async def remove(self, ctx):
-        """
-        Removes a channel from the blacklist
-        """
+        """Remove a channel from the blacklist."""
         removed_channels = []
         absent_channels = []
         desc = ''
@@ -246,7 +230,7 @@ class Admin(commands.Cog):
             if success:
                 removed_channels.append(ctx.message.channel.name)
                 if ctx.message.channel.id in self.bot.blchannels:
-                    del self.bot.blchannels[self.bot.blchannels.index(ctx.message.channel.id)]
+                    del self.bot.blchannels[self.bot.blchannels.index(ctx.message.channel.id)]  # noqa
             if removed_channels:
                 for channel in removed_channels:
                     desc += f'{channel} \n'
@@ -282,4 +266,5 @@ class Admin(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Admin(bot))
