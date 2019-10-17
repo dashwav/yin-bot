@@ -29,6 +29,7 @@ class Yinbot(Bot):
         self.pg_utils = pg_utils
         self.server_settings = {}
         self.start_time = int(time())
+        self.botcogs = [x.lower() for x in config['cogs']]
         self.credentials = config['token']
         self.guild_id = config['guild_id']
         self.bot_owner_id = config['owner_id']

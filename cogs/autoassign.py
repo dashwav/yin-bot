@@ -5,7 +5,7 @@ from discord.ext import commands
 from .utils import checks
 
 
-class AutoAssign(commands.Cog):
+class Autoassign(commands.Cog):
     """Allow server owners to create a list of roles that are added on guild join."""  # noqa
 
     def __init__(self, bot):
@@ -136,4 +136,4 @@ class AutoAssign(commands.Cog):
 
 def setup(bot):
     """General cog loading."""
-    bot.add_cog(AutoAssign(bot))
+    bot.add_cog(Autoassign(bot))

@@ -4,7 +4,7 @@ from discord.ext import commands
 import random as rng
 
 
-class RNG(commands.Cog):
+class Rng(commands.Cog):
     """Various fun RNG Commands."""
 
     def __init__(self, bot):
@@ -84,4 +84,4 @@ class RNG(commands.Cog):
 
 def setup(bot):
     """General cog loading."""
-    bot.add_cog(RNG(bot))
+    bot.add_cog(Rng(bot))
