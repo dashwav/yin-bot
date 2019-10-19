@@ -1,7 +1,7 @@
 """Generalized Functions Hub."""
 
 # internal modules
-import re
+import datetime
 
 # external modules
 import discord
@@ -9,12 +9,16 @@ from discord.ext import commands
 
 # relative modules
 
+
 class MemberID(commands.Converter):
-    """Extract a member id and force to be in guild.
-    
-    The main purpose is for banning people and forcing the to-be-banned user in the guild.
+    """Extract a member id and force to be in guild."""
+
+    """
+    The main purpose is for banning people and forcing
+    the to-be-banned user in the guild.
     """
     async def convert(self, ctx, argument):
+        """Discord converter."""
         try:
             argument = extract_id(argument)
             m = await commands.MemberConverter().convert(ctx, argument)
@@ -34,11 +38,15 @@ class MemberID(commands.Converter):
                                            ' user due to role hierarchy.')
             return m
 
+
 class BannedMember(commands.Converter):
+    """Find a banned user."""
+
     async def convert(self, ctx, argument):
+        """Discord converter."""
         ban_list = await ctx.guild.bans()
         member_id = extract_id(argument)
-        if member_id != None:
+        if member_id is not None:
             entity = discord.utils.find(
                 lambda u: str(u.user.id) == str(member_id), ban_list)
             return entity
@@ -47,38 +55,44 @@ class BannedMember(commands.Converter):
 
 
 class GeneralMember(commands.Converter):
-    """Generalized member maker.
-    
-    This will try to resolve a member given some argument, if unable to and the argument is an id, will contruct a fake user. If argument isnt an id then fail
+    """Generalized member maker."""
+
+    """
+    This will try to resolve a member given some argument,
+    if unable to and the argument is an id, will contruct a fake user.
+    If argument isn't an id then fail
     """
     async def convert(self, ctx, argument):
+        """Discord Convert."""
         failed = False
         target = None
         try:
             target = get_member(ctx, argument)
         except Exception as e:
             failed = True
-            self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')
-        if failed or isinstance(target, type(None)):
+            self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')  # noqa
+        if failed or target is None:
             try:
-                member_id = extract_id(argument, 'member')
+                member_id = extract_id(argument)
                 target = create_fake_user(member_id)
                 target.guild = ctx.guild
                 target.bot = False
             except Exception as e:
-                self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')
-        if target != None:
+                self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')  # noqa
+        if target is not None:
             return target
         else:
             raise commands.BadArgument("Not a valid member.")
 
 
-def create_fake(target_id: str, dtype: str='member'):
+def create_fake(target_id: str, dtype: str = 'member'):
+    """General ABC creator."""
     if dtype == 'member':
         return create_fake_user(target_id)
 
 
 def create_fake_user(user_id: str):
+    """Create fake ABC for a user."""
     member = fake_object(int(user_id))
     member.name = 'GenericUser'
     member.displayname = member.name
@@ -87,79 +101,28 @@ def create_fake_user(user_id: str):
     member.joined_at = datetime.datetime.utcnow()
     return member
 
+
 class fake_object:
+    """Recreate ABC class."""
 
     def __init__(self, snowflake):
+        """Init. Method."""
         self.id = int(snowflake)
         self.name = ''
         self.created_at = datetime.datetime.utcnow()
 
     def __repr__(self):
+        """Repr method."""
         return ''.format(self.id)
 
     def __eq__(self, other):
+        """Equiv Method."""
         return self.id == other.id
-
-def clean_command(argument: str):
-    """Check if argument is # or <@#>.
-
-    Parameters
-    ----------
-    argument: str
-        text to parse
-
-    Returns
-    ----------
-    str
-        the bare id
-    """
-    i = 1
-    for x in argument:
-        if x != ' ':
-            i += 1
-        else:
-            break
-    return argument[i:]
-
-
-def clean_str(argument: str, dtype: str='role'):
-    argument = str(argument)
-    general = argument.replace('<', '').replace('>', '')\
-                      .replace('@', '')
-    if dtype == 'role':
-        return general.replace('&', '')
-    if dtype == 'channel':
-        return general.replace('#', '')
-    else:
-        return general.replace('#', '').replace('&', '')
-
-
-def is_id(argument: str):
-    """Check if argument is #.
-
-    Parameters
-    ----------
-    argument: str
-        text to parse
-
-    Returns
-    ----------
-    str
-        the bare id
-    """
-    status = True
-    for x in argument:
-        try:
-            _ = int(x)
-        except:
-            status = False
-            return False
-    return True
 
 
 def get_member(ctx, argument: str):
-    """Tries to return a member object.
-
+    """Return a member object."""
+    """
     Parameters
     ----------
     argument: str
@@ -170,10 +133,12 @@ def get_member(ctx, argument: str):
     discord.Member
         member object to return
     """
-    ret = extract_id(argument, 'member')
-    t_st = clean_str(argument, 'member').lower()
+    ret = extract_id(argument)
+    t_st = argument.lower()
     if not ret:
-        ret = discord.utils.find(lambda m: (m.id == ret) or (m.name.lower() == t_st), ctx.guild.members)
+        ret = discord.utils.find(lambda m: (m.id == ret) or
+                                           (t_st in [m.name.lower(), m.display_name.lower()]),  # noqa
+                                 ctx.guild.members)
     else:
         ret = ctx.guild.get_member(int(ret))
     if not ret:
@@ -183,9 +148,10 @@ def get_member(ctx, argument: str):
     else:
         return None
 
-def extract_id(argument: str, dtype: str='member'):
-    """Check if argument is # or <@#>.
 
+def extract_id(argument: str):
+    """Extract id from argument."""
+    """
     Parameters
     ----------
     argument: str
@@ -196,55 +162,11 @@ def extract_id(argument: str, dtype: str='member'):
     str
         the bare id
     """
-    if argument.strip(' ') == '':
-        return ''
-    argument = clean_str(argument, dtype)
-    if is_id(argument):
-        return argument
-    if dtype == 'member':
-        regexes = (
-            r'\<?\@?(\d{17,})\>?',  # '<@!?#17+>'
-            r'\<?\@?(\d{1,})\>?',  # '<@!?#+>'
-            r'?(\d{17,})',  # '!?#17+>'
-            r'?(\d{1,})',  # '!?#+>'
-        )
-    elif dtype == 'role':
-        regexes = (
-            r'\<?\@?\&?(\d{17,})\>?',  # '<@!?#17+>'
-            r'\<?\@?\&?(\d{1,})\>?',  # '<@!?#+>'
-            r'?(\d{17,})',  # '!?#17+>'
-            r'?(\d{1,})',  # '!?#+>'
-        )
-    elif dtype == 'channel':
-        regexes = (
-            r'\<?\#?(\d{17,})\>?',  # '<@!?#17+>'
-            r'\<?\#?(\d{1,})\>?',  # '<@!?#+>'
-            r'?(\d{17,})',  # '!?#17+>'
-            r'?(\d{1,})',  # '!?#+>'
-        )
-    else:
-        regexes = (
-            r'?(\d{17,})',  # '!?#17+>'
-            r'?(\d{1,})',  # '!?#+>'
-        )
-    i = 0
-    member_id = ''
-    while i < len(regexes):
-        regex = regexes[i]
-        try:
-            match = re.finditer(regex, argument, re.MULTILINE)
-        except:
-            match = None
-        i += 1
-        if match is None:
-            continue
-        else:
-            match = [x for x in match]
-            if len(match) > 0:
-                match = match[0]
-                member_id = int(match[0], base=10)
-                return str(member_id)
-    return None
+    ex = ''.join(list(filter(str.isdigit, str(argument))))
+    if len(ex) < 15:
+        return None
+    return ex
+
 
 # end of code
 

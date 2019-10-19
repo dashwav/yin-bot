@@ -1,7 +1,10 @@
 """Generalized warning system."""
+
 import discord
 from discord.ext import commands
+
 from .utils import checks, embeds
+from .utils.functions import GeneralMember
 
 
 class Warnings(commands.Cog):
@@ -27,7 +30,7 @@ class Warnings(commands.Cog):
             await ctx.send(embed=local_embed, delete_after=5)
 
     @warn.command(aliases=['!'])
-    async def major(self, ctx, member: discord.Member, *, reason: str = None):
+    async def major(self, ctx, member: GeneralMember, *, reason: str = None):
         """Issue a major warning."""
         if reason is None:
             await ctx.send(
@@ -54,7 +57,7 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
     @warn.command(aliases=['?'])
-    async def minor(self, ctx, member: discord.Member, *, reason: str = None):
+    async def minor(self, ctx, member: GeneralMember, *, reason: str = None):
         """Issue a minor warning."""
         if reason is None:
             await ctx.send(
@@ -81,7 +84,7 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error trying to warn user: {e}')
 
     @warn.command(aliases=['e'])
-    async def edit(self, ctx, member: discord.Member,
+    async def edit(self, ctx, member: GeneralMember,
                    index: int = None, dtype: str = None, *,
                    reason: str = None):
         """Edit a warning."""
@@ -112,7 +115,7 @@ class Warnings(commands.Cog):
             self.bot.logger.warning(f'Error editing warnings for user: {e}')
 
     @warn.command(aliases=['rm', 'rem', 'remove', 'delete'])
-    async def remove_warning(self, ctx, member: discord.Member,
+    async def remove_warning(self, ctx, member: GeneralMember,
                              index: int = None):
         """Remove a warning from a user at selected index."""
         if member is None or index is None:
@@ -142,7 +145,7 @@ class Warnings(commands.Cog):
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
-    async def warnings(self, ctx, member: discord.Member, recent: bool = True):
+    async def warnings(self, ctx, member: GeneralMember, recent: bool = True):
         """Return all the warnings a user has."""
         try:
             warnings = None

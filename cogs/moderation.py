@@ -101,6 +101,7 @@ class Moderation(commands.Cog):
                         self.bot.logger.warning(f'Error storing modaction: {e}')  # noqa
                     local_embed = embeds.ModerationEmbed(
                         member, ctx.author, reason)
+                    await ctx.send(embed=local_embed)
                     mod_logs = await self.bot.pg_utils.get_modlogs(ctx.guild.id)  # noqa
                     for channel_id in mod_logs:
                         await (self.bot.get_channel(channel_id)).send(
