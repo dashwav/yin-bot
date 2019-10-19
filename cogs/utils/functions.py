@@ -74,6 +74,7 @@ class GeneralMember(commands.Converter):
         if failed or target is None:
             try:
                 member_id = extract_id(argument)
+                assert member_id is not None
                 target = create_fake_user(member_id)
                 target.guild = ctx.guild
                 target.bot = False
@@ -99,6 +100,7 @@ def create_fake_user(user_id: str):
     member.discriminator = '0000'
     member.mention = f'<@{member.id}>'
     member.joined_at = datetime.datetime.utcnow()
+    member.bot = False
     return member
 
 
