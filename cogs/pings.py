@@ -1,14 +1,14 @@
+"""Ping an unpingable role."""
 from discord.ext import commands
 from discord.utils import find
 from .utils import checks, embeds
 
 
 class Pings(commands.Cog):
+    """Ping an unpingable role."""
 
     def __init__(self, bot):
-        """
-        init for cog class
-        """
+        """Init method."""
         super().__init__()
         self.bot = bot
 
@@ -16,9 +16,7 @@ class Pings(commands.Cog):
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
     async def ping(self, ctx, *roles: commands.clean_content):
-        """
-        Pings all the roles passed into the command
-        """
+        """Ping all the roles passed into the command."""
         if not roles:
             await ctx.send(
               embed=embeds.CommandErrorEmbed(
@@ -49,3 +47,8 @@ class Pings(commands.Cog):
         await ctx.message.delete()
         for role in found_roles:
             await role.edit(mentionable=False)
+
+
+def setup(bot):
+    """General cog loading."""
+    bot.add_cog(Pings(bot))

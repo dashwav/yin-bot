@@ -1,32 +1,24 @@
-"""
-Handling the auto assignable roles
-"""
+"""Handling the auto assignable roles."""
 
 import discord
 from discord.ext import commands
+from .utils import checks
 
 
-class AutoAssign(commands.Cog):
-    """
-    Cog to handle the ability of server owners
-    to create a list of roles that should be added on guild join
-    """
+class Autoassign(commands.Cog):
+    """Allow server owners to create a list of roles that are added on guild join."""  # noqa
 
     def __init__(self, bot):
-        """
-        Init class
-        """
+        """Init method."""
         super().__init__()
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        """
-        Actually adds the autoassign roles
-        """
+        """Actually adds the autoassign roles."""
         autoassign_roles = []
         autoassign_role_ids = await \
-            	self.bot.pg_utils.get_autoassign_roles(member.guild.id)
+            self.bot.pg_utils.get_autoassign_roles(member.guild.id)
         if not autoassign_role_ids:
             return
         for role in member.guild.roles:
@@ -38,9 +30,7 @@ class AutoAssign(commands.Cog):
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
     async def autoassignroles(self, ctx):
-        """
-        Manages server's autoassign roles
-        """
+        """Manage server's autoassign roles."""
         if ctx.invoked_subcommand is None:
             message = ' \n'
             autoassign_roles = []
@@ -60,9 +50,7 @@ class AutoAssign(commands.Cog):
 
     @autoassignroles.command()
     async def add(self, ctx, *, role_name):
-        """
-        Adds a role to the servers auto-assignable roles list
-        """
+        """Add a role to the servers auto-assignable roles list."""
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -103,9 +91,7 @@ class AutoAssign(commands.Cog):
 
     @autoassignroles.command()
     async def remove(self, ctx, *, role_name):
-        """
-        Removes a role from the serves auto-assignable roles list
-        """
+        """Remove a role from the serves auto-assignable roles list."""
         found_role = None
         for role in ctx.guild.roles:
             if role.name.lower() == role_name.lower():
@@ -149,4 +135,5 @@ class AutoAssign(commands.Cog):
 
 
 def setup(bot):
-	bot.add_cog(AutoAssign(bot))
+    """General cog loading."""
+    bot.add_cog(Autoassign(bot))

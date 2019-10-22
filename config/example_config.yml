@@ -13,3 +13,19 @@ postgres_credentials:
     user: "yinbotuser"
     database: "yinbotdb"
     password: "yinbot-password"
+
+cogs:
+    - Admin
+    - Autoassign
+    - Filter
+    - Gateway
+    - Info
+    - Logging
+    - Moderation
+    - Owner
+    - Pings
+    - Rng
+    - Roles
+    - Stats
+    - Voice
+    - Warnings

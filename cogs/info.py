@@ -1,48 +1,40 @@
-"""
-Cog for giving out useful info: bot invite link, stats, ping, etc
-"""
+"""Cog for giving out useful info: bot invite link, stats, ping, etc."""
 import discord
 import datetime
-from .utils import checks, embeds
 from discord.ext import commands
+from .utils import embeds
 
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'
 
 
 class Info(commands.Cog):
+    """Cog for general info."""
 
     def __init__(self, bot):
+        """Init method."""
         self.bot = bot
         super().__init__()
 
     @commands.command()
     async def invite(self, ctx):
-        """
-        Prints out a clickable link to invite yin
-        """
+        """Print out a clickable link to invite yin."""
         await ctx.send(embed=embeds.InviteEmbed())
 
     @commands.command()
     async def uptime(self, ctx):
-        """
-        Prints out uptime of bot
-        """
+        """Print out uptime of bot."""
         now = datetime.datetime.utcnow()
         uptime = now - self.bot.uptime
         await ctx.send(f'Uptime: {uptime}')
 
     @commands.command()
     async def support(self, ctx):
-        """
-        Links support server
-        """
+        """Link support server."""
         await ctx.send(embed=embeds.SupportEmbed())
 
     @commands.command()
     async def stats(self, ctx):
-        """
-        Prints out stats embed
-        """
+        """Print out stats embed."""
         now = datetime.datetime.utcnow()
         uptime = now - self.bot.uptime
         total_servers = len(self.bot.guilds)
@@ -57,3 +49,8 @@ class Info(commands.Cog):
         )
         local_embed.set_footer(text=f'yinbot v{version_number}{commit}')
         await ctx.send(embed=local_embed)
+
+
+def setup(bot):
+    """General cog loading."""
+    bot.add_cog(Info(bot))

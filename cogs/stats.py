@@ -1,6 +1,4 @@
-"""
-Cog that will print out various bot statistics
-"""
+"""Print out various bot statistics."""
 import json
 
 from discord.ext import commands
@@ -10,14 +8,15 @@ DISCORD_BOTS_API = 'https://bots.discord.pw/api'
 
 
 class Stats(commands.Cog):
-    """
-    Simple bot statistics as well as server logging
-    """
+    """Simple bot statistics as well as server logging."""
+
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
 
     async def update(self):
+        """General updater for various API endpoints."""
         guild_count = len(self.bot.guilds)
 
         """ Comment this out because bot isn't on carbonitix
@@ -49,13 +48,13 @@ class Stats(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        """
-        await self.update()
-        """
+        """Listen when bot joins a guild."""
+        # await self.update()
         await self.bot.pg_utils.add_server(guild.id)
         self.bot.server_settings = \
             await self.bot.pg_utils.get_server_settings()
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Stats(bot))

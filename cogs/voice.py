@@ -1,24 +1,22 @@
-"""
-Cog to handle voice role + channel creation
-"""
+"""Handle Voiceroles, channel changes, and status changes."""
 import discord
 from .utils import checks, embeds
 from discord.ext import commands
 
 
 class Voice(commands.Cog):
+    """Handle Voiceroles, channel changes, and status changes."""
+
     def __init__(self, bot):
+        """Init method."""
         super().__init__()
         self.bot = bot
-        self.logger = bot.logger
 
     @commands.group(aliases=['vcrole'])
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
     async def voiceroles(self, ctx):
-        """
-        Returns whether voice_roles are enabled for the server
-        """
+        """Check if voiceroles are enabled."""
         if ctx.invoked_subcommand is None:
             desc = ''
             vcrole_enabled = await\
@@ -33,10 +31,7 @@ class Voice(commands.Cog):
 
     @voiceroles.command()
     async def add(self, ctx, *, role_name):
-        """
-        Sets voiceroles to enabled for server and creates the
-        role if it doesn't exits
-        """
+        """Enable voiceroles and create the role if it doesn't exist."""
         if ctx.author.voice.channel is None:
             local_embed = discord.Embed(
                 title=f'You must be in a voice channel to use this command',
@@ -89,9 +84,7 @@ class Voice(commands.Cog):
 
     @voiceroles.command()
     async def remove(self, ctx, *, role_name):
-        """
-        Removes the given role from the voice channel.
-        """
+        """Remove the given role from the voice channel."""
         if ctx.author.voice.channel is None:
             local_embed = discord.Embed(
                 title=f'You must be in a voice channel to use this command',
@@ -139,9 +132,7 @@ class Voice(commands.Cog):
 
     @voiceroles.command()
     async def disable(self, ctx):
-        """
-        Disables all voice roles for server
-        """
+        """Disable all voice roles for server."""
         vcrole_enabled = await\
             self.bot.pg_utils.get_voice_enabled(ctx.guild.id)
         if not vcrole_enabled:
@@ -170,10 +161,7 @@ class Voice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        """
-        Checks if a user has recently joined or left a voice channel and adds
-        role if necessary
-        """
+        """Listen for voice channel changes and apply role if applicable."""
         vc_enabled = await self.bot.pg_utils.get_voice_enabled(
             member.guild.id)
         if not vc_enabled:
@@ -189,7 +177,7 @@ class Voice(commands.Cog):
                     if role.id == vc_role:
                         found_role = role
                 if not found_role:
-                    self.logger.warning(
+                    self.bot.logger.warning(
                         f'Couldn\'t find {vc_role} in guild {member.guild.id}')
                     continue
                 users_roles.append(found_role)
@@ -203,8 +191,8 @@ class Voice(commands.Cog):
                     if role.id == vc_role:
                         try:
                             users_roles.remove(role)
-                        except ValueError as e:
-                            self.logger.warning(
+                        except ValueError:
+                            self.bot.logger.warning(
                                 f'{vc_role} not found in {users_roles}')
             await member.edit(roles=set(users_roles))
         else:
@@ -216,8 +204,8 @@ class Voice(commands.Cog):
                     if role.id == vc_role:
                         try:
                             users_roles.remove(role)
-                        except ValueError as e:
-                            self.logger.warning(
+                        except ValueError:
+                            self.bot.logger.warning(
                                 f'{vc_role} not found in {users_roles}')
             vc_roles = await self.bot.pg_utils.get_channel_roles(
                 member.guild.id, after.channel.id
@@ -228,7 +216,7 @@ class Voice(commands.Cog):
                     if role.id == vc_role:
                         found_role = role
                 if not found_role:
-                    self.logger.warning(
+                    self.bot.logger.warning(
                         f'Couldn\'t find {vc_role} in guild {member.guild.id}')
                     continue
                 users_roles.append(found_role)
@@ -236,4 +224,5 @@ class Voice(commands.Cog):
 
 
 def setup(bot):
+    """General cog loading."""
     bot.add_cog(Voice(bot))
