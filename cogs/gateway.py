@@ -25,7 +25,8 @@ class Gateway(commands.Cog):
         for ch_id in welcome_channels:
             channel = self.bot.get_channel(ch_id)
             await channel.send(welcome_message.replace(
-                f'%user%', member.mention))
+                f'%user%', member.mention).replace(
+                f'%server%', member.guild.name))
 
     @commands.group()
     @commands.guild_only()
@@ -46,7 +47,7 @@ class Gateway(commands.Cog):
             await ctx.send(embed=local_embed)
 
     @welcome.command(name='set')
-    async def setwelcome(self, ctx, *, welcome_string):
+    async def setwelcome(self, ctx, *, welcome_string: str):
         """Attempt to set welcome message to string passed in."""
         if not welcome_string:
             local_embed = discord.Embed(
@@ -63,7 +64,8 @@ class Gateway(commands.Cog):
         )
         if success:
             desc = welcome_string.replace(
-                f'%user%', ctx.message.author.mention)
+                f'%user%', ctx.message.author.mention).replace(
+                f'%server%', ctx.guild.name)
             local_embed = discord.Embed(
                 title=f'Welcome message set:',
                 description=f'**Preview:**\n{desc} ',
