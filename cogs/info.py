@@ -50,6 +50,8 @@ class Info(commands.Cog):
                         i = -1
                     else:
                         i += 1
+            if 'commands/' not in command:
+                command = ''
         else:
             command = ''
         await ctx.send(help + command + '>.')
