@@ -1,11 +1,11 @@
 """General purpose discord bot with a focus on doing moderation simply and well."""  # noqa
 
-import yaml
-import yappi
 import subprocess
 import datetime
 from time import time, sleep
 
+import yappi
+import gila
 from logging import Formatter, INFO, StreamHandler, getLogger
 from discord.ext.commands import Bot
 
@@ -41,8 +41,10 @@ class Yinbot(Bot):
     @classmethod
     async def get_instance(cls):
         """Async method to initialize the pg_utils class."""
-        with open("config/config.yml", 'r') as yml_config:
-            config = yaml.load(yml_config)
+        config = gila.Gila()
+        config.set_config_file('config/config.yml')
+        config.read_config_file()
+        config = config.all_config()
         logger = getLogger('yinbot')
         console_handler = StreamHandler()
         console_handler.setFormatter(Formatter(
