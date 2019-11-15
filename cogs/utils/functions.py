@@ -73,13 +73,13 @@ class GeneralMember(commands.Converter):
             self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')  # noqa
         if failed or target is None:
             try:
-                member_id = extract_id(argument)
+                member_id = extract_id(argument, False)
                 assert member_id is not None
                 target = create_fake_user(member_id)
                 target.guild = ctx.guild
                 target.bot = False
             except Exception as e:
-                self.bot.logger.warning(f'Problems resolving member, making a fake user. Probably was removed from the guild. {e}')  # noqa
+                self.bot.logger.warning(f'Problems making a fake user.{e}')  # noqa
         if target is not None:
             return target
         else:
@@ -104,7 +104,7 @@ def create_fake_user(user_id: str):
     return member
 
 
-class fake_object:
+class fake_object(object):
     """Recreate ABC class."""
 
     def __init__(self, snowflake):
@@ -112,6 +112,9 @@ class fake_object:
         self.id = int(snowflake)
         self.name = ''
         self.created_at = datetime.datetime.utcnow()
+
+    def __setattr__(self, key, value):
+        object.__setattr__(self, key, value)
 
     def __repr__(self):
         """Repr method."""
@@ -151,7 +154,7 @@ def get_member(ctx, argument: str):
         return None
 
 
-def extract_id(argument: str):
+def extract_id(argument: str, strict: bool=True):
     """Extract id from argument."""
     """
     Parameters
@@ -165,8 +168,9 @@ def extract_id(argument: str):
         the bare id
     """
     ex = ''.join(list(filter(str.isdigit, str(argument))))
-    if len(ex) < 15:
-        return None
+    if strict:
+        if len(ex) < 15:
+            return None
     return ex
 
 
