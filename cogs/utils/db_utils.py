@@ -115,8 +115,20 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (channel_id)
     );"""
 
+    role_greetings = f"""
+    CREATE TABLE IF NOT EXISTS {schema}.role_greetings (
+      serverid BIGINT references {schema}.servers(serverid),
+      channel_id bigint,
+      role_id bigint,
+      greeting TEXT,
+      addtime TIMESTAMP DEFAULT current_timestamp,
+      PRIMARY KEY (channel_id)
+    );
+    """
+
     """
     #################################################################################
+    idk why this is here anymore
     #################################################################################
     """
 
@@ -165,6 +177,7 @@ async def make_tables(pool: Pool, schema: str):
     await pool.execute(servers)
     await pool.execute(voice_roles)
     await pool.execute(voice_logging)
+    await pool.execute(role_greetings)
     await pool.execute(modlog_channels)
     await pool.execute(welcome_channels)
     await pool.execute(logging_channels)
@@ -1372,3 +1385,89 @@ class PostgresController():
             return role_list
         except Exception:
             return []
+
+    async def set_role_greeting(self, guild_id: int, channel_id: int, role_id: int, message: str, logger):
+        """
+        Sets a role Greeting for a server
+        :param guild_id: Guild to update message for
+        :param message: string to insert
+        """
+        sql = """
+        INSERT INTO {}.role_greetings
+        VALUES ($1, $2, $3, $4)
+        """.format(self.schema)
+
+        try:
+            await self.pool.execute(
+                sql, guild_id, channel_id, role_id, message)
+            return True
+        except Exception as e:
+            logger.warning(f'Issue setting role greetings: {e}')
+            return False
+
+    async def get_role_greetings(self, role_id: int, logger):
+        """
+        Returns the rolegreetings if it exists
+        :param role_id: role to get channels/messages for
+        """
+        sql = """
+        SELECT * from {}.role_greetings
+        WHERE role_id = $1
+        """.format(self.schema)
+        try:
+            greetings = await self.pool.fetch(sql, role_id)
+            return greetings
+        except Exception as e:
+            logger.warning(f'Error while getting role greetings: {e}')
+            return None
+
+    async def get_channel_role_greeting(self, role_id: int, channel_id: int, logger):
+        """
+        Returns the rolegreetings if it exists
+        :param role_id: role to get channels/messages for
+        """
+        sql = """
+        SELECT * from {}.role_greetings
+        WHERE role_id = $1
+        AND channel_id = $2
+        """.format(self.schema)
+        try:
+            greetings = await self.pool.fetchrow(sql, role_id, channel_id)
+            return greetings
+        except Exception as e:
+            logger.warning(f'Error while getting role greetings: {e}')
+            return None
+
+    async def get_all_role_greetings(self, guild_id: int, logger):
+        """
+        Returns the rolegreetings if it exists
+        :param role_id: role to get channels/messages for
+        """
+        sql = """
+        SELECT * from {}.role_greetings
+        WHERE serverid = $1
+        """.format(self.schema)
+        try:
+            greetings = await self.pool.fetch(sql, guild_id)
+            return greetings
+        except Exception as e:
+            logger.warning(f'Error while getting role greetings: {e}')
+            return None
+
+    async def del_role_greeting(self, role_id: int, channel_id: int, logger):
+        """
+        Removes a role from the autoassign roles array for the server
+        :param guild_id: guild to remove role from
+        :param role_id: role to remove
+        """
+        sql = """
+        DELETE from {}.role_greetings
+        WHERE channel_id = $1
+        AND role_id = $2
+        """.format(self.schema)
+        try:
+            await self.pool.execute(sql, channel_id, role_id)
+        except Exception as e:
+            logger.warning(f'Error removing role_greeting: {e}')
+            return False
+        return True
