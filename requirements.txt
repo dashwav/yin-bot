@@ -1,5 +1,5 @@
 typing==3.6.2
 asyncpg==0.18.2
-discord.py==1.0.1
+discord.py==1.2.4
 yappi==1.0
-gila==0.3.0
+gila==0.4.0
