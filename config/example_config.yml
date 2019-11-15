@@ -2,6 +2,8 @@ token: ""
 
 guild_id: 123456789
 
+log_level: "INFO"
+
 base_voice: "Voice"
 
 owner_id: 164546159140929538
