@@ -157,11 +157,13 @@ class Warnings(commands.Cog):
             recent = False if ctx.message.content.lower().endswith('false') else True
             await _warnings(self.bot, ctx, await GeneralMember.convert(self, ctx, ctx.message.content), ctx.guild.id, recent)
             return
-        try:
-            await ctx.author.create_dm()
-            await _warnings(self.bot, ctx.author.dm_channel, ctx.author, ctx.guild.id, False)
-        except Exception as e:
-            self.bot.logger.warn("Failed to send dm.")
+        elif ctx.message.content.lower().endswith('warnings me'):
+            try:
+                await ctx.author.create_dm()
+                await _warnings(self.bot, ctx.author.dm_channel, ctx.author, ctx.guild.id, False)
+            except Exception as e:
+                self.bot.logger.warn("Failed to send dm.")
+        return
 
     @warnings.error
     async def warnings_error(self, ctx, error):
