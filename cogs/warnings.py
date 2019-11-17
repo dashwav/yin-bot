@@ -42,6 +42,7 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
+            return
         try:
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
@@ -69,6 +70,7 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
+            return
         try:
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
@@ -98,6 +100,7 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
+            return
         dtype = True if dtype.lower() == 'major' else False
         try:
             count = await self.bot.pg_utils.set_single_warning(
@@ -146,7 +149,7 @@ class Warnings(commands.Cog):
     @commands.guild_only()
     @checks.has_permissions(manage_roles=True)
     async def warnings(self, ctx, member: GeneralMember, recent: bool = True):
-        await _warnings(self, ctx, member, member.guild.id, recent)
+        await _warnings(self.bot, ctx, member, member.guild.id, recent)
 
     @warnings.error
     async def warnings_error(self, ctx, error):
