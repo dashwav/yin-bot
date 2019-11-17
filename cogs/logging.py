@@ -350,6 +350,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Send message on a user editing messages."""
+        if getattr(before, 'guild') is None:
+            return
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
         try:
@@ -384,6 +386,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         """Send message on a user editing messages."""
+        if getattr(message, 'guild') is None:
+            return
         if not self.bot.server_settings[message.guild.id]['logging_enabled']:
             return
         if message.author.bot:
@@ -414,6 +418,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         """Send message on a user role or name update."""
+        if getattr(before, 'guild') is None:
+            return
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
         if before.roles == after.roles:
@@ -454,6 +460,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_user_update(self, before, after):
         """Send message on a username update."""
+        if getattr(before, 'guild') is None:
+            return
         if before.name == after.name:
             return
         user_mutuals = []
@@ -480,6 +488,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Send a message on user vc update."""
+        if getattr(before, 'guild') is None:
+            return
         vc_logging = await self.bot.pg_utils.get_voice_logging(
             member.guild.id)
         if not vc_logging:

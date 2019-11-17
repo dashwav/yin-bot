@@ -104,6 +104,16 @@ def create_fake_user(user_id: str):
     return member
 
 
+def duplicate_member(base_member):
+    """Duplicate a member object."""
+    new_member = create_fake_user(base_member.id)
+    for i in dir(base_member):
+        if '__' in i:
+            continue
+        setattr(new_member, i, getattr(base_member, i))
+    return new_member
+
+
 class fake_object(object):
     """Recreate ABC class."""
 

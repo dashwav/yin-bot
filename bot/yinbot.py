@@ -11,7 +11,8 @@ from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
 from cogs.utils import embeds
-
+from cogs.utils.functions import extract_id, duplicate_member
+from cogs.warnings import _warnings as warnings
 
 class Yinbot(Bot):
     """Actual bot class."""
@@ -101,6 +102,13 @@ class Yinbot(Bot):
         if ctx.author.bot:
             return
         elif isinstance(ctx.guild, type(None)):
+            if ctx.content.startswith('warnings'):
+                try:
+                    guild_id = int(extract_id(ctx.content))
+                except Exception as e:
+                    await ctx.channel.send('Could not find the guild you wanted.')
+                user = duplicate_member(ctx.author)
+                await warnings(self, ctx.channel, user, guild_id, False)
             return
         elif self.user in ctx.mentions:
             await ctx.channel.send(
