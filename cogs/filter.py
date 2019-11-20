@@ -70,8 +70,6 @@ class Filter(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """General message catcher for filtering."""
-        if getattr(message, 'guild') is None:
-            return
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return

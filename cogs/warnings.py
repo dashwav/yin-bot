@@ -147,62 +147,56 @@ class Warnings(commands.Cog):
 
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
-    async def warnings(self, ctx):
+    async def warnings(self, ctx, member: str, recent: bool = True):
         """[warnings|infractions] <member|me> [recent=True]
 
         Return all the warnings a user has. You can just pass in me to get your own warnings in DM.
         """
         resolved = ctx.channel.permissions_for(ctx.author)
-        if getattr(resolved, 'manage_roles', None) and not ctx.message.content.lower().endswith('warnings me'):
-            recent = False if ctx.message.content.lower().endswith('false') else True
-            await _warnings(self.bot, ctx, await GeneralMember.convert(self, ctx, ctx.message.content), ctx.guild.id, recent)
-            return
-        elif ctx.message.content.lower().endswith('warnings me'):
-            try:
-                await ctx.author.create_dm()
-                await _warnings(self.bot, ctx.author.dm_channel, ctx.author, ctx.guild.id, False)
-            except Exception as e:
-                self.bot.logger.warn("Failed to send dm.")
-        return
+        guild_id = ctx.guild.id
+        if member == 'me':
+            recent = False
+            await ctx.author.create_dm()
+            channel = ctx.author.dm_channel
+            member = ctx.author
+        elif getattr(resolved, 'manage_roles', None):
+            channel = ctx.channel
+            member = await GeneralMember.convert(self, ctx, member)
+        try:
+            warnings = None
+            moderations = None
+            count = [await self.bot.pg_utils.get_warning_count(guild_id, member.id),  # noqa
+                        await self.bot.pg_utils.get_moderation_count(guild_id, member.id)]  # noqa
+            warnings = await self.bot.pg_utils.get_warnings(
+                guild_id,
+                member.id,
+                self.bot.logger,
+                recent=recent)
+            moderations = await self.bot.pg_utils.get_moderation(
+                guild_id,
+                member.id,
+                self.bot.logger,
+                recent=recent)
+        except Exception as e:
+            await channel.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying to get user warnings: {e}')
+        try:
+            local_embed = embeds.WarningListEmbed(
+                member, warnings, self.bot.logger, count[0] != len(warnings))
+            await channel.send(embed=local_embed)
+            if moderations or count[-1]:
+                mod_embed = embeds.ModerationListEmbed(
+                    member, moderations, self.bot.logger,
+                    count[1] != len(moderations))
+                await channel.send(embed=mod_embed)
+        except Exception as e:
+            await channel.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying to create/send user warnings: {e}')
 
     @warnings.error
     async def warnings_error(self, ctx, error):
         """Specialized warning error."""
         self.bot.logger.warning(f'Error retrieving warnings for user {error}')
-
-
-async def _warnings(bot, channel, member: GeneralMember, guild_id: int, recent: bool = True):
-    """Return all the warnings a user has."""
-    try:
-        warnings = None
-        moderations = None
-        count = [await bot.pg_utils.get_warning_count(guild_id, member.id),  # noqa
-                    await bot.pg_utils.get_moderation_count(guild_id, member.id)]  # noqa
-        warnings = await bot.pg_utils.get_warnings(
-            guild_id,
-            member.id,
-            bot.logger,
-            recent=recent)
-        moderations = await bot.pg_utils.get_moderation(
-            guild_id,
-            member.id,
-            bot.logger,
-            recent=recent)
-    except Exception as e:
-        await channel.send(embed=embeds.InternalErrorEmbed())
-        bot.logger.warning(f'Error trying to get user warnings: {e}')
-    try:
-        local_embed = embeds.WarningListEmbed(
-            member, warnings, bot.logger, count[0] > len(warnings))
-        await channel.send(embed=local_embed)
-        if moderations:
-            mod_embed = embeds.ModerationListEmbed(
-                member, moderations, bot.logger,
-                count[1] > len(moderations))
-            await channel.send(embed=mod_embed)
-    except Exception as e:
-        await channel.send(embed=embeds.InternalErrorEmbed())
-        bot.logger.warning(f'Error trying to create/send user warnings: {e}')
 
 
 def setup(bot):

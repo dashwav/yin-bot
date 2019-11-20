@@ -7,12 +7,12 @@ from time import time, sleep
 import yappi
 import gila
 from logging import Formatter, INFO, StreamHandler, getLogger
+import discord
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
 from cogs.utils import embeds
 from cogs.utils.functions import extract_id, duplicate_member
-from cogs.warnings import _warnings as warnings
 
 class Yinbot(Bot):
     """Actual bot class."""
@@ -101,7 +101,7 @@ class Yinbot(Bot):
         """On all messages."""
         if ctx.author.bot:
             return
-        elif isinstance(ctx.guild, type(None)):
+        if isinstance(ctx.channel, discord.DMChannel):
             return
         elif self.user in ctx.mentions:
             await ctx.channel.send(
