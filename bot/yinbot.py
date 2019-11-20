@@ -7,6 +7,7 @@ from time import time, sleep
 import yappi
 import gila
 from logging import Formatter, StreamHandler, getLogger
+import discord
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
