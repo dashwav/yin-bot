@@ -350,6 +350,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Send message on a user editing messages."""
+        if isinstance(before.channel, discord.DMChannel):
+            return
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
         try:
@@ -384,6 +386,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         """Send message on a user editing messages."""
+        if isinstance(message.channel, discord.DMChannel):
+            return
         if not self.bot.server_settings[message.guild.id]['logging_enabled']:
             return
         if message.author.bot:
@@ -480,8 +484,6 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Send a message on user vc update."""
-        if getattr(before, 'guild') is None:
-            return
         vc_logging = await self.bot.pg_utils.get_voice_logging(
             member.guild.id)
         if not vc_logging:
