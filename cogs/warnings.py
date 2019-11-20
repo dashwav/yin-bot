@@ -148,8 +148,7 @@ class Warnings(commands.Cog):
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
     async def warnings(self, ctx, member: str, recent: bool = True):
-        """[warnings|infractions] <member|me> [recent=True]
-
+        """
         Return all the warnings a user has. You can just pass in me to get your own warnings in DM.
         """
         resolved = ctx.channel.permissions_for(ctx.author)
