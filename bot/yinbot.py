@@ -6,8 +6,7 @@ from time import time, sleep
 
 import yappi
 import gila
-from logging import Formatter, INFO, StreamHandler, getLogger
-import discord
+from logging import Formatter, StreamHandler, getLogger
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
@@ -43,6 +42,7 @@ class Yinbot(Bot):
     async def get_instance(cls):
         """Async method to initialize the pg_utils class."""
         config = gila.Gila()
+        config.set_default("log_level", "INFO")
         config.set_config_file('config/config.yml')
         config.read_config_file()
         config = config.all_config()
@@ -52,7 +52,7 @@ class Yinbot(Bot):
             '%(asctime)s %(levelname)s %(name)s: %(message)s')
         )
         logger.addHandler(console_handler)
-        logger.setLevel(INFO)
+        logger.setLevel(config.get("log_level"))
         postgres_cred = config['postgres_credentials']
         pg_utils = None
         while not pg_utils:
