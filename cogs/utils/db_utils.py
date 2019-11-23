@@ -44,6 +44,7 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {schema}.servers (
       serverid BIGINT,
       prefix varchar(2),
+      warnings_dm boolean DEFAULT TRUE,
       voice_enabled boolean DEFAULT FALSE,
       invites_allowed boolean DEFAULT TRUE,
       voice_logging boolean DEFAULT FALSE,
@@ -174,19 +175,13 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (serverid, channelid)
     );"""
 
-    await pool.execute(servers)
-    await pool.execute(voice_roles)
-    await pool.execute(voice_logging)
-    await pool.execute(role_greetings)
-    await pool.execute(modlog_channels)
-    await pool.execute(welcome_channels)
-    await pool.execute(logging_channels)
-    await pool.execute(assignableroles)
-    await pool.execute(blacklist_channels)
-    await pool.execute(warnings)
-    await pool.execute(moderation)
-    await pool.execute(autoassign)
-    await pool.execute(slowchannels)
+    for db in (servers, voice_roles, voice_logging,
+               role_greetings, modlog_channels,
+               welcome_channels, logging_channels,
+               assignableroles, blacklist_channels,
+               warnings, moderation, autoassign, slowchannels):
+        await pool.execute(db)
+
 
 
 class PostgresController():
@@ -240,27 +235,28 @@ class PostgresController():
         Inserts into the server table a new server
         :param guild_id: the id of the server added
         """
-        sql = """
-        INSERT INTO {}.servers VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-        ON CONFLICT (serverid)
-        DO nothing;
-        """.format(self.schema)
+        cols = {
+                'serverid': guild_id,
+                'prefix': '-',
+                'warnings_dm': True,
+                'voice_enabled': False,
+                'invites_allowed': False,
+                'voice_logging': False,
+                'modlog_enabled': False,
+                'welcome_message': f'Welcome %user%!',
+                'logging_enabled': False,
+                'ban_footer': f'This is an automated message',
+                'kick_footer': f'This is an automated message',
+                'addtime': datetime.datetime.now()
+                }
 
-        await self.pool.execute(
-            sql,
-            guild_id,
-            '-',
-            False,
-            True,
-            False,
-            False,
-            f'Welcome %user%!',
-            False,
-            f'This is an automated message',
-            f'This is an automated message',
-            datetime.datetime.now()
-            )
+        sql = f"""
+            INSERT INTO {self.schema}.servers ({','.join(cols.keys())}) VALUES
+                ({','.join(['$' + str(i + 1) for i in range(len(cols.keys()))])})
+                ON CONFLICT (serverid) DO nothing;
+            """
+
+        return await self.pool.execute(sql, *[v for k, v in cols.items()])
 
     async def get_server_settings(self):
         """
@@ -268,9 +264,7 @@ class PostgresController():
         """
         prefix_dict = {}
         sql = """
-        SELECT serverid, prefix, modlog_enabled,
-        logging_enabled, invites_allowed
-        FROM {}.servers;
+        SELECT * FROM {}.servers;
         """.format(self.schema)
         val_list = await self.pool.fetch(sql)
         for row in val_list:
@@ -278,9 +272,18 @@ class PostgresController():
                 'prefix': row['prefix'],
                 'modlog_enabled': row['modlog_enabled'],
                 'logging_enabled': row['logging_enabled'],
-                'invites_allowed': row['invites_allowed']
+                'invites_allowed': row['invites_allowed'],
+                'warnings_dm': row['warnings_dm']
                 }
         return prefix_dict
+
+    async def set_server_setting(self, guild_id: int, key: str, val):
+        sql = f"""
+            UPDATE {self.schema}.servers
+                SET {key} = $1
+                WHERE serverid = $2;
+            """
+        return await self.pool.execute(sql, val, guild_id)
 
     async def get_server(self, server_id: int, logger):
         """

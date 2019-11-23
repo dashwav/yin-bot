@@ -12,6 +12,25 @@ class Admin(commands.Cog):
         super().__init__()
         self.bot = bot
 
+    @commands.command()
+    @commands.guild_only()
+    @checks.is_admin()
+    async def togglepublicwarnings(self, ctx):
+        """Toggle if guild members can invoke warnings me, the self-invokable public warning system."""
+        self.bot.server_settings[ctx.guild.id]['warnings_dm'] = not self.bot.server_settings[ctx.guild.id]['warnings_dm']  # noqa
+        try:
+            await self.bot.pg_utils.set_server_setting(ctx.guild.id, 'warnings_dm', self.bot.server_settings[ctx.guild.id]['warnings_dm']) # noqa
+            local_embed = discord.Embed(
+                title=f'Warnings DM-able: '
+                f'{self.bot.server_settings[ctx.guild.id]["warnings_dm"]}',
+                description=' ',
+                color=0x419400
+            )
+            await ctx.send(embed=local_embed)
+        except Exception:
+            await ctx.message.add_reaction(r'❌')
+            return
+
     @commands.group()
     @commands.guild_only()
     @checks.is_admin()

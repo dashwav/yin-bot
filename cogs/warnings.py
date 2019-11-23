@@ -154,6 +154,9 @@ class Warnings(commands.Cog):
         resolved = ctx.channel.permissions_for(ctx.author)
         guild_id = ctx.guild.id
         if member == 'me':
+            if not self.bot.server_settings[ctx.guild.id]['warnings_dm']:
+                await ctx.message.add_reaction(r'❌')
+                return
             recent = False
             await ctx.author.create_dm()
             channel = ctx.author.dm_channel
