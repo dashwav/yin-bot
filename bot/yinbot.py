@@ -104,7 +104,7 @@ class Yinbot(Bot):
             return
         if isinstance(ctx.channel, discord.DMChannel):
             return
-        elif self.user in ctx.mentions:
+        elif self.user in ctx.mentions and (('prefix' in ctx.clean_content) or ('help' in ctx.clean_content)) and self.server_settings[ctx.guild.id]['pingableprefix']:
             await ctx.channel.send(
                 embed=embeds.MentionHelpEmbed(
                     await self.get_pre(self, ctx)

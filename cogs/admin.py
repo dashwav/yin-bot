@@ -15,6 +15,21 @@ class Admin(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @checks.is_admin()
+    async def togglepingableprefix(self, ctx):
+        """Enable and disable the bot pingable prefix response."""
+        try:
+            new = not self.bot.server_settings[ctx.guild.id]['pingableprefix']
+            await self.bot.pg_utils.set_server_setting(ctx.guild.id, 'pingableprefix', new)
+            self.bot.server_settings[ctx.guild.id]['pingableprefix'] = new
+            await ctx.send(f'Set bot pingable prefix response to: {new}')
+        except Exception as e:
+            self.bot.logger.warn(f'Failed to set pingableprefix: {e}')
+            await ctx.send(f'Failed to set pingableprefix: {e}')
+        return
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.is_admin()
     async def togglepublicwarnings(self, ctx):
         """Toggle if guild members can invoke warnings me, the self-invokable public warning system."""
         self.bot.server_settings[ctx.guild.id]['warnings_dm'] = not self.bot.server_settings[ctx.guild.id]['warnings_dm']  # noqa

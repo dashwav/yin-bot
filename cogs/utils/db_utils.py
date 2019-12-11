@@ -44,6 +44,7 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {schema}.servers (
       serverid BIGINT,
       prefix varchar(2),
+      pingableprefix boolean DEFAULT TRUE,
       warnings_dm boolean DEFAULT TRUE,
       voice_enabled boolean DEFAULT FALSE,
       invites_allowed boolean DEFAULT TRUE,
@@ -126,13 +127,6 @@ async def make_tables(pool: Pool, schema: str):
       PRIMARY KEY (channel_id)
     );
     """
-
-    """
-    #################################################################################
-    idk why this is here anymore
-    #################################################################################
-    """
-
 
     autoassign = f"""
     CREATE TABLE IF NOT EXISTS {schema}.autoassign(
@@ -238,6 +232,7 @@ class PostgresController():
         cols = {
                 'serverid': guild_id,
                 'prefix': '-',
+                'pingableprefix': True,
                 'warnings_dm': True,
                 'voice_enabled': False,
                 'invites_allowed': False,
@@ -273,7 +268,8 @@ class PostgresController():
                 'modlog_enabled': row['modlog_enabled'],
                 'logging_enabled': row['logging_enabled'],
                 'invites_allowed': row['invites_allowed'],
-                'warnings_dm': row['warnings_dm']
+                'warnings_dm': row['warnings_dm'],
+                'pingableprefix': row['pingableprefix'],
                 }
         return prefix_dict
 
