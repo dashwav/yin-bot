@@ -16,12 +16,19 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @checks.is_admin()
     async def togglepingableprefix(self, ctx):
-        """Enable and disable the bot pingable prefix response."""
+        """Toggle the bot pingable prefix response."""
         try:
             new = not self.bot.server_settings[ctx.guild.id]['pingableprefix']
             await self.bot.pg_utils.set_server_setting(ctx.guild.id, 'pingableprefix', new)
             self.bot.server_settings[ctx.guild.id]['pingableprefix'] = new
             await ctx.send(f'Set bot pingable prefix response to: {new}')
+            local_embed = discord.Embed(
+                title=f'Pingable Prefix Response: '
+                f'{new}',
+                description='This determines if mentioning the bot with either "prefix" or "help" will respond with the bots help info.',
+                color=0x419400
+            )
+            await ctx.send(embed=local_embed)
         except Exception as e:
             self.bot.logger.warn(f'Failed to set pingableprefix: {e}')
             await ctx.send(f'Failed to set pingableprefix: {e}')
@@ -130,7 +137,7 @@ class Admin(commands.Cog):
                 )
                 self.bot.server_settings[ctx.guild.id]['modlog_enabled'] = True
             else:
-                self.bot.logger.info(f'slktjsaj')
+                self.bot.logger.info(f'Troubles adding modlog to list')
                 local_embed = embeds.InternalErrorEmbed()
             await ctx.send(embed=local_embed)
         except Exception as e:

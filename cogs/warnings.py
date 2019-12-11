@@ -148,8 +148,19 @@ class Warnings(commands.Cog):
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
     async def warnings(self, ctx, member: str, recent: bool = True):
-        """
-        Return all the warnings a user has. You can just pass in me to get your own warnings in DM.
+        """Return all the warnings a user has.
+
+        You can just pass in me to get your own warnings in DM.
+
+        Parameters
+        ----------
+        member: str
+            Must designate the user to find warnings. Can be "me", userid,
+            usermention, or username. If user is not in guild, will still
+            complete, but the username and discriminator displayed will be
+            incorrect.
+        recent: bool [Defaults: True]
+            Want to display only recent (<6months) warnings and modactions.
         """
         resolved = ctx.channel.permissions_for(ctx.author)
         guild_id = ctx.guild.id
