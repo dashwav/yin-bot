@@ -41,12 +41,19 @@ async def get_postgres():
 
 async def migrate():
     pg_utils, config, logger = await get_postgres()
-    add_table = f"""
-    ALTER TABLE {config['postgres_credentials']['database']}.servers
-        ADD COLUMN pingableprefix BOOLEAN DEFAULT TRUE;
+
+    add_table_warnings = f"""
+    ALTER TABLE {config['postgres_credentials']['database']}.warnings
+        ADD COLUMN mod_id BIGINT DEFAULT 0;
+    """
+
+    add_table_moderation = f"""
+    ALTER TABLE {config['postgres_credentials']['database']}.moderation
+        ADD COLUMN mod_id BIGINT DEFAULT 0;
     """
     try:
-        await pg_utils.pool.execute(add_table)
+        await pg_utils.pool.execute(add_table_warnings)
+        await pg_utils.pool.execute(add_table_moderation)
     except Exception as e:
         logger.critical("Error doing final migration:")
         logger.critical(e)
