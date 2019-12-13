@@ -44,12 +44,12 @@ async def migrate():
 
     add_table_warnings = f"""
     ALTER TABLE {config['postgres_credentials']['database']}.warnings
-        ADD COLUMN mod_id BIGINT DEFAULT 0;
+        ADD COLUMN modid BIGINT DEFAULT 0;
     """
 
     add_table_moderation = f"""
     ALTER TABLE {config['postgres_credentials']['database']}.moderation
-        ADD COLUMN mod_id BIGINT DEFAULT 0;
+        ADD COLUMN modid BIGINT DEFAULT 0;
     """
     try:
         await pg_utils.pool.execute(add_table_warnings)
