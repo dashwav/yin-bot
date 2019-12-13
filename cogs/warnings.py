@@ -47,6 +47,7 @@ class Warnings(commands.Cog):
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
                 member.id,
+                ctx.author.id,
                 reason,
                 True,
                 self.bot.logger
@@ -75,6 +76,7 @@ class Warnings(commands.Cog):
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
                 member.id,
+                ctx.author.id,
                 reason,
                 False,
                 self.bot.logger
@@ -87,10 +89,23 @@ class Warnings(commands.Cog):
 
     @warn.command(aliases=['e'])
     async def edit(self, ctx, member: GeneralMember,
-                   index: int = None, dtype: str = None, *,
+                   index: int = None, warntype: str = None, *,
                    reason: str = None):
-        """Edit a warning."""
-        if not reason or not index or not dtype:
+        """Edit a warning.
+
+        Parameters
+        ----------
+        member:
+            The ID, name, or mentionable of a user.
+        index: int
+            Index of the warning
+        warntype: str
+            The warning type, major | minor
+        reason: str
+            The reason for warning the user.
+
+        """
+        if not reason or not index or not warntype:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1), warning type, reason>, try again.",  # noqa
                 delete_after=5)
@@ -101,17 +116,20 @@ class Warnings(commands.Cog):
                 delete_after=5
             )
             return
-        dtype = True if dtype.lower() == 'major' else False
+        if warntype.lower() not in ('major', 'minor'):
+            reason = f'{warntype} {reason}'
+            warntype = 'minor'
+        warntype = True if warntype.lower() == 'major' else False
         try:
             count = await self.bot.pg_utils.set_single_warning(
                 ctx.guild.id,
                 member.id,
                 reason,
-                dtype,
+                warntype,
                 index,
                 self.bot.logger
             )
-            local_embed = embeds.WarningEditEmbed(member, dtype, reason, count)
+            local_embed = embeds.WarningEditEmbed(member, warntype, reason, count)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())

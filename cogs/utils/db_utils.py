@@ -141,6 +141,7 @@ async def make_tables(pool: Pool, schema: str):
     CREATE TABLE IF NOT EXISTS {schema}.warnings(
       serverid BIGINT,
       userid BIGINT,
+      modid BIGINT,
       indexid INT,
       reason text,
       major BOOLEAN DEFAULT FALSE,
@@ -151,7 +152,7 @@ async def make_tables(pool: Pool, schema: str):
     moderation = f"""
     CREATE TABLE IF NOT EXISTS {schema}.moderation (
       serverid BIGINT,
-      moderatorid BIGINT,
+      modid BIGINT,
       userid BIGINT,
       indexid INT,
       action INT,
@@ -999,6 +1000,17 @@ class PostgresController():
     """
     Moderations
     """
+    async def compile_modactions(self, guild_id: int, days: int, logger):
+        """Compile all modactions in last X days."""
+        sql = f"""
+            SELECT * FROM {self.schema}.moderation
+            WHERE serverid = $1 AND (logtime >= DATE_TRUNC('day', now()) - INTERVAL '{days} day');
+        """
+        try:
+            return await self.pool.fetch(sql, guild_id)
+        except Exception as e:
+            logger.warning(f'Error compiling moderations {e}')
+            return []
 
     async def get_modaction_indexes(self, guild_id, user_id):
         """
@@ -1025,35 +1037,40 @@ class PostgresController():
         """.format(self.schema)
         return await self.pool.fetchval(sql, guild_id, user_id)
 
-    async def insert_modaction(self, guild_id: int, mod_id: int,
-                               target_id: int, reason: str,
+    async def insert_modaction(self, serverid: int, modid: int,
+                               userid: int, reason: str,
                                action_type: Action):
         """
         Inserts into the roles table a new rolechange
-        :param mod_id: the id of the mod that triggered the action
-        :param target_id: the id of user that action was performed on
+        :param modid: the id of the mod that triggered the action
+        :param userid: the id of user that action was performed on
         :param action_type: The type of change that occured
         """
-        sql = """
-        INSERT INTO {}.moderation VALUES ($1, $2, $3, $4, $5, $6);
-        """.format(self.schema)
 
-        moderations = await self.get_moderation_count(guild_id, target_id)
-        all_modac_i = await self.get_modaction_indexes(guild_id, target_id)
+        moderations = await self.get_moderation_count(serverid, userid)
+        all_modac_i = await self.get_modaction_indexes(serverid, userid)
         if all_modac_i:
             index = max(all_modac_i) + 1
         else:
             index = 1
 
-        await self.pool.execute(
-            sql, 
-            guild_id,
-            mod_id,
-            target_id,
-            index,
-            action_type.value,
-            reason
-        )
+        params = {'serverid': serverid,
+                  'userid': userid,
+                  'modid': modid,
+                  'indexid': index,
+                  'reason': reason,
+                  'action': action_type.value,}
+        keyl = '$' + ',$'.join(list(map(lambda x: str(x + 1), range(len(params.keys())))))
+        sql = f"""
+            INSERT INTO {self.schema}.moderation ({','.join(params.keys())}) VALUES ({keyl});
+        """
+        try:
+            await self.pool.execute(sql, *(list(params.values())))
+            return moderations
+        except Exception as e:
+            logger.warning(f'Error inserting warning into db: {e}')
+            return False
+
 
     async def get_moderation(self, guild_id: int, user_id: int, logger, recent=False):
         """
@@ -1135,6 +1152,17 @@ class PostgresController():
     """
     Warnings
     """
+    async def compile_warnings(self, guild_id: int, days: int, logger):
+        """Compile all modactions in last X days."""
+        sql = f"""
+            SELECT * FROM {self.schema}.warnings
+            WHERE serverid = $1 AND (logtime >= DATE_TRUNC('day', now()) - INTERVAL '{days} day');
+        """
+        try:
+            return await self.pool.fetch(sql, guild_id)
+        except Exception as e:
+            logger.warning(f'Error compiling warnings {e}')
+            return []
 
     async def get_warning_count(self, guild_id, user_id):
         """
@@ -1162,35 +1190,36 @@ class PostgresController():
         return list(map(lambda m: m['indexid'], sql_i))
 
     async def add_warning(
-            self, guild_id: int, user_id: str,
+            self, serverid: int, userid: int, modid: int,
             reason: str, major: bool, logger):
         """
         Takes a userid and string and inserts it into the guild's
         warning log
-        :param guild_id: guild to search infractions
-        :param user_id: user id to count for
+        :param serverid: guild to search infractions
+        :param userid: user id to count for
+        :param modid: id of the moderator
         :param reason: reason for warning
         :param major: whether warning is a major/minor warning
         """
-        infraction_count = await self.get_warning_count(guild_id, user_id)
-        all_warn_i = await self.get_warning_indexes(guild_id, user_id)
+        infraction_count = await self.get_warning_count(serverid, userid)
+        all_warn_i = await self.get_warning_indexes(serverid, userid)
         if all_warn_i:
             index = max(all_warn_i) + 1
         else:
             index = 1
 
-        sql = """
-        INSERT INTO {}.warnings VALUES ($1, $2, $3, $4, $5);
-        """.format(self.schema)
+        params = {'serverid': serverid,
+                  'userid': userid,
+                  'modid': modid,
+                  'indexid': index,
+                  'reason': reason,
+                  'major': major,}
+        keyl = '$' + ',$'.join(list(map(lambda x: str(x + 1), range(len(params.keys())))))
+        sql = f"""
+            INSERT INTO {self.schema}.warnings ({','.join(params.keys())}) VALUES ({keyl});
+        """
         try:
-            await self.pool.execute(
-                sql,
-                guild_id,
-                user_id,
-                index,
-                reason,
-                major
-            )
+            await self.pool.execute(sql, *(list(params.values())))
             return infraction_count
         except Exception as e:
             logger.warning(f'Error inserting warning into db: {e}')

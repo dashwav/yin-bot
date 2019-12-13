@@ -2,6 +2,7 @@
 import discord
 from discord.ext import commands
 from .utils import checks, embeds
+from .utils.functions import GeneralMember
 
 
 class Admin(commands.Cog):
@@ -33,6 +34,61 @@ class Admin(commands.Cog):
             self.bot.logger.warn(f'Failed to set pingableprefix: {e}')
             await ctx.send(f'Failed to set pingableprefix: {e}')
         return
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(manage_roles=True)
+    async def compileactivity(self, ctx, num_of_days: int=7):
+        """Compile the last X days worth of moderation actions.
+
+        Parameters
+        ----------
+        num_of_days: int
+            Number of days to consider
+        """
+        try:
+            warnings = await self.bot.pg_utils.compile_warnings(ctx.guild.id, num_of_days, self.bot.logger)
+            modactions = await self.bot.pg_utils.compile_modactions(ctx.guild.id, num_of_days, self.bot.logger)
+            num_of_warnings = 0
+            num_of_modactions = 0
+            moderators = {}
+            for action in warnings:
+                if action['modid'] == 0:
+                    id = self.bot.user.id
+                else:
+                    id = action['modid']
+                if id not in moderators:
+                    moderators[id] = 0
+                moderators[id] += 1
+                num_of_warnings += 1
+            for action in modactions:
+                if action['modid'] == 0:
+                    id = self.bot.user.id
+                else:
+                    id = action['modid']
+                if id not in moderators:
+                    moderators[id] = 0
+                moderators[id] += 1
+                num_of_warnings += 1
+            ret = []
+            for mod in moderators:
+                user = await GeneralMember.convert(self, ctx, mod)
+                user = user.mention
+                number = moderators[mod]
+                ret.append([user, number])
+            ret.sort(key=lambda x: x[1])
+            ret = "\n".join(map(lambda x: f'{x[0]}: {x[1]}', ret[:5]))
+
+            local_embed = discord.Embed(
+                title=f'Moderation Activity (Top 5): ',
+                description=f'{ret}',
+                color=0x419400
+            )
+            await ctx.send(embed=local_embed)
+        except Exception as e:
+            self.bot.loggerger.warn(e)
+            await ctx.message.add_reaction(r'❌')
+            return
 
     @commands.command()
     @commands.guild_only()
