@@ -149,7 +149,7 @@ def get_member(ctx, argument: str):
         member object to return
     """
     ret = extract_id(argument)
-    t_st = argument.lower()
+    t_st = str(argument).lower()
     if not ret:
         ret = discord.utils.find(lambda m: (m.id == ret) or
                                            (t_st in [m.name.lower(), m.display_name.lower()]),  # noqa
