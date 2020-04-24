@@ -63,7 +63,7 @@ class Yinbot(Bot):
         )
         logger.addHandler(console_handler)
         logger.setLevel(config.get("log_level"))
-        postgres_cred = config['postgres_credentials']
+        postgres_cred = config.get("postgres_credentials")
         pg_utils = None
         while not pg_utils:
             try:
