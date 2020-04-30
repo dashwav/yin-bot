@@ -88,6 +88,7 @@ class Yinbot(Bot):
 
     def start_bot(self, cogs):
         """Actually start the bot."""
+        self.remove_command('help')
         for cog in cogs:
             self.add_cog(cog)
         yappi.start()
