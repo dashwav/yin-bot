@@ -22,7 +22,8 @@ class Yinbot(Bot):
         """Init for bot class."""
         try:
             self.commit = f"-{subprocess.check_output(['git', 'describe', '--always']).strip().decode()}"  # noqa
-        except Exception:
+        except Exception as e:
+            logger.warning(f'Error loading git commit: {e}')
             self.commit = ''
         file = open('.version', 'r')
         self.version = file.read()

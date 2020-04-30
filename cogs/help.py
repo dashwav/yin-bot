@@ -16,7 +16,7 @@ class Help(commands.Cog):
         try:
             help_embed = discord.Embed(title='Help', type='rich')
             help_embed.set_footer(
-                text=f'Requested by {ctx.message.author.name}',
+                text=f'Requested by {ctx.message.author.name} | yinbot v{self.bot.version}{self.bot.commit}',
                 icon_url=self.bot.user.avatar_url
             )
 
@@ -31,7 +31,7 @@ class Help(commands.Cog):
                     name = command.name + ':'
                     commands_list += f'> **{name}** {command.short_doc}\n'
                 if not commands_list:
-                    commands_list += '\u200b'
+                    commands_list += '`No commands found in this cog`'
                 help_embed.add_field(
                     name=cog,
                     value=commands_list,
