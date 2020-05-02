@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 
+
 class Help(commands.Cog):
 
     def __init__(self, bot):
@@ -12,11 +13,29 @@ class Help(commands.Cog):
                       description='The help command!',
                       aliases=['commands', 'command'],
                       usage='cog')
-    async def help_command(self, ctx, cog='all'):
+    async def help_command(self, ctx, *args):
+        """
+        Main control flow logic for the help command
+        """
+        if len(args) == 0:
+            # No command/cog passed in so print all help items
+            await self.send_base_help(ctx)
+
+        if args[0] in self.bot.cogs.keys():
+            # Cog is passed in
+            await self.send_cog_help(ctx, args[0])
+            
+    async def send_base_help(self, ctx):
         try:
-            help_embed = discord.Embed(title='Help', type='rich')
+            help_embed = discord.Embed(
+                title='Help',
+                type='rich',
+                description=f'Use `{ctx.prefix}{ctx.invoked_with} '
+                            f'[command]` for more info on a command.\n'
+            )
             help_embed.set_footer(
-                text=f'Requested by {ctx.message.author.name} | yinbot v{self.bot.version}{self.bot.commit}',
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
                 icon_url=self.bot.user.avatar_url
             )
 
@@ -37,6 +56,38 @@ class Help(commands.Cog):
                     value=commands_list,
                     inline=False,
                 )
+            await ctx.send(embed=help_embed)
+        except Exception as e:
+            await ctx.send(e)
+
+    async def send_cog_help(self, ctx, cog):
+        """
+        Send the help embed, but limited to a single cog
+        """
+        try:
+            help_embed = discord.Embed(
+                title='Yinbot Help',
+                type='rich',
+                description=f'Use `{ctx.prefix}{ctx.invoked_with} '
+                            f'[command]` for more info on a command.\n'
+            )
+            help_embed.set_footer(
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
+                icon_url=self.bot.user.avatar_url
+            )
+            cog_commands = self.bot.get_cog(cog).get_commands()
+            commands_list = ''
+            for command in cog_commands:
+                name = command.name + ':'
+                commands_list += f'> **{name}** {command.short_doc}\n'
+            if not commands_list:
+                commands_list += '`No commands found in this cog`'
+            help_embed.add_field(
+                name=cog,
+                value=commands_list,
+                inline=False,
+            )
             await ctx.send(embed=help_embed)
         except Exception as e:
             await ctx.send(e)
