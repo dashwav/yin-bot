@@ -1336,8 +1336,7 @@ class PostgresController():
             return False
 
 
-    async def add_autoassign_role(self, guild_id: int, role_i-assignableroles 
-t, logger):
+    async def add_autoassign_role(self, guild_id: int, role_id: int, logger):
         """
         Adds a role to the autoassign roles array for the server
         :param guild_id: guild to add role to
