@@ -39,11 +39,9 @@ class Help(commands.Cog):
             if hasattr(entity, '__cog_commands__'):
                 await self.send_cog_help(ctx, args[0])
             elif isinstance(entity, Group):
-                # TODO: Implement Group Help Command
-                await ctx.send(f'Group: {qualified_name}')
+                await self.send_command_group_help(ctx, args[0]) 
             elif isinstance(entity, Command):
-                # TODO: Implement Basic Help Command:
-                await ctx.send(f'Command: {qualified_name}')
+                await self.send_command_help(ctx, args[0]) 
             else:
                 return None
         except Exception as e:
@@ -113,6 +111,88 @@ class Help(commands.Cog):
                 value=commands_list,
                 inline=False,
             )
+            await ctx.send(embed=help_embed)
+        except Exception as e:
+            await ctx.send(e)
+
+    async def send_command_group_help(self, ctx, cmd):
+        """
+        Send the help command for a single command
+        """
+        try:
+            found_command = self.bot.get_command(cmd)
+            parent = found_command.full_parent_name
+            if len(found_command.aliases) > 0:
+                aliases = '\n- '.join(found_command.aliases)
+                fmt = f'- {found_command.name}\n - {aliases}'
+                if parent:
+                    fmt = parent + ' ' + fmt
+                alias = fmt
+            else:
+                alias = found_command.name if not parent else parent + ' ' + found_command.name
+
+            help_embed = discord.Embed(
+                title=f'Yinbot Help - {found_command.name} command',
+                type='rich',
+                description=f'{found_command.help}'
+            )
+            help_embed.set_footer(
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
+                icon_url=self.bot.user.avatar_url
+            )
+
+            cmd_usage = f'`{ctx.prefix}{found_command.name} {found_command.signature}`'
+            help_embed.add_field(
+                name='Command Usage',
+                value=cmd_usage,
+                inline=False,
+            )
+            if alias:
+                help_embed.add_field(
+                    name='Aliases',
+                    value=alias,
+                    inline=True,
+                )
+            await ctx.send(embed=help_embed)
+        except Exception as e:
+            await ctx.send(e)
+
+    async def send_command_help(self, ctx, cmd):
+        """
+        Send the help command for a single command
+        """
+        try:
+            alias = None
+            found_command = self.bot.get_command(cmd)
+            if len(found_command.aliases) > 0:
+                aliases = '\n- '.join(found_command.aliases)
+                fmt = f'- {found_command.name}\n - {aliases}'
+                alias = fmt
+
+            help_embed = discord.Embed(
+                title=f'Yinbot Help - {found_command.name} command',
+                type='rich',
+                description=f'{found_command.help}'
+            )
+            help_embed.set_footer(
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
+                icon_url=self.bot.user.avatar_url
+            )
+
+            cmd_usage = f'`{ctx.prefix}{found_command.name} {found_command.signature}`'
+            help_embed.add_field(
+                name='Command Usage',
+                value=cmd_usage,
+                inline=False,
+            )
+            if alias:
+                help_embed.add_field(
+                    name='Aliases',
+                    value=alias,
+                    inline=True,
+                )
             await ctx.send(embed=help_embed)
         except Exception as e:
             await ctx.send(e)
