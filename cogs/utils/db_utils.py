@@ -1,5 +1,12 @@
 """
 Database utility functions.
+DISCLAIMER: This was a copy from the first discord bot I had ever written and
+was my first foray into SQL. DO NOT use this as a template for any SQL that you
+might write as it is filled with terrible practices and is not exceptionally
+performant. That being said - it does work and overall I would rather not risk 
+breaking everythign for more "correct code". If/When I have the time to refactor
+this code it will be done all at once and with a much better pre-planned schema
+design.
 """
 from typing import Optional
 from .enums import Action
@@ -1329,7 +1336,8 @@ class PostgresController():
             return False
 
 
-    async def add_autoassign_role(self, guild_id: int, role_id: int, logger):
+    async def add_autoassign_role(self, guild_id: int, role_i-assignableroles 
+t, logger):
         """
         Adds a role to the autoassign roles array for the server
         :param guild_id: guild to add role to
