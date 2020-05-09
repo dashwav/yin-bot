@@ -39,7 +39,7 @@ class Help(commands.Cog):
             if hasattr(entity, '__cog_commands__'):
                 await self.send_cog_help(ctx, args[0])
             elif isinstance(entity, Group):
-                await self.send_command_group_help(ctx, args[0]) 
+                await self.send_command_group_help(ctx, args) 
             elif isinstance(entity, Command):
                 await self.send_command_help(ctx, args[0]) 
             else:
@@ -120,16 +120,21 @@ class Help(commands.Cog):
         Send the help command for a single command
         """
         try:
-            found_command = self.bot.get_command(cmd)
+            full_qual = ' '.join(cmd)
+            found_command = self.bot.get_command(full_qual)
             parent = found_command.full_parent_name
+
+            alias = None
             if len(found_command.aliases) > 0:
                 aliases = '\n- '.join(found_command.aliases)
                 fmt = f'- {found_command.name}\n - {aliases}'
-                if parent:
-                    fmt = parent + ' ' + fmt
                 alias = fmt
-            else:
-                alias = found_command.name if not parent else parent + ' ' + found_command.name
+
+            sub_cmds = None
+            if len(found_command.commands) > 0:
+                sub_cmd_names = [cmd.name for cmd in found_command.commands]
+                sub_cmds = '- '
+                sub_cmds += '\n- '.join(sub_cmd_names)
 
             help_embed = discord.Embed(
                 title=f'Yinbot Help - {found_command.name} command',
@@ -142,7 +147,8 @@ class Help(commands.Cog):
                 icon_url=self.bot.user.avatar_url
             )
 
-            cmd_usage = f'`{ctx.prefix}{found_command.name} {found_command.signature}`'
+            cmd_sig = found_command.name if not parent else parent + ' ' + found_command.name
+            cmd_usage = f'`{ctx.prefix}{cmd_sig} {found_command.signature}`'
             help_embed.add_field(
                 name='Command Usage',
                 value=cmd_usage,
@@ -152,6 +158,13 @@ class Help(commands.Cog):
                 help_embed.add_field(
                     name='Aliases',
                     value=alias,
+                    inline=True,
+                )
+            
+            if sub_cmds:
+                help_embed.add_field(
+                    name='Subcommands',
+                    value=sub_cmds,
                     inline=True,
                 )
             await ctx.send(embed=help_embed)
