@@ -1,5 +1,5 @@
 from discord.ext import commands
-from discord.ext.commands import Group, Command
+from discord.ext.commands import Group, Command, CommandError
 import discord
 
 
@@ -33,7 +33,8 @@ class Help(commands.Cog):
             qualified_name = entity.qualified_name
         except AttributeError:
             # if we're here then it's not a cog, group, or command.
-            return None
+            await self.command_not_found(ctx, args[0])
+            return
 
         try:
             if hasattr(entity, '__cog_commands__'):
@@ -43,7 +44,7 @@ class Help(commands.Cog):
             elif isinstance(entity, Command):
                 await self.send_command_help(ctx, args[0]) 
             else:
-                return None
+                await self.command_not_found(ctx, args[0])
         except Exception as e:
             await ctx.send(e)
 
@@ -53,7 +54,8 @@ class Help(commands.Cog):
                 title='Help',
                 type='rich',
                 description=f'Use `{ctx.prefix}{ctx.invoked_with} '
-                            f'[command]` for more info on a command.\n'
+                            f'[command/group]` for more info.\n'
+                            f'You can find the wiki here: https://dashwav.github.io/yin-bot/'
             )
             help_embed.set_footer(
                 text=f'Requested by {ctx.message.author.name} | '
@@ -68,11 +70,15 @@ class Help(commands.Cog):
 
                 cog_commands = self.bot.get_cog(cog).get_commands()
                 commands_list = ''
-                for command in cog_commands:
+                filtered = await self.filter_commands(cog_commands, ctx)
+                for command in filtered:
+                    if command.hidden:
+                        continue
                     name = command.name + ':'
-                    commands_list += f'> **{name}** {command.short_doc}\n'
+                    doc = command.help.split("\n", 1)[0]
+                    commands_list += f'> **{name}** {doc}\n'
                 if not commands_list:
-                    commands_list += '`No commands found in this cog`'
+                    continue
                 help_embed.add_field(
                     name=cog,
                     value=commands_list,
@@ -101,9 +107,13 @@ class Help(commands.Cog):
 
             cog_commands = self.bot.get_cog(cog).get_commands()
             commands_list = ''
-            for command in cog_commands:
+            filtered = await self.filter_commands(cog_commands, ctx)
+            for command in filtered:
+                if command.hidden:
+                    continue
                 name = command.name + ':'
-                commands_list += f'> **{name}** {command.short_doc}\n'
+                doc = command.help.split("\n", 1)[0]
+                commands_list += f'> **{name}** {doc}\n'
             if not commands_list:
                 commands_list += '`No commands found in this cog`'
             help_embed.add_field(
@@ -224,3 +234,38 @@ class Help(commands.Cog):
             await ctx.send(embed=help_embed)
         except Exception as e:
             await ctx.send(e)
+
+    async def command_not_found(self, ctx, cmd):
+        """
+        Send the help command for a single command
+        """
+        try:
+            help_embed = discord.Embed(
+                title=f'Yinbot Help - Command not found!',
+                type='rich',
+                description=f'No command called "{cmd}" found.'
+            )
+            help_embed.set_footer(
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
+                icon_url=self.bot.user.avatar_url
+            )
+            await ctx.send(embed=help_embed)
+        except Exception as e:
+            await ctx.send(e)
+
+    async def filter_commands(self, cmd_list, ctx):
+        #Stolen from discord.py commands/help.py
+        async def predicate(cmd, ctx):
+            try:
+                return await cmd.can_run(ctx)
+            except CommandError:
+                return False
+
+        ret = []
+        for cmd in cmd_list:
+            valid = await predicate(cmd, ctx)
+            if valid:
+                ret.append(cmd)
+
+        return ret
