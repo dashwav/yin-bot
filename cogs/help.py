@@ -132,7 +132,11 @@ class Help(commands.Cog):
         try:
             full_qual = ' '.join(cmd)
             found_command = self.bot.get_command(full_qual)
-            parent = found_command.full_parent_name
+            try:
+                parent = found_command.full_parent_name
+            except AttributeError:
+                await self.command_not_found(ctx, full_qual)
+                return
 
             alias = None
             if len(found_command.aliases) > 0:
