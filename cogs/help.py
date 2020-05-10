@@ -135,6 +135,7 @@ class Help(commands.Cog):
             try:
                 parent = found_command.full_parent_name
             except AttributeError:
+                # TODO: ideally this should say "command X does not have subcommand Y"
                 await self.command_not_found(ctx, full_qual)
                 return
 
