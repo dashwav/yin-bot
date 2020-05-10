@@ -26,7 +26,8 @@ class Autoassign(commands.Cog):
                 autoassign_roles.append(role)
         await member.add_roles(*autoassign_roles)
 
-    @commands.group(aliases=['aar', 'autoassign'])
+    @commands.group(aliases=['aar', 'autoassign'],
+                    brief='https://dashwav.github.io/yin-bot/commands/Roles/#assignable-roles')
     @commands.guild_only()
     @checks.admin_or_permissions(manage_roles=True)
     async def autoassignroles(self, ctx):
@@ -48,7 +49,7 @@ class Autoassign(commands.Cog):
             )
             await ctx.send(embed=local_embed)
 
-    @autoassignroles.command()
+    @autoassignroles.command(brief='https://dashwav.github.io/yin-bot/commands/Roles/#addremove')
     async def add(self, ctx, *, role_name):
         """Add a role to the servers auto-assignable roles list."""
         found_role = None
