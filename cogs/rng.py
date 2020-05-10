@@ -38,7 +38,7 @@ class Rng(commands.Cog):
             await ctx.send(f'Incorrect random subcommand passed. Try '
                            f'{ctx.prefix}help random')
 
-    @random.command()
+    @random.command(brief='https://dashwav.github.io/yin-bot/commands/Misc/#random-number')
     async def number(self, ctx, minimum=0, maximum=100):
         """Display a random number within an optional range."""
         """The minimum must be smaller than the maximum and the maximum number
@@ -51,7 +51,7 @@ class Rng(commands.Cog):
 
         await ctx.send(rng.randint(minimum, maximum))
 
-    @commands.command()
+    @commands.command(brief='https://dashwav.github.io/yin-bot/commands/Misc/#choose-from-options')
     async def choose(self, ctx, *, text):
         """Choose between multiple choices."""
         """To denote multiple choices, you should use a semicolon ;.
@@ -67,7 +67,7 @@ class Rng(commands.Cog):
         )
         await ctx.send(embed=local_embed)
 
-    @commands.command(name='8ball')
+    @commands.command(name='8ball', brief='https://dashwav.github.io/yin-bot/commands/Misc/#8ball')
     async def eightball(self, ctx, *, question):
         """Use magic to determine the answer to a question."""
         if not question:

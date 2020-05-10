@@ -131,7 +131,7 @@ class Help(commands.Cog):
                 alias = fmt
 
             sub_cmds = None
-            if len(found_command.commands) > 0:
+            if hasattr(found_command, 'commands') and len(found_command.commands) > 0:
                 sub_cmd_names = [cmd.name for cmd in found_command.commands]
                 sub_cmds = '- '
                 sub_cmds += '\n- '.join(sub_cmd_names)
@@ -167,6 +167,14 @@ class Help(commands.Cog):
                     value=sub_cmds,
                     inline=True,
                 )
+            
+            if found_command.brief:
+                help_embed.add_field(
+                    name='Wiki',
+                    value=found_command.brief,
+                    inline=False,
+                )
+
             await ctx.send(embed=help_embed)
         except Exception as e:
             await ctx.send(e)
@@ -205,6 +213,13 @@ class Help(commands.Cog):
                     name='Aliases',
                     value=alias,
                     inline=True,
+                )
+            
+            if found_command.brief:
+                help_embed.add_field(
+                    name='Wiki',
+                    value=found_command.brief,
+                    inline=False,
                 )
             await ctx.send(embed=help_embed)
         except Exception as e:
