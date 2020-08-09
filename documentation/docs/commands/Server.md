@@ -57,7 +57,7 @@ This logging channel will serve as a log for all general purpose server logging
 ### Modlog
 This logging channel will post a message on each mod-action taken on the server.
 
-**Command**: `modlog enable | modlog disable`
+**Command**: `modlog add_channel | modlog remove_channel`
 
 **Usage**: This will either enable or disable modlogs to the current channel. Usage with just `modlog` will print out current log channels
 
