@@ -6,6 +6,7 @@ from time import time, sleep
 
 import yappi
 import gila
+import discord
 from logging import Formatter, StreamHandler, getLogger
 from discord.ext.commands import Bot
 
@@ -36,7 +37,10 @@ class Yinbot(Bot):
         self.base_voice = config['base_voice']
         self.logger = logger
         self.blchannels = blacklist
-        super().__init__(command_prefix=self.get_pre, case_insensitive=True)
+
+        intents = discord.Intents.default()
+        intents.members = True
+        super().__init__(command_prefix=self.get_pre, case_insensitive=True, intents=intents)
 
     @classmethod
     async def get_instance(cls):
