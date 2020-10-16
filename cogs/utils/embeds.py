@@ -19,7 +19,7 @@ USEREDITCOLOR = 0xe9e6c2
 ROLECOLOR = 0x800080
 
 INVITE = 'https://discordapp.com/oauth2/authorize?'\
-         'client_id=369362004458078208&scope=bot&permissions=268528894'
+         'client_id=369362004458078208&scope=bot&permissions=268561623'
 
 DISCORD = 'https://discordapp.com/invite/svU3Mdd'
 
