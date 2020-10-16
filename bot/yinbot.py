@@ -40,6 +40,7 @@ class Yinbot(Bot):
 
         intents = discord.Intents.default()
         intents.members = True
+        intents.presences = False
         super().__init__(command_prefix=self.get_pre, case_insensitive=True, intents=intents)
 
     @classmethod
