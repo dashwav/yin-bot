@@ -16,6 +16,8 @@ postgres_credentials:
     database: "yinbotdb"
     password: "yinbot-password"
 
+prod: false
+
 cogs:
     - Admin
     - Autoassign

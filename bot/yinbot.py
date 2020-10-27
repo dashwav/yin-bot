@@ -39,9 +39,13 @@ class Yinbot(Bot):
         self.blchannels = blacklist
 
         intents = discord.Intents.default()
-        intents.members = True
-        intents.presences = False
-        super().__init__(command_prefix=self.get_pre, case_insensitive=True, intents=intents)
+        if config.get("prod"):
+            intents.members = True
+        super().__init__(
+            command_prefix=self.get_pre,
+            case_insensitive=True,
+            intents=intents,
+        )
 
     @classmethod
     async def get_instance(cls):
@@ -66,7 +70,7 @@ class Yinbot(Bot):
                     logger=logger, connect_kwargs=postgres_cred)
             except Exception as e:
                 logger.critical(
-                    f'Error initializing DB - trying again in 5 seconds')
+                    'Error initializing DB - trying again in 5 seconds')
                 logger.debug(f'Error: {e}')
                 sleep(5)
         server_settings = await pg_utils.get_server_settings()
