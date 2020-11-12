@@ -1,8 +1,9 @@
 """Cog for filtering, primarily discord links, but maybe more later."""
+import re
+
 import discord
 from discord.ext import commands
 from .utils import checks, embeds
-import re
 
 
 class Filter(commands.Cog):
@@ -70,6 +71,8 @@ class Filter(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """General message catcher for filtering."""
+        if isinstance(message.channel, discord.DMChannel):
+            return
         try:
             if self.bot.server_settings[message.guild.id]['invites_allowed']:
                 return

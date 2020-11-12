@@ -21,6 +21,7 @@ class Info(commands.Cog):
         super().__init__()
 
     @commands.command(alias=['doc', 'docs'])
+    @commands.guild_only()
     async def wiki(self, ctx, command: str = None):
         """Print out a link to docs for yin.
 
@@ -57,11 +58,13 @@ class Info(commands.Cog):
         await ctx.send(help + command + '>.')
 
     @commands.command()
+    @commands.guild_only()
     async def invite(self, ctx):
         """Print out a clickable link to invite yin."""
         await ctx.send(embed=embeds.InviteEmbed())
 
     @commands.command()
+    @commands.guild_only()
     async def uptime(self, ctx):
         """Print out uptime of bot."""
         now = datetime.datetime.utcnow()
@@ -69,11 +72,13 @@ class Info(commands.Cog):
         await ctx.send(f'Uptime: {uptime}')
 
     @commands.command()
+    @commands.guild_only()
     async def support(self, ctx):
         """Link support server."""
         await ctx.send(embed=embeds.SupportEmbed())
 
     @commands.command()
+    @commands.guild_only()
     async def stats(self, ctx):
         """Print out stats embed."""
         now = datetime.datetime.utcnow()

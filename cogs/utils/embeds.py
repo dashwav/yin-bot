@@ -565,7 +565,7 @@ class WarningListEmbed(discord.Embed):
 
         local_title = f'**{warned_user.name}#{warned_user.discriminator}'\
                       f'**\'s infractions'
-        local_desc = f'' if infractions else f'User has no warnings'
+        local_desc = f'' if infractions else f'User has no recent warnings'
         warning_string = ''
         string_list = []
         for index, warning in enumerate(infractions):
@@ -577,7 +577,7 @@ class WarningListEmbed(discord.Embed):
                                  f'[{date}]\n'
             if len(tmp_warning_string) + len(warning_string) > 1000:
                 string_list.append(warning_string)
-                warning_string = tmp_warning_string
+                warning_string = ''
             warning_string += tmp_warning_string
         string_list.append(warning_string)
         super().__init__(
@@ -585,21 +585,20 @@ class WarningListEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
-        if string_list[0] != '':
-            for index, string in enumerate(string_list):
-                if count:
-                    string = f'{string}\nThere are more warnings > 6 months ago.'
-                string = f'{string}\n**Join Date:** {warned_user.joined_at.strftime("%b %d %Y %H:%M")}'
-                if index == 0:
-                    self.add_field(
-                        name='Infractions:',
+        for index, string in enumerate(string_list):
+            if count:
+                string += f'\nThere are more warnings > 6 months ago.'
+            string += f'\n**Join Date:** {warned_user.joined_at.strftime("%b %d %Y %H:%M")}'
+            if index == 0:
+                self.add_field(
+                    name='Infractions:',
+                    value=string
+                )
+            else:
+                self.add_field(
+                        name='Infractions:(cont)',
                         value=string
                     )
-                else:
-                    self.add_field(
-                            name='Infractions:(cont)',
-                            value=string
-                        )
         self.set_footer(text=return_current_time())
 
 
@@ -612,7 +611,7 @@ class ModerationListEmbed(discord.Embed):
 
         local_title = f'**{moderated_user.name}#{moderated_user.discriminator}'\
                       f'**\'s modactions'
-        local_desc = f'' if modactions else f'User has no modactions'
+        local_desc = f'' if modactions else f'User has no recent modactions'
         moderation_string = ''
         string_list = []
         for index, moderation in enumerate(modactions):
@@ -624,7 +623,7 @@ class ModerationListEmbed(discord.Embed):
                                  f'[{date}]\n'
             if len(tmp_warning_string) + len(moderation_string) > 1000:
                 string_list.append(moderation_string)
-                moderation_string = tmp_warning_string
+                moderation_string = ''
             moderation_string += tmp_warning_string
         string_list.append(moderation_string)
         super().__init__(
@@ -632,21 +631,20 @@ class ModerationListEmbed(discord.Embed):
             title=local_title,
             description=local_desc,
             )
-        if string_list[0] != '':
-            for index, string in enumerate(string_list):
-                if count:
-                    string = f'{string}\nThere are more mod actions > 6 months ago.'
-                string = f'{string}\n**Join Date:** {moderated_user.joined_at.strftime("%b %d %Y %H:%M")}'
-                if index == 0:
-                    self.add_field(
-                        name='Modactions:',
+        for index, string in enumerate(string_list):
+            if count:
+                string += f'\nThere are more mod actions > 6 months ago.'
+            string += f'\n**Join Date:** {moderated_user.joined_at.strftime("%b %d %Y %H:%M")}'
+            if index == 0:
+                self.add_field(
+                    name='Modactions:',
+                    value=string
+                )
+            else:
+                self.add_field(
+                        name='Modactions:(cont)',
                         value=string
                     )
-                else:
-                    self.add_field(
-                            name='Modactions:(cont)',
-                            value=string
-                        )
         self.set_footer(text=return_current_time())
 
 class ModEditEmbed(discord.Embed):

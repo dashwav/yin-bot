@@ -104,6 +104,16 @@ def create_fake_user(user_id: str):
     return member
 
 
+def duplicate_member(base_member):
+    """Duplicate a member object."""
+    new_member = create_fake_user(base_member.id)
+    for i in dir(base_member):
+        if '__' in i:
+            continue
+        setattr(new_member, i, getattr(base_member, i))
+    return new_member
+
+
 class fake_object(object):
     """Recreate ABC class."""
 
@@ -139,7 +149,7 @@ def get_member(ctx, argument: str):
         member object to return
     """
     ret = extract_id(argument)
-    t_st = argument.lower()
+    t_st = str(argument).lower()
     if not ret:
         ret = discord.utils.find(lambda m: (m.id == ret) or
                                            (t_st in [m.name.lower(), m.display_name.lower()]),  # noqa

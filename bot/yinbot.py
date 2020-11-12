@@ -8,11 +8,12 @@ import yappi
 import gila
 import discord
 from logging import Formatter, StreamHandler, getLogger
+import discord
 from discord.ext.commands import Bot
 
 from cogs.utils.db_utils import PostgresController
 from cogs.utils import embeds
-
+from cogs.utils.functions import extract_id, duplicate_member
 
 class Yinbot(Bot):
     """Actual bot class."""
@@ -111,9 +112,9 @@ class Yinbot(Bot):
         """On all messages."""
         if ctx.author.bot:
             return
-        elif isinstance(ctx.guild, type(None)):
+        if isinstance(ctx.channel, discord.DMChannel):
             return
-        elif self.user in ctx.mentions:
+        elif self.user in ctx.mentions and (('prefix' in ctx.clean_content) or ('help' in ctx.clean_content)) and self.server_settings[ctx.guild.id]['pingableprefix']:
             await ctx.channel.send(
                 embed=embeds.MentionHelpEmbed(
                     await self.get_pre(self, ctx)

@@ -42,10 +42,12 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
+            return
         try:
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
                 member.id,
+                ctx.author.id,
                 reason,
                 True,
                 self.bot.logger
@@ -69,10 +71,12 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
+            return
         try:
             count = await self.bot.pg_utils.add_warning(
                 ctx.guild.id,
                 member.id,
+                ctx.author.id,
                 reason,
                 False,
                 self.bot.logger
@@ -85,10 +89,23 @@ class Warnings(commands.Cog):
 
     @warn.command(aliases=['e'])
     async def edit(self, ctx, member: GeneralMember,
-                   index: int = None, dtype: str = None, *,
+                   index: int = None, warntype: str = None, *,
                    reason: str = None):
-        """Edit a warning."""
-        if not reason or not index or not dtype:
+        """Edit a warning.
+
+        Parameters
+        ----------
+        member:
+            The ID, name, or mentionable of a user.
+        index: int
+            Index of the warning
+        warntype: str
+            The warning type, major | minor
+        reason: str
+            The reason for warning the user.
+
+        """
+        if not reason or not index or not warntype:
             await ctx.send(
                 "You need to supply the correct parameters <member, index (from 1), warning type, reason>, try again.",  # noqa
                 delete_after=5)
@@ -98,17 +115,21 @@ class Warnings(commands.Cog):
                 "Reason must be shorter than 500 char",
                 delete_after=5
             )
-        dtype = True if dtype.lower() == 'major' else False
+            return
+        if warntype.lower() not in ('major', 'minor'):
+            reason = f'{warntype} {reason}'
+            warntype = 'minor'
+        warntype = True if warntype.lower() == 'major' else False
         try:
             count = await self.bot.pg_utils.set_single_warning(
                 ctx.guild.id,
                 member.id,
                 reason,
-                dtype,
+                warntype,
                 index,
                 self.bot.logger
             )
-            local_embed = embeds.WarningEditEmbed(member, dtype, reason, count)
+            local_embed = embeds.WarningEditEmbed(member, warntype, reason, count)
             await ctx.send(embed=local_embed)
         except Exception as e:
             await ctx.send(embed=embeds.InternalErrorEmbed())
@@ -144,35 +165,64 @@ class Warnings(commands.Cog):
 
     @commands.command(aliases=['infractions'])
     @commands.guild_only()
-    @checks.has_permissions(manage_roles=True)
-    async def warnings(self, ctx, member: GeneralMember, recent: bool = True):
-        """Return all the warnings a user has."""
+    async def warnings(self, ctx, member: str, recent: bool = True):
+        """Return all the warnings a user has.
+
+        You can just pass in me to get your own warnings in DM.
+
+        Parameters
+        ----------
+        member: str
+            Must designate the user to find warnings. Can be "me", userid,
+            usermention, or username. If user is not in guild, will still
+            complete, but the username and discriminator displayed will be
+            incorrect.
+        recent: bool [Defaults: True]
+            Want to display only recent (<6months) warnings and modactions.
+        """
+        resolved = ctx.channel.permissions_for(ctx.author)
+        guild_id = ctx.guild.id
+        if member == 'me':
+            if not self.bot.server_settings[ctx.guild.id]['warnings_dm']:
+                await ctx.message.add_reaction(r'❌')
+                return
+            recent = False
+            await ctx.author.create_dm()
+            channel = ctx.author.dm_channel
+            member = ctx.author
+        elif getattr(resolved, 'manage_roles', None):
+            channel = ctx.channel
+            member = await GeneralMember.convert(self, ctx, member)
         try:
             warnings = None
             moderations = None
-            count = [await self.bot.pg_utils.get_warning_count(ctx.guild.id, member.id),  # noqa
-                     await self.bot.pg_utils.get_moderation_count(ctx.guild.id, member.id)]  # noqa
+            count = [await self.bot.pg_utils.get_warning_count(guild_id, member.id),  # noqa
+                        await self.bot.pg_utils.get_moderation_count(guild_id, member.id)]  # noqa
             warnings = await self.bot.pg_utils.get_warnings(
-                ctx.guild.id,
+                guild_id,
                 member.id,
                 self.bot.logger,
                 recent=recent)
             moderations = await self.bot.pg_utils.get_moderation(
-                ctx.guild.id,
+                guild_id,
                 member.id,
                 self.bot.logger,
                 recent=recent)
+        except Exception as e:
+            await channel.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying to get user warnings: {e}')
+        try:
             local_embed = embeds.WarningListEmbed(
-                member, warnings, self.bot.logger, count[0] > len(warnings))
-            await ctx.send(embed=local_embed)
-            if moderations:
+                member, warnings, self.bot.logger, count[0] != len(warnings))
+            await channel.send(embed=local_embed)
+            if moderations or count[-1]:
                 mod_embed = embeds.ModerationListEmbed(
                     member, moderations, self.bot.logger,
-                    count[1] > len(moderations))
-                await ctx.send(embed=mod_embed)
+                    count[1] != len(moderations))
+                await channel.send(embed=mod_embed)
         except Exception as e:
-            await ctx.send(embed=embeds.InternalErrorEmbed())
-            self.bot.logger.warning(f'Error trying to get user warnings: {e}')
+            await channel.send(embed=embeds.InternalErrorEmbed())
+            self.bot.logger.warning(f'Error trying to create/send user warnings: {e}')
 
     @warnings.error
     async def warnings_error(self, ctx, error):

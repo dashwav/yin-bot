@@ -350,6 +350,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
         """Send message on a user editing messages."""
+        if isinstance(before.channel, discord.DMChannel):
+            return
         if not self.bot.server_settings[before.guild.id]['logging_enabled']:
             return
         try:
@@ -384,6 +386,8 @@ class Logging(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         """Send message on a user editing messages."""
+        if isinstance(message.channel, discord.DMChannel):
+            return
         if not self.bot.server_settings[message.guild.id]['logging_enabled']:
             return
         if message.author.bot:
