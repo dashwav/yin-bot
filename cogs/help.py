@@ -127,7 +127,7 @@ class Help(commands.Cog):
 
     async def send_command_group_help(self, ctx, cmd):
         """
-        Send the help command for a single command
+        Send the help command for a grouped command
         """
         try:
             full_qual = ' '.join(cmd)
@@ -135,8 +135,7 @@ class Help(commands.Cog):
             try:
                 parent = found_command.full_parent_name
             except AttributeError:
-                # TODO: ideally this should say "command X does not have subcommand Y"
-                await self.command_not_found(ctx, full_qual)
+                await self.subcommand_not_found(ctx, ' '.join(cmd[:-1]), cmd[-1])
                 return
 
             alias = None
@@ -242,13 +241,32 @@ class Help(commands.Cog):
 
     async def command_not_found(self, ctx, cmd):
         """
-        Send the help command for a single command
+        Creates and sends embed notifying user command not found
         """
         try:
             help_embed = discord.Embed(
                 title=f'Yinbot Help - Command not found!',
                 type='rich',
                 description=f'No command called "{cmd}" found.'
+            )
+            help_embed.set_footer(
+                text=f'Requested by {ctx.message.author.name} | '
+                     f'yinbot v{self.bot.version}{self.bot.commit}',
+                icon_url=self.bot.user.avatar_url
+            )
+            await ctx.send(embed=help_embed)
+        except Exception as e:
+            await ctx.send(e)
+
+    async def subcommand_not_found(self, ctx, cmd, subcmd):
+        """
+        Creates and sends embed notifying user a subcommand was not found
+        """
+        try:
+            help_embed = discord.Embed(
+                title=f'Yinbot Help - Subcommand not found!',
+                type='rich',
+                description=f'No subcommand for "{cmd}" called "{subcmd}" found.'
             )
             help_embed.set_footer(
                 text=f'Requested by {ctx.message.author.name} | '
