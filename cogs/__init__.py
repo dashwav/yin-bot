@@ -2,6 +2,7 @@
 from cogs.admin import Admin
 from cogs.filter import Filter
 from cogs.gateway import Gateway
+from cogs.help import Help
 from cogs.info import Info
 from cogs.logging import Logging
 from cogs.moderation import Moderation
@@ -19,6 +20,7 @@ __all__ = [
     'Autoassign',
     'Filter',
     'Gateway',
+    'Help',
     'Info',
     'Logging',
     'Moderation',

@@ -23,7 +23,8 @@ class Yinbot(Bot):
         """Init for bot class."""
         try:
             self.commit = f"-{subprocess.check_output(['git', 'describe', '--always']).strip().decode()}"  # noqa
-        except Exception:
+        except Exception as e:
+            logger.warning(f'Error loading git commit: {e}')
             self.commit = ''
         file = open('.version', 'r')
         self.version = file.read()
@@ -63,7 +64,7 @@ class Yinbot(Bot):
         )
         logger.addHandler(console_handler)
         logger.setLevel(config.get("log_level"))
-        postgres_cred = config['postgres_credentials']
+        postgres_cred = config.get("postgres_credentials")
         pg_utils = None
         while not pg_utils:
             try:
@@ -88,6 +89,7 @@ class Yinbot(Bot):
 
     def start_bot(self, cogs):
         """Actually start the bot."""
+        self.remove_command('help')
         for cog in cogs:
             self.add_cog(cog)
         yappi.start()
