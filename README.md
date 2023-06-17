@@ -1,4 +1,6 @@
 # Yin-bot
+NOTE: Archived 2023 - feel free to fork and host yourself if you are interested.
+
 General purpose discord bot written in python for the discord.py rewrite library
 
 # Invite
